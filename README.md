@@ -1,13 +1,29 @@
 # CRE_detection
 
-This repository takes a directory:
-CRE_Candidates:
-  
-  -B045-above_cutoff_results.txt
-  
-  -B045-snr_results.txt
-  
-  ....
+WHAT YOU NEED:
 
-And performs all the necessary comparisons for generating a list of characteristically repeating earthquakes for each station, and then for the entire network in combination. It combines the earthquakes into sequences. 
-The code can produce summaries and images of each family, GMT maps, and python plots of time-dependent behavior. 
+--Raw Data Dirs (for each station)
+
+--Code Dir
+
+	--Code (python, bash, c)
+	--"CRE_Candidates" (inputs to this process)
+		--*_above_cutoff_results.txt
+		--*_snr_results.txt
+		--station_locations.txt (file that contains NAME LON LAT data_dir, for each station)
+	—“Mapping_files”
+		--Faults, seismicity, etc. 
+	—“GMT_Scripts”
+		--just GMT code
+
+
+
+WHAT WILL BE CREATED: 
+	--"CREs_by_station"
+		--Station_DIRs
+			--repeaters_list.txt
+			--Maps, Histograms, and (optionally) waveform plots
+	--Results
+		—-A bunch of maps, histograms, slip histories, and (optionally) family images. 
+		—-Easy summary for tradeoffs
+	--Tradeoffs
