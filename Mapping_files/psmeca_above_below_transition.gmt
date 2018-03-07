@@ -1,0 +1,55 @@
+#! /bin/bash
+# Plot the mechanisms for repeaters at the Mendocino Triple Junction
+# 9/23/2016 Kathryn Materna
+
+
+lonW=-124.75
+lonE=-124.1
+latS=40.18
+latN=40.55
+
+range="$lonW/$lonE/$latS/$latN"
+projection="m10.5i"
+gmt makecpt -T0/8.0/0.5 -Cjet > mycpt.cpt
+
+#ABOVE THE CUTOFF
+output="Mechanisms_above_cutoff.ps"
+
+# Plot the coast of California. Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-125/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B0.25:."Focal Mechanisms at the Mendocino Triple Junction": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults and historic seismicity
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Gdarkgray -P -K -O >> $output # Plot all earthquakes
+
+# # Plot the repeating earthquake families WITH SLIP RATES. 
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+
+# Add mechanisms! 
+gmt psmeca mechanisms_shallow.txt -R$range -J$projection -Gblack -K -O -Sa1 -C >> $output
+
+
+
+
+
+# BELOW THE CUTOFF
+output="Mechanisms_below_cutoff.ps"
+
+# Plot the coast of California. Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-125/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B0.25:."Focal Mechanisms at the Mendocino Triple Junction": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults and historic seismicity
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Gdarkgray -P -K -O >> $output # Plot all earthquakes
+
+# # Plot the repeating earthquake families WITH SLIP RATES. 
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+
+# Add mechanisms! 
+gmt psmeca mechanisms_deep.txt -R$range -J$projection -Gblack -K -O -Sa1 -C >> $output
+
+

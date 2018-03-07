@@ -1,0 +1,88 @@
+#! /bin/bash
+# PROFILE TO SHOW DEPTH DEPENDENCE
+# Plot the HypoDD microseismicity catalog at the Mendocino Transform Fault
+# Using little gray dots for the earthquakes. 
+# Also plot the repeating earthquake families where we have slip rates. 
+# 9/08/2016
+
+
+lonW=-125.5
+lonE=-123
+latS=39.8
+latN=41.0
+range="$lonW/$lonE/$latS/$latN"
+projection="m2.3i"
+
+
+Cx=-124.3
+Cx_start=-125.5
+Cx_end=-123
+Cy=40.33
+azimuth=90
+lmin=-90
+lmax=90
+width_min=-12
+width_max=12
+width_tight_min=-2
+width_tight_max=2
+
+output="Depth_Profile.ps"
+
+
+
+# ---------------------------------------- #
+# Plot the depth profile
+
+
+maxdepth=-40
+twice_length=$(echo $lmax - $lmin | bc)  # for the full profile
+brange="$Cx_start/$Cx_end/$maxdepth/0" # The edges of the eventual cross-section (in km)
+# set so that the coastline is at zero. 
+bprojection="x5.9/0.15"
+
+# Make a projection of seismicity with depth. 
+awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+# F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
+# C: center
+# A: Azimuth
+# Q: put km units
+
+# Project the cascadia subduction zone model from Slab1p0 into the depth profile. 
+gmt project Mapping_files/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_tight_min/$width_tight_max -Q -V >!tslab.tmp
+
+
+# Establish dimensions for the box with cross-section
+gmt psxy Mapping_files/box_dim -R${brange} -J${bprojection} -Bf0.5a1:"Depth Profile":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+# B2: annotate the axes every 2 km
+# X and Y: move this axis relative to map
+
+
+# Plot the hypocenters on the cross section profile 
+awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.06 -Ggray26 -V >> $output
+awk '{print $1, $3*(1.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthickest,magenta -V >> $output
+# Including the repeaters! 
+gmt psxy Families_xz_hypodd.txt -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Gred -Wthick,blue >> $output  # if you want single-color dots. 
+gmt psxy Families_xz_ncss.txt -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Gred -Wthick,blue >> $output  # if you want single-color dots. 
+
+
+# ---------------------------------------- #
+# Plot the coast of California and the DD catalog above. 
+
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -L-125.0/39.99/39.99/50+jt+u -B1.0:."Repeater Locations at MTJ": -K -O -X0 -Y9 -P >> $output
+# Df = full resolution coastline; N1=country boundaries; N2=stat boundaries. 
+awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray26 -K -O -P >> $output # Plot all hypodd earthquakes
+
+# Make the cross-section annotations (SJ means rotated rectangle)
+gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,blue << EOF >>$output
+$Cx $Cy $azimuth $(echo $lmax - $lmin | bc) $(echo $width_max - $width_min | bc) 
+EOF
+# The pipe bc is for adding floating point numbers
+
+# Add the fault map
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,black -K -O >> $output
+
+# # Plot the repeating earthquake families
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Gred -Wthick,blue -K -O -P >> $output   # if you want single-color dots. 
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Gred -Wthick,blue -K -O -P >> $output   # if you want single-color dots. 
+
+rm gmt.history

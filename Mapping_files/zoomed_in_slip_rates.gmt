@@ -1,0 +1,41 @@
+#! /bin/bash
+# Plot the slip rates for repeaters at the Mendocino Triple Junction
+# 1/2/2016 Kathryn Materna
+
+lonW=-124.65
+lonE=-124.32
+latS=40.22
+latN=40.39
+
+range="$lonW/$lonE/$latS/$latN"
+projection="m25.3i"
+output="Slip_Rates_zoomed_in_many_stations.ps"
+
+# Plot the coast of California. Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-124.53/40.24/40.24/10+jt+u -Wblack -Slightblue -Glightgray -B0.10:."Mendocino Triple Junction Slip Rates": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults
+#gmt psxy ../Holocene_LatestPleistocene.txt -R$range -J$projection -Wthin,red -K -O >> $output
+#gmt psxy ../LateQuaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+
+
+# Make a colormap using JET colorscale (for slip rates). 
+gmt makecpt -T0/8.0/0.05 -Cjet > mycpt.cpt
+
+# Plot the slip rates for each family we have
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -K -O -Sc5p -Wblack -Cmycpt.cpt >> $output
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -K -O -Ss5p -Wblack -Cmycpt.cpt >> $output
+
+# Plot the scale for the slip rate colors
+gmt psscale -D0.2i/1.1i/-4c/0.6c -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr: -O -K >> $output
+
+
+# Plot the location of the borehole seismometer
+gmt psxy -R$range -J$projection -Sa -Gred -Wthin,white -K -O <<EOF >> $output 
+-124.2843 40.32197 0.4 EOF
+

@@ -1,0 +1,55 @@
+#! /bin/bash
+# Plot the repeaters at the Mendocino Transform Fault
+# 1/2/2016 Kathryn Materna
+
+#lonW=-124.65
+#lonE=-124.35
+#latS=40.25
+#latN=40.35
+
+lonW=-126.2
+lonE=-123.5
+latS=39.75
+latN=41.0
+
+range="$lonW/$lonE/$latS/$latN"
+projection="m3.2i"
+output="Network_Repeaters_depths.ps"
+
+# Plot the coast of California. 
+# Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-125/39.9/39.9/50+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Depths of Repeating Earthquakes at the MTJ": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults
+gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+
+# Plot all earthquakes
+#gmt psxy B046.PB.EHZ..D._lats_and_lons.txt -R$range -J$projection -Sc -Gblack -K -O >> $output
+
+# Plot all earthquakes and depths
+gmt makecpt -T0/35/5 -Cjet -Z > mycpt.cpt
+gmt psxy repeaters_xyzm_hypodd.txt -i0,1,2,3s2.0 -R$range -J$projection -O -K -Scp -Cmycpt.cpt >> $output
+gmt psxy repeaters_xyzm_ncss.txt -i0,1,2,3s2.5 -R$range -J$projection -O -K -Ssp -Cmycpt.cpt >> $output
+gmt psxy event_connectors.txt -R$range -J$projection -Wthinner,white -K -O >> $output
+# Sc: circles (p means points)
+# C: color scale
+# -i0,1,2,3: tells the program to read the columns in this order, and to scale up the values of Col3 by a scale factor
+
+gmt psscale -D0.2i/1.1i/-4c/0.6c -Cmycpt.cpt -B10:"EQ Depth":/:km: -O -K >> $output
+# D: Dimensions (MUST BE IN inches / centimeters)
+# B: Scale has 5km boxes.  I just copied the syntax on the annotation.  
+
+# Making a legend. 
+gmt pslegend -R$range -J$projection -F+pthin,black+gazure2 -DjTR+w6.0+jTR+l1.2 -C0.1i/0.1i -K -O <<EOF >> $output
+
+G -0.0i
+#H 16 Helvetica Seismometers at MTJ
+G 0.05i
+S 0.1i c 0.12i black 0.70p 0.3i HypoDD Location
+S 0.1i s 0.14i black 0.70p 0.3i NCSS Location
+G 0.05i
+EOF

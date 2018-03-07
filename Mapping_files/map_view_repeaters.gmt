@@ -1,0 +1,66 @@
+#! /bin/bash
+# Plot the repeaters at the Mendocino Transform Fault
+# 1/2/2016 Kathryn Materna
+
+#lonW=-124.65
+#lonE=-124.35
+#latS=40.25
+#latN=40.35
+
+lonW=-127
+lonE=-123
+latS=39.5
+latN=41.5
+
+sta_lon=$1
+sta_lat=$2
+sta_name=$3
+
+range="$lonW/$lonE/$latS/$latN"
+projection="m2.3i"
+output="Repeater_Locations.ps"
+
+# Plot the coast of California. 
+# Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Repeating Earthquakes at the Mendocino Triple Junction": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults
+gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+
+# Plot all earthquakes
+#gmt psxy B046.PB.EHZ..D._lats_and_lons.txt -R$range -J$projection -Sc -Gblack -K -O >> $output
+
+# Plot the repeating earthquakes
+gmt psxy event_locations_first_hypodd.txt -R$range -J$projection -Sc -Gblack -Wthin,white -K -O >> $output
+gmt psxy event_locations_second_hypodd.txt -R$range -J$projection -Sc -Gblue -Wthin,white -K -O >> $output
+gmt psxy event_locations_first_ncss.txt -R$range -J$projection -Ss -Gblack -Wthin,white -K -O >> $output
+gmt psxy event_locations_second_ncss.txt -R$range -J$projection -Ss -Gblue -Wthin,white -K -O >> $output
+gmt psxy event_connectors.txt -R$range -J$projection -Wthin,white -K -O >> $output
+
+
+# Plot the location of the borehole seismometer
+echo $sta_lon $sta_lat 0.4 | gmt psxy -R$range -J$projection -Sa -Gred -Wthin,white -K -O >> $output 
+
+# Plot the location of the borehole seismometer
+echo $sta_lon $sta_lat 12 0 1 BL $sta_name | gmt pstext -R$range -J$projection -K -O >> $output 
+
+# Making a more complicated legend. 
+gmt pslegend -R$range -J$projection -F+pthin,black+gazure2 -DjTR+w6.0+jTR+l1.2 -C0.1i/0.1i -K -O <<EOF >> $output
+
+G -0.0i
+#H 16 Helvetica Seismometers at MTJ
+G 0.05i
+S 0.1i c 0.12i black 0.50p,white 0.3i HypoDD Location
+S 0.1i s 0.14i black 0.70p,white 0.3i NCSS Location
+#S 0.1i t 0.1i white 0.80p 0.3i EDM (1970-1997)
+#S 0.1i - 0.1i black thick,black 0.3i Faults
+#S 0.1i f 0.25i/-1/0.075ilb 0/0/255 0.25p 0.3i This is a fault
+#S 0.1i - 0.15i - 0.25tap 0.3i A contour
+
+#S 0.1i v 0.25i/0.02i/0.06i/0.05i 255/0/255 0.25p 0.3i This is a vector
+G 0.05i
+EOF
