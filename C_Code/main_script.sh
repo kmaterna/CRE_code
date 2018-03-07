@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+# This script will take additional files in the "add_on" directory and compare them to: 
+# 1. the files in the home directory, and 
+# 2. the other files in the add-on directory. 
+# It will APPEND the coherence and SNR results to the end of the results files. 
+# It can also handle re-dos that have already been included, but for some reason need to be deleted and re-added. 
+# It should be called from the B045/ or parallel directory. 
+
+station_name=$1
+echo $station_name
+setup.sh $station_name         # Figure out what data we have; grab names of files, make safe copies of result files. 
+delete_redos.sh $station_name  # If we are doing redos, delete existing comparisons before we re-do that station. 
+
+# Compare existing files with everything in the add-on directory. 
+# flags are -L/$HOME/sac/lib -lsacio -lsac for personal machine (not BSL network)
+gcc -o add_nearby.o ../../C_CREs/generate_nearby_add_ons_list.c -L/share/apps/sac/lib -lsacio -lsac -lm
+./add_nearby.o $station_name
+
+echo "Merging any added files into the 'exist' directory for logical managing in the future"
+merge_added_exist.sh $station_name # moves added files into 'exist' for logical managing in future
+make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
+
+gcc -o major_computation.o ../../C_CREs/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
+./major_computation.o $station_name append_mode
+
+echo "Producing SNR solution file"
+python ../../C_CREs/update_solution_file_with_SNR.py $station_name  # only does computation for each "hit" from the last step (cc>0.6)
+
+cleaning_up.sh $station_name
