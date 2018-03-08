@@ -16,7 +16,9 @@ def get_dirs_for_station(station_location_file):
 	ifile=open(station_location_file);
 	for line in ifile:
 		temp=line.split();
-		stations.append(temp[0])
+                u=temp[0].decode("utf-8-sig");
+                s=u.encode("utf-8");  # issues with the first line of the text file and its utf-8 encoding. 
+		stations.append(s)
 		station_paths.append(temp[3]);
 	ifile.close();
 	return [stations, station_paths];

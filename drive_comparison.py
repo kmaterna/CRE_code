@@ -30,7 +30,7 @@ SNR_cutoff = [5.0];
 Minimum_freq_width = [5.0];
 
 # Parameters that aren't likely to change between experiments
-time_window=[2008.7, 2017.60]; # start time and end time for repeater search, etc. You may want to change this. 
+time_window=[2008.7, 2018.20]; # start time and end time for repeater search, etc. You may want to change this. 
 families_list="families_list.txt";
 families_summaries="Families_Summaries.txt";
 stage1_results="Stage1_Results"

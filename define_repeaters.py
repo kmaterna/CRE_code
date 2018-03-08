@@ -70,6 +70,8 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 	four_char=station_name;
 	if len(station_name)==3:
 		four_char=station_name+"_"
+        u = station_name.decode("utf-8-sig");
+        station_name = u.encode("utf-8");
 	
 	# This is where we have put the results of the C calculation with all the candidates (xcorr > 0.60). 
 	data_input_file = candidate_input_dir+'/'+four_char+'-above_cutoff_results.txt'
@@ -89,7 +91,9 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 	ifile=open(station_location_file,'r');
 	for line in ifile:
 		temp=line.split();
-		if temp[0]==station_name:
+                u=temp[0].decode("utf-8-sig");
+                s=u.encode("utf-8");  # issues with the first line of the text file and its utf-8 encoding. 
+		if s==station_name:
 			station_coords=[float(temp[1]), float(temp[2])];
 			raw_sac_dir=temp[3];
 	ifile.close();
