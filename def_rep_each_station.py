@@ -30,14 +30,14 @@ def CRE_post_analysis(MyParams,output_dir):
 	get_summary_statistics.get_summary_statistics(MyParams.families_summaries);  # This changes for Mendocino vs. other places. 
 
 	# # OPTIONAL IN ANY SEQUENCE: HISTOGRAMS, GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS
-	#mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
-	#gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
-        
-        #view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
-
+	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
+	
+        # These are moderately specific to Mendocino; small changes necessary for Anza. 
+        gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
+        view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
         # These two are right now very specific to Mendocino. 
-	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries);
-	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries); 	
+	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
+	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data); 	
 	return;
 
 

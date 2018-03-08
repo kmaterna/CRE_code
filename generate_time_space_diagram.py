@@ -12,7 +12,7 @@ import util_general_functions
 
 
 
-def main_program(time_window,family_summaries):
+def main_program(time_window,family_summaries, mapping_data):
 
 	dont_plot_family = 1.0;  # number of years between the beginning and end of the sequence, in case we dont want short-lived sequences
 	colorlist='brgcmky'
@@ -22,11 +22,11 @@ def main_program(time_window,family_summaries):
 	color_change_time = 2015.07; # the timing of the M5.7 event. 
 
 	# Zoomed in, simpler: 
-	time_space_simpler(family_summaries, lon_bounds, lat_bounds, [0, 18] , dont_plot_family, time_window[0], time_window[1], color_change_time+10);   # shallower cluster
-	time_space_simpler(family_summaries, lon_bounds, lat_bounds, [18, 35], dont_plot_family, time_window[0], time_window[1], color_change_time);  # deeper cluster
+	time_space_simpler(family_summaries, lon_bounds, lat_bounds, [0, 18] , dont_plot_family, time_window[0], time_window[1], mapping_data, color_change_time+10);   # shallower cluster
+	time_space_simpler(family_summaries, lon_bounds, lat_bounds, [18, 35], dont_plot_family, time_window[0], time_window[1], mapping_data, color_change_time);  # deeper cluster
 
 	# More complicated, colored by depth, zoomed in and zoomed out: 
-	time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 35], dont_plot_family,time_window[0],time_window[1],colorlist);
+	time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 35], dont_plot_family,time_window[0],time_window[1], mapping_data, colorlist);
 
 	print "Space-Time Diagrams Created!"
 	return;
@@ -34,9 +34,9 @@ def main_program(time_window,family_summaries):
 
 
 
-def plot_recent_M5_eqs(ax): # plot stars for major earthquakes in the time range. 
+def plot_recent_M5_eqs(ax, mapping_data): # plot stars for major earthquakes in the time range. 
 	# record of major >M5 earthquakes in: "latitude longitude depth time magnitude"
-	input_file=open("Mapping_files/M5up.eq",'r');	
+	input_file=open(mapping_data+"/M5up.eq",'r');	
 	for line in input_file:
 		temp=line.split();
 		comment_flag=temp[0]
@@ -72,8 +72,8 @@ def plot_M6p5_eq(ax): # M6.5 Earthquake in 2010
 	ax.plot([-127,-121],[2010.027, 2010.027],'--k'); 
 	return ax;
 
-def plot_eq_cloud(ax,dep_min,dep_max,lat_min,lat_max):
-	input_file=open("Mapping_files/hypodd.txyzm",'r');
+def plot_eq_cloud(ax,dep_min,dep_max,lat_min,lat_max, mapping_data):
+	input_file=open(mapping_data+"/hypodd.txyzm",'r');
 
 	for line in input_file:
 		temp=line.split();
@@ -86,8 +86,8 @@ def plot_eq_cloud(ax,dep_min,dep_max,lat_min,lat_max):
 				ax.plot(lon, time, '.', color='gray');
 	return ax;
 
-def plot_eq_cloud_afterM5p7(ax,dep_min,dep_max,lat_min,lat_max, time_start, dot_color):
-	input_file=open("Mapping_files/hypodd.txyzm",'r');
+def plot_eq_cloud_afterM5p7(ax,dep_min,dep_max,lat_min,lat_max, time_start, dot_color, mapping_data):
+	input_file=open(mapping_data+"/hypodd.txyzm",'r');
 	for line in input_file:
 		temp=line.split();
 		time=float(temp[0]);
@@ -117,7 +117,7 @@ def axis_format(ax, start_time, end_time):  # useful formatting for the axis of 
 # ********************************** # 
 
 
-def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family,start_time,end_time,colorlist):
+def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family,start_time,end_time, mapping_data, colorlist):
 	"""
 	Zoomed out and Zoomed in color-coded by depth. 
 	"""
@@ -152,9 +152,9 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
 	cbar.set_label('Depth (km)')
 
 	# For the cloud of microseismicity:
-	ax = plot_eq_cloud(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1]);
+	ax = plot_eq_cloud(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1], mapping_data);
 	ax = axis_format(ax,start_time,end_time);
-	ax = plot_recent_M5_eqs(ax);
+	ax = plot_recent_M5_eqs(ax, mapping_data);
 	ax = plot_M6p8_eq(ax);
 	#ax = plot_M6p5_eq(ax);
 
@@ -171,7 +171,7 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
 	return;
 
 
-def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family,start_time,end_time, color_change_time):
+def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family,start_time,end_time, mapping_data, color_change_time):
 	"""
 	Simplified Zoomed in on the active region. 
 	Adding the stars for M5 earthquakes. 
@@ -209,11 +209,11 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
 
 	# For the cloud of microseismicity and other annotations:
 	ax = axis_format(ax,start_time,end_time);
-	ax = plot_eq_cloud(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1]);
-	ax = plot_eq_cloud_afterM5p7(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1], color_change_time,'salmon');	
+	ax = plot_eq_cloud(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1], mapping_data);
+	ax = plot_eq_cloud_afterM5p7(ax, dep_bounds[0], dep_bounds[1], lat_bounds[0], lat_bounds[1], color_change_time,'salmon', mapping_data);	
 	ax = plot_M6p8_eq(ax);
 	ax = plot_M5p7_eq(ax);
-	ax = plot_recent_M5_eqs(ax);
+	ax = plot_recent_M5_eqs(ax, mapping_data);
 	#ax = plot_M6p5_eq(ax);
 
 
