@@ -27,14 +27,15 @@ def CRE_post_analysis(MyParams,output_dir):
 	find_network_repeaters.network_repeaters_two_more_stations(MyParams.Network_repeaters_list, MyParams.stage2_results);
         connected_component_analysis.connected_components(MyParams.time_window,MyParams.Network_repeaters_list,MyParams.families_list);
 	make_family_summaries.main_program(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations);
-	get_summary_statistics.get_summary_statistics(MyParams.families_summaries);
+	get_summary_statistics.get_summary_statistics(MyParams.families_summaries);  # This changes for Mendocino vs. other places. 
 
 	# # OPTIONAL IN ANY SEQUENCE: HISTOGRAMS, GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS
-	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
-	gmt_plotting.main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  # there's a few scripts in here that don't play nice with the current relative path scheme. Come back to this tomorrow. 
+	#mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
+	gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
+        # there's a few scripts in here that don't play nice with the current relative path scheme. Come back to this tomorrow. 
         
-        view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
-        # Having an issue with finding the code directory (oops, it doesn't really know that...). 
+       # view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
+        # Having an issue with finding filter_sac.sh in the code directory (oops, it doesn't really know that...). 
 
         # These two are right now very specific to Mendocino. 
 	# generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries);

@@ -7,8 +7,6 @@
 #latS=40.25
 #latN=40.35
 
-mapping_files=$1
-
 lonW=-127
 lonE=-123
 latS=39.5

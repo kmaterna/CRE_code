@@ -53,3 +53,6 @@ gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Wthinnest,black -Cm
 gmt psmeca mechanisms_deep.txt -R$range -J$projection -Gblack -K -O -Sa1 -C >> $output
 
 
+echo "file made:"
+echo $output
+

@@ -7,6 +7,7 @@
 # Also plot the historical large seismicity in GCMT focal mechanism form
 # 12/01/2016
 
+mapping_data=$1
 
 lonW=-124.70
 lonE=-124.19
@@ -44,7 +45,7 @@ gmt makecpt -T-9400/3400/100 -Cgray -Z > myrainbow.cpt
 
 
 # Make a projection of seismicity with depth. 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
 gmt project Families_xyz_hypodd.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis1.tmp
 gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis2.tmp
 # F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
@@ -53,11 +54,11 @@ gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -
 # Q: put km units
 
 # Project the cascadia subduction zone model from Slab1p0 into the depth profile. 
-gmt project Mapping_files/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W-1/1 -Q -V >!tslab.tmp
+gmt project $mapping_data/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W-1/1 -Q -V >!tslab.tmp
 
 
 # Establish the cross-section in a new box
-gmt psxy Mapping_files/box_dim -R${brange} -J${bprojection} -Bf0.25a0.25:"":/f10a10:"Depth (km)":wEsN -P -K -X3 -Y2 -V >$output
+gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.25a0.25:"":/f10a10:"Depth (km)":wEsN -P -K -X3 -Y2 -V >$output
 # B2: annotate the axes every 2 km
 # X and Y: move this axis relative to map
 
@@ -67,7 +68,7 @@ awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange
 
 # Add the historical large seismicity in the box. 
 # Make a projection of the large seismicity in the box. 
-awk '{print $4, $3, $5, $6}' Mapping_files/M5p5up.eq | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!large_profile.tmp
+awk '{print $4, $3, $5, $6}' $mapping_data/M5p5up.eq | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!large_profile.tmp
 awk '{print $1, $3*(-1.0), $4*(2.0)}' !large_profile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sap -Gyellow -Wthinner,black >> $output
 awk '{print $1, $3*(1.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthickest,magenta -V >> $output
 awk '{print $1, $3-(7.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthin,black,- -V >> $output
@@ -90,7 +91,7 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Glightgray -B0.25:."":We
 
 # Resample to make the topography a bit more clear. 
 # Use grdsample to make a fine mesh out of a course one, or the other way around. 
-gmt grdsample Mapping_files/srtm1205.grd -GTopogrid.grd -I$resampling
+gmt grdsample $mapping_data/srtm1205.grd -GTopogrid.grd -I$resampling
 
 # Make some illumination data # # Plot the topography data
 gmt grdgradient Topogrid.grd -A350 -GTopogrid.grad -Nt
@@ -100,7 +101,7 @@ gmt grdmath Topogrid.hist 6 DIV = Topogrid.norm
 gmt grdimage Topogrid.grd -ITopogrid.norm -R$range -J$projection -K -V -O -Cmyrainbow.cpt >> $output
 
 # Do the same thing for the second tile (haven't gotten them to combine with grdpaste yet)
-gmt grdsample Mapping_files/srtm1204.grd -GTopogrid.grd -I$resampling
+gmt grdsample $mapping_data/srtm1204.grd -GTopogrid.grd -I$resampling
 gmt grdgradient Topogrid.grd -A350 -GTopogrid.grad -Nt
 gmt grdhisteq Topogrid.grad -GTopogrid.hist -N
 gmt grdinfo Topogrid.hist
@@ -110,12 +111,12 @@ gmt grdimage Topogrid.grd -ITopogrid.norm -R$range -J$projection -K -V -O -Cmyra
 
 
 # Add the fault map
-gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,gray20 -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,gray20 -K -O >> $output
 
 #Covering up offshore faults
 gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -L-124.6/40.275/40.275/10+jt+u -P -K -O >> $output
 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray26 -P -K -O >> $output # Plot all earthquakes
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray26 -P -K -O >> $output # Plot all earthquakes
 
 # Make the cross-section annotations (SJ means rotated rectangle)
 gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,red << EOF >>$output
@@ -131,13 +132,13 @@ gmt pstext -R$range -J$projection -F+a+f10p,Times-BoldItalic,black -O -K << EOF 
 EOF
 
 # Plot the historical large seismicity in stars
-awk '{print $4, $3, $6*(2.0)}' Mapping_files/M5p5up.eq | gmt psxy -J$projection -R$range -Sap -Gyellow -Wthinner,black -P -K -O >> $output
+awk '{print $4, $3, $6*(2.0)}' $mapping_data/M5p5up.eq | gmt psxy -J$projection -R$range -Sap -Gyellow -Wthinner,black -P -K -O >> $output
 
 
 # Plot focal mechanisms for big events. 
-python GMT_Scripts/make_focal_mechanism_list.py Mapping_files/M5p5up_mtcatalog_ncsnbased.eq  yes_label # select only events which have GCMT moment tensors 
-gmt psmeca focal_mechanism_list1.txt -R$range -J$projection -K -O -C -Sd0.5u >> $output
-gmt psmeca focal_mechanism_list2.txt -R$range -J$projection -K -O -C -Sd0.5 >> $output
+#python GMT_Scripts/make_focal_mechanism_list.py $mapping_data/M5p5up_mtcatalog_ncsnbased.eq  yes_label # select only events which have GCMT moment tensors 
+#gmt psmeca focal_mechanism_list1.txt -R$range -J$projection -K -O -C -Sd0.5u >> $output
+#gmt psmeca focal_mechanism_list2.txt -R$range -J$projection -K -O -C -Sd0.5 >> $output
 # -Sd means double-couple
 # -Sm means full moment tensor
 # u means plot label BELOW the beachball
@@ -155,3 +156,6 @@ gmt psscale -R -J -DjTR+w4c/0.5c+o-1.5/1.5 -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr
 
 rm gmt.history
 rm mycpt.cpt
+
+echo "file made:"
+echo $output

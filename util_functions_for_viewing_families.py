@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from obspy.core.stream import Stream
 from obspy import read
 from subprocess import call
+import os
 
 
 
@@ -54,6 +55,9 @@ def make_similarity_matrix(number_of_events, event_names,ev1_non_repeaters,ev2_n
 # -------- MAKING THE FIRST SAVED FIGURE (WAVEFORMS) ----- #
 def make_waveform_plot(family_of_interest, event_names, magnitude, station, sac_directory, save_path):
 	""" Plotting all the waveforms in a given family. """
+        
+        path_to_python=os.path.dirname(os.path.realpath(__file__));
+
 	x=np.arange(0,20.48,0.01)
 	number_of_events=len(event_names);
 	plt.figure()
@@ -63,7 +67,7 @@ def make_waveform_plot(family_of_interest, event_names, magnitude, station, sac_
 
 		sacfile=sac_directory+'*.'+name
 		print sacfile
-		call(["./filter_sac.sh",sacfile])
+		call([path_to_python+"/filter_sac.sh",sacfile])
 
 		st1 = read('filtfile.sac')
 		tr1 = st1[0]

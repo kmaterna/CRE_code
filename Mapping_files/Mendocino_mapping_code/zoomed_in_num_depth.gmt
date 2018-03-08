@@ -6,6 +6,7 @@
 # AND PLOT THE NUMBER OF EVENTS. 
 # 9/08/2016
 
+mapping_data=$1
 
 lonW=-125.4
 lonE=-124
@@ -39,7 +40,7 @@ gmt makecpt -T1.9/8.0/1.0 -Cjet > mycpt.cpt
 
 
 # Make a projection of seismicity with depth. 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
 gmt project Families_number_of_events.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis_num.tmp
 # F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
 # C: center
@@ -47,7 +48,7 @@ gmt project Families_number_of_events.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin
 # Q: put km units
 
 # Establish the cross-section in a new box
-gmt psxy Mapping_files/box_dim -R${brange} -J${bprojection} -Bf0.25a0.5:"Depth Profile ":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.25a0.5:"Depth Profile ":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
 # B2: annotate the axes every 2 km
 # X and Y: move this axis relative to map
 
@@ -65,7 +66,7 @@ awk '{print $1, $3*(-1.0), $4}' !tseis_num.tmp | gmt psxy -J${bprojection} -R${b
 
 gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -B0.5:."Repeater Number of Events":WeSN -P -K -O -X0 -Y9 >> $output
 # Df = full resolution coastline; N1=country boundaries; N2=stat boundaries. 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Gblack -P -K -O >> $output # Plot all earthquakes
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Gblack -P -K -O >> $output # Plot all earthquakes
 
 # Make the cross-section annotations (SJ means rotated rectangle)
 gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,blue << EOF >>$output
@@ -83,3 +84,6 @@ gmt psscale -R -J -DjTR+w4c/0.5c+o-1.5/1.5 -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr
 
 rm gmt.history
 rm mycpt.cpt
+
+echo "file made:"
+echo $output

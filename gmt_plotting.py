@@ -14,9 +14,9 @@ import util_general_functions
 
 
 
-def main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
+def mendocino_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
 	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data);
-	#familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
+	familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
 	cleaning_up();
 	return;
 
@@ -107,7 +107,7 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 
 
 
-def familywise_gmt(families_summaries):
+def familywise_gmt(families_summaries, mapping_code, mapping_data):
 	input_file=open(families_summaries,'r');
 	outputfile1=open("Families_xy_hypodd.txt",'w');
 	outputfile2=open("Families_xy_ncss.txt",'w');
@@ -142,14 +142,14 @@ def familywise_gmt(families_summaries):
 	output_nums.close();
 	input_file.close();
 
-	call(mapping_code+'/microseismicity_map.gmt')   # makes the depth profile of red dots for repeaters. 
-	call(mapping_code+'/zoomed_in_slip_depth.gmt')  # makes the depth profile with colored dots for slip rate
-	call(mapping_code+'/zoomed_in_num_depth.gmt')  # makes the depth profile with colored dots for slip rate
-	call(mapping_code+'/very_zoomed_in_slip_depth.gmt')  # makes the depth profile with colored dots for slip rate. 
-	call(mapping_code+'/cross_section_plus_historical.gmt')  # makes the depth profile and adds recent M5 events. 
-	call(mapping_code+'/very_zoomed_in_plus_historical.gmt')  # makes the zoomed in graph with M5s. 
-	call(mapping_code+'/slip_rates.gmt')
-	call(mapping_code+'zoomed_in_slip_rates.gmt')
+	call([mapping_code+'/microseismicity_map.gmt',mapping_data],shell=False)   # makes the depth profile of red dots for repeaters. 
+	call([mapping_code+'/zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
+	call([mapping_code+'/zoomed_in_num_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
+	call([mapping_code+'/very_zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate. 
+	call([mapping_code+'/cross_section_plus_historical.gmt',mapping_data],shell=False)  # makes the depth profile and adds recent M5 events. 
+	call([mapping_code+'/very_zoomed_in_plus_historical.gmt',mapping_data],shell=False)  # makes the zoomed in graph with M5s. 
+	call([mapping_code+'/slip_rates.gmt',mapping_data],shell=False)
+	call([mapping_code+'/zoomed_in_slip_rates.gmt',mapping_data],shell=False)
 
 	return;
 

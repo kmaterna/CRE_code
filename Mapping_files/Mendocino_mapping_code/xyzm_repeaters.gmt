@@ -55,3 +55,6 @@ S 0.1i c 0.12i black 0.70p 0.3i HypoDD Location
 S 0.1i s 0.14i black 0.70p 0.3i NCSS Location
 G 0.05i
 EOF
+
+echo "file made:"
+echo $output

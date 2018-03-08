@@ -5,6 +5,7 @@
 # Also plot the repeating earthquake families where we have slip rates. 
 # 9/08/2016
 
+mapping_data=$1
 
 lonW=-125.5
 lonE=-123
@@ -41,18 +42,18 @@ brange="$Cx_start/$Cx_end/$maxdepth/0" # The edges of the eventual cross-section
 bprojection="x5.9/0.15"
 
 # Make a projection of seismicity with depth. 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
 # F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
 # C: center
 # A: Azimuth
 # Q: put km units
 
 # Project the cascadia subduction zone model from Slab1p0 into the depth profile. 
-gmt project Mapping_files/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_tight_min/$width_tight_max -Q -V >!tslab.tmp
+gmt project $mapping_data/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_tight_min/$width_tight_max -Q -V >!tslab.tmp
 
 
 # Establish dimensions for the box with cross-section
-gmt psxy Mapping_files/box_dim -R${brange} -J${bprojection} -Bf0.5a1:"Depth Profile":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.5a1:"Depth Profile":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
 # B2: annotate the axes every 2 km
 # X and Y: move this axis relative to map
 
@@ -70,7 +71,7 @@ gmt psxy Families_xz_ncss.txt -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Gred
 
 gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -L-125.0/39.99/39.99/50+jt+u -B1.0:."Repeater Locations at MTJ": -K -O -X0 -Y9 -P >> $output
 # Df = full resolution coastline; N1=country boundaries; N2=stat boundaries. 
-awk '{print $2, $3, $4, $5}' Mapping_files/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray26 -K -O -P >> $output # Plot all hypodd earthquakes
+awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray26 -K -O -P >> $output # Plot all hypodd earthquakes
 
 # Make the cross-section annotations (SJ means rotated rectangle)
 gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,blue << EOF >>$output
@@ -79,10 +80,12 @@ EOF
 # The pipe bc is for adding floating point numbers
 
 # Add the fault map
-gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,black -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,black -K -O >> $output
 
 # # Plot the repeating earthquake families
 gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Gred -Wthick,blue -K -O -P >> $output   # if you want single-color dots. 
 gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Gred -Wthick,blue -K -O -P >> $output   # if you want single-color dots. 
 
+echo "file made:"
+echo $output
 rm gmt.history

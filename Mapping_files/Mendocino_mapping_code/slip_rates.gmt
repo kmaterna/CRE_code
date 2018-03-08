@@ -8,6 +8,8 @@ lonE=-123
 latS=39.5
 latN=41.1
 
+mapping_data=$1
+
 range="$lonW/$lonE/$latS/$latN"
 projection="m2.9i"
 output="Slip_Rates_many_stations.ps"
@@ -19,10 +21,10 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-125/39.7/39.7/50+jt+u -Wblack
 # Add all the faults
 #gmt psxy ../Holocene_LatestPleistocene.txt -R$range -J$projection -Wthin,red -K -O >> $output
 #gmt psxy ../LateQuaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
 
 
 # Make a colormap using JET colorscale (for slip rates). 
@@ -42,5 +44,8 @@ gmt psscale -D0.2i/1.1i/-4c/0.6c -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr: -O -K >>
 
 # Plot the location of the borehole seismometer
 gmt psxy -R$range -J$projection -Sa -Gred -Wthin,white -K -O <<EOF >> $output 
--124.2843 40.32197 0.4 EOF
+-124.2843 40.32197 0.4 
+EOF
 
+echo "file made:"
+echo $output
