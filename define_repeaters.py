@@ -11,7 +11,7 @@ your physical parameters.  Then run it!
 import numpy as np
 import collections
 from subprocess import call 
-import os 
+import os, io
 import make_histograms_plots
 
 Params=collections.namedtuple('Params',[
@@ -72,7 +72,7 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 		four_char=station_name+"_"
 	
 	# This is where we have put the results of the C calculation with all the candidates (xcorr > 0.60). 
-	data_input_file = candidate_input_dir+"/"+four_char+"-above_cutoff_results.txt"
+	data_input_file = candidate_input_dir+'/'+four_char+'-above_cutoff_results.txt'
 	snr_input_file = candidate_input_dir+"/"+four_char+"-snr_results.txt"	
 
 	# This is where we want to put the CRE detections for each station
@@ -136,14 +136,18 @@ def print_out_statements(MyParams):
 # ------------------ INPUTS ------------------- # 
 
 def inputs(MyParams):
-
 	Candidates_coh = read_data_input_file(MyParams.data_input_file);
 	Candidates_snr = read_snr_input_file(MyParams.snr_input_file);
 	return [Candidates_coh, Candidates_snr];
 
 
 def read_data_input_file(filename):
-	ifile=open(filename,'r');
+        filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
+        filename_inner=filename.split('/')[1];
+        u = filename_inner.decode("utf-8-sig");
+        s = u.encode("utf-8");
+        t=filename_split[0]+"/"+s;
+	ifile=open(t,'r');
 	event1name=[]; event2name=[]; ev1mag=[]; ev2mag=[]; ev1dist=[]; ev2dist=[]; xcorr=[]; coh_collection=[];
 	for line in ifile:
 		coh=[];
@@ -165,7 +169,13 @@ def read_data_input_file(filename):
 def read_snr_input_file(filename):
 	# Read in the SNR information. 
 	
-	ifile=open(filename,'r');
+        filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
+        filename_inner=filename.split('/')[1];
+        u = filename_inner.decode("utf-8-sig");
+        s = u.encode("utf-8");
+        t=filename_split[0]+"/"+s;
+	ifile=open(t,'r');
+
 	f_axis1=[]; snr1=[]; 
 	f_axis2=[]; snr2=[];
 	event1name=[]; event2name=[];
