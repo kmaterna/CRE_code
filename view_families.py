@@ -11,10 +11,10 @@ import util_general_functions
 import os
 
 
-def view_families(time_window,families_list,families_summaries,station_locations,output_dir,families=[-1]):
+def view_families(time_window,families_list,families_summaries,station_locations,mapping_data,output_dir,families=[-1]):
 	# Note: families=-1 is the default state, and means do all families. 
 	# Alternately: families = [0, 1, 2, 3] means only do a few stations
-	[summary_array,stations,station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,station_locations);
+	[summary_array,stations,station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,station_locations,mapping_data);
 	output_dir=output_dir+"Image_Families/";
 	for i, myline in enumerate(summary_array):
 		if families[0]==-1:  # do all families
@@ -27,12 +27,12 @@ def view_families(time_window,families_list,families_summaries,station_locations
 
 # -------- INPUT PARAMETERS ------ #
 
-def overall_inputs(families_summaries,station_locations):
+def overall_inputs(families_summaries,station_locations,mapping_data):
 
 	# Mapping Files
-	[ca_lon, ca_lat]=np.loadtxt("Mapping_files/CA_bdr",unpack=True);
+	[ca_lon, ca_lat]=np.loadtxt(mapping_data+"/CA_bdr",unpack=True);
 	ca_coords=[ca_lon, ca_lat];
-	plates_file="Mapping_files/nuvel1_plates_mod.txt";
+	plates_file=mapping_data+"/nuvel1_plates_mod.txt";
 	input_plates=open(plates_file,'r');
 	# for drawing the plate boundaries
 	plate_lat=[];   plate_lon=[]

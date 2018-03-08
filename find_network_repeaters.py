@@ -16,8 +16,8 @@ Indv_station_repeaters = collections.namedtuple('Indv_station_repeaters',[
 # The station_data field is full of arrays with elements like "2010.241.010956.71447890.sac 2017.175.203253.72820756.sac".
 
 
-def network_repeaters_two_more_stations(Network_repeaters_list):
-	[filelist,outfile] = configure(Network_repeaters_list);   # Get all the individual-station CRE files. 
+def network_repeaters_two_more_stations(Network_repeaters_list,stage2_results):
+	[filelist,outfile] = configure(Network_repeaters_list,stage2_results);   # Get all the individual-station CRE files. 
 	Individual_station_repeaters = inputs(filelist);  # read them into an array
 	[evpairs,stations]      =compute(Individual_station_repeaters);  # compute the unique repeaters and where they were observed
 	outputs(evpairs,stations,outfile);  # write a file. 
@@ -26,9 +26,9 @@ def network_repeaters_two_more_stations(Network_repeaters_list):
 
 
 # --------------------- GUTS -------------------- # 
-def configure(Network_repeaters_list):
+def configure(Network_repeaters_list,stage2_results):
 	call(['rm',Network_repeaters_list],shell=False);
-	copy_list=glob.glob('CREs_by_station/*/*_*_list.txt');
+	copy_list=glob.glob(stage2_results+'/CREs_by_station/*/*_*_list.txt');
 	for item in copy_list:
 		call(['cp',item,'.'],shell=False); 
 	filelist=glob.glob("*_repeaters_list.txt");

@@ -12,6 +12,8 @@ lonE=-123.5
 latS=39.75
 latN=41.0
 
+mapping_data=$1
+
 range="$lonW/$lonE/$latS/$latN"
 projection="m3.2i"
 output="Network_Repeaters_depths.ps"
@@ -22,10 +24,10 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-125/39.9/39.9/50+jt+u -Wblack
 # Df = full resolution coastline
 
 # Add all the faults
-gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
 
 # Plot all earthquakes
 #gmt psxy B046.PB.EHZ..D._lats_and_lons.txt -R$range -J$projection -Sc -Gblack -K -O >> $output

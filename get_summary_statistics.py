@@ -30,7 +30,7 @@ def get_summary_statistics(families_summaries):
 
 
 
-def configure():
+def configure():  # You're going to want to change this for different locations (Mendocino, Anza, etc.)
 	output_filename="summary_statistics.txt";
 	min_lon=-124.75;
 	max_lon=-124.25;
