@@ -13,7 +13,9 @@ TotalParams=collections.namedtuple('TotalParams',[
 	'families_list',
 	'families_summaries',
 	'station_locations',
-	'time_window'])
+	'time_window',
+        'stage1_results',
+        'stage2_results'])
 
 
 # Definition of types of parameters I want to loop through. 
@@ -30,9 +32,11 @@ time_window=[2008.7, 2017.60]; # start time and end time for repeater search, et
 Network_repeaters_list='Network_CRE_pairs_list.txt';
 families_list="families_list.txt";
 families_summaries="Families_Summaries.txt";
-station_locations="CRE_Candidates/station_locations.txt"
+stage1_results="Stage1_Results"
+stage2_results="Stage2_Results"
+station_locations="station_locations.txt"
 MyParams=TotalParams(Network_repeaters_list=Network_repeaters_list, families_list=families_list, families_summaries=families_summaries,
-	station_locations=station_locations,time_window=time_window);
+	station_locations=station_locations,time_window=time_window, stage1_results=stage1_results, stage2_results=stage2_results);
 
 
 # # Preferred

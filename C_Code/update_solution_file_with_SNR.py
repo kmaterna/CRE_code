@@ -13,6 +13,7 @@ import numpy as np
 from sys import argv
 
 station_name=argv[1]
+code_dir=argv[2]
 if len(station_name)==3:
 	station_name=station_name+'_';
 input_file=open(station_name+"-above_cutoff_results.txt",'r');
@@ -30,7 +31,7 @@ for line in input_file:
 	sacfile2=temp[1]
 
 	# Call to compute SNR for sac file #1
-	call("gcc -o get_snr.o ../../C_CREs/get_snr.c -L/share/apps/sac/lib  -lsacio -lsac -lm", shell=True)
+	call("gcc -o get_snr.o "+code_dir+"/get_snr.c -L/share/apps/sac/lib  -lsacio -lsac -lm", shell=True)
 	calling="noise_floor_VS_data.sh "+sacfile1
 	call(calling,shell=True);  
 	# Sac splits up the noise from the data and FFTs them both

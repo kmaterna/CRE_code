@@ -1,8 +1,7 @@
 # Takes in: metric, cutoff, mean/median, Max-frequency, SNR cutoff, minimum_span, 
 
 from subprocess import call
-import glob
-import os
+import glob, os, sys
 import define_repeaters
 import find_network_repeaters
 import connected_component_analysis
@@ -16,8 +15,9 @@ import get_summary_statistics
 
 
 def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, SNR_cutoff=5.0, Minimum_frequency_width=5.0):
-	output_dir=make_output_dir(metric,cutoff,freq_method,max_frequency,statistic);  # config step
-	define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
+	output_dir=setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic);  # config step
+	sys.exit(0);
+        define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
 	CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
 	cleaning_up(output_dir);  # Move everything to output directory
 	return;
@@ -45,12 +45,25 @@ def CRE_post_analysis(MyParams,output_dir):
 
 # ----------- NOT LIKELY TO CHANGE BELOW THIS POINT ----------------- # 
 
-def make_output_dir(metric,cutoff,freq_method,max_frequency,statistic):
+def setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic):
+        #make_input_dir(MyParams);  # if you haven't done this since updating, you want to copy the new stage1 results from the station directories. 
+        output_dir = make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic); 
+        return output_dir;
+
+def make_input_dir(MyParams):
+        # Move the "above_cutoff_results" and "snr_result" into a staging directory. 
+        # This might become a script soon if we need to remove directory headings etc. 
+        call(['mkdir','-p',MyParams.stage1_results],shell=False);
+        call('cp */*-above_cutoff_results.txt '+MyParams.stage1_results,shell=True);
+        call('cp */*-snr_results.txt '+MyParams.stage1_results,shell=True);
+        return;
+
+def make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic):
 	# Place outputs in specific folder
 	if metric=="corr":
-		directory_name = "Results/"+metric+"_"+str(cutoff)+"/";
+		directory_name = MyParams.stage2_results+"/"+metric+"_"+str(cutoff)+"/";
 	else:
-		directory_name = "Results/"+metric+"_"+str(cutoff)+"_"+freq_method+"_"+str(max_frequency)+"_"+statistic+"/";
+		directory_name = MyParams.stage2_results+"/"+metric+"_"+str(cutoff)+"_"+freq_method+"_"+str(max_frequency)+"_"+statistic+"/";
 	print "Directory name is " +directory_name;
 	call(['mkdir','-p',directory_name],shell=False); # For the result directory
 	call(['mkdir','-p',directory_name+"Image_families/"],shell=False); # For the image directory

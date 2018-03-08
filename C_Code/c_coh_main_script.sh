@@ -36,6 +36,6 @@ gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/
 ./major_computation.o $station_name append_mode
 
 echo "Producing SNR solution file"
-python $where_is_code/update_solution_file_with_SNR.py $station_name  # only does computation for each "hit" from the last step (cc>0.6)
+python $where_is_code/update_solution_file_with_SNR.py $station_name $where_is_code  # only does computation for each "hit" from the last step (cc>0.6)
 
 cleaning_up.sh $station_name
