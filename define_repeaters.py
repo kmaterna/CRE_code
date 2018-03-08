@@ -46,17 +46,17 @@ Results_summary=collections.namedtuple('Results_summary',[
 	'mag1','mag2'])
 
 
-def define_repeaters(station_name, station_location_file, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, snr_cutoff=5.0, Minimum_frequency_width=5.0, plot_all=0):
-	MyParams=configure(station_name, station_location_file, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
+def define_repeaters(station_name, inParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, snr_cutoff=5.0, Minimum_frequency_width=5.0, plot_all=0):
+	MyParams=configure(station_name, inParams.stage1_results, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
 	[Candidates_coh, Candidates_snr] = inputs(MyParams);
 	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
-	outputs(MyParams, Total_results, CRE_results);
+	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
 	return;
 
 
 # ------------------ CONFIGURE ------------------- # 
 
-def configure(station_name, station_location_file, metric, cutoff, statistic, freq_method, highest_chosen_frequency, snr_cutoff, Minimum_frequency_width, plot_all):
+def configure(station_name, candidate_input_dir, stage2_dir, station_location_file, metric, cutoff, statistic, freq_method, highest_chosen_frequency, snr_cutoff, Minimum_frequency_width, plot_all):
 
 	# Decisions that you rarely change:
 	magnitude_difference_tolerance = 3.0;    # We ignore event pairs that have very disparate magnitudes.  
@@ -72,12 +72,12 @@ def configure(station_name, station_location_file, metric, cutoff, statistic, fr
 		four_char=station_name+"_"
 	
 	# This is where we have put the results of the C calculation with all the candidates (xcorr > 0.60). 
-	data_input_file = "CRE_Candidates/"+four_char+"-above_cutoff_results.txt"
-	snr_input_file = "CRE_Candidates/"+four_char+"-snr_results.txt"	
+	data_input_file = candidate_input_dir+"/"+four_char+"-above_cutoff_results.txt"
+	snr_input_file = candidate_input_dir+"/"+four_char+"-snr_results.txt"	
 
 	# This is where we want to put the CRE detections for each station
-	output_dir1="CREs_by_station/"
-	output_dir_inner="CREs_by_station/"+station_name+"/";
+	output_dir1=stage2_dir+"/CREs_by_station/"
+	output_dir_inner=stage2_dir+"/CREs_by_station/"+station_name+"/";
 	CRE_out_filename=output_dir_inner+station_name+"_repeaters_list.txt";
 	total_out_filename=output_dir_inner+station_name+"_total_list.txt";
 
@@ -363,7 +363,7 @@ def determine_freqs_by_SNR(freq1, snr1, freq2, snr2, cutoff, max_frequency, lowe
 
 # ------------------ OUTPUTS ------------------- # 
 
-def outputs(MyParams, Total_results, CRE_results):
+def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 
 	Header_string="Choices and Parameters: cutoff="+str(MyParams.cutoff)+"; snr_cutoff="+str(MyParams.snr_cutoff)+"; magnitude_difference="+str(MyParams.magnitude_difference_tolerance)+"; statistic = "+MyParams.statistic+"; Available frequencies = "+str(MyParams.lowest_chosen_frequency)+" to "+str(MyParams.highest_chosen_frequency)+".\n"
 	ofile=open(MyParams.total_out_filename,'w');
@@ -398,7 +398,7 @@ def outputs(MyParams, Total_results, CRE_results):
 	# # ------------- PLOTTING ------------ #
 	if len(CRE_results.name1)>0:
 
-		make_histograms_plots.make_repeaters_map(MyParams);   # making a gmt plot of repeating event locations. 
+		make_histograms_plots.make_repeaters_map(MyParams, mapping_data, mapping_code);   # making a gmt plot of repeating event locations. 
 		
 		if MyParams.plot_arg:
 			make_histograms_plots.make_repeater_seismograms(MyParams);

@@ -15,7 +15,9 @@ TotalParams=collections.namedtuple('TotalParams',[
 	'station_locations',
 	'time_window',
         'stage1_results',
-        'stage2_results'])
+        'stage2_results',
+        'mapping_code',
+        'mapping_data'])
 
 
 # Definition of types of parameters I want to loop through. 
@@ -30,13 +32,15 @@ Minimum_freq_width = [5.0];
 # Parameters that aren't likely to change between experiments
 time_window=[2008.7, 2017.60]; # start time and end time for repeater search, etc. 
 Network_repeaters_list='Network_CRE_pairs_list.txt';
+mapping_code='/work/seismo85/kmaterna/CRE_detection/Mapping_files/Mendocino_mapping_code'
+mapping_data='/work/seismo85/kmaterna/CRE_detection/Mapping_files/Mendocino_mapping_data'
 families_list="families_list.txt";
 families_summaries="Families_Summaries.txt";
 stage1_results="Stage1_Results"
 stage2_results="Stage2_Results"
 station_locations="station_locations.txt"
 MyParams=TotalParams(Network_repeaters_list=Network_repeaters_list, families_list=families_list, families_summaries=families_summaries,
-	station_locations=station_locations,time_window=time_window, stage1_results=stage1_results, stage2_results=stage2_results);
+	station_locations=station_locations,time_window=time_window, stage1_results=stage1_results, stage2_results=stage2_results, mapping_code=mapping_code, mapping_data=mapping_data);
 
 
 # # Preferred

@@ -150,7 +150,7 @@ def get_event_location(sacfile):
 
 
 # Make a gmt map of the repeaters distribution
-def make_repeaters_map(MyParams):
+def make_repeaters_map(MyParams, mapping_data, mapping_code):
 
 	ifile=open(MyParams.CRE_out_filename,'r')
 	evfile1=open('event_locations_first_hypodd.txt','w')
@@ -173,7 +173,7 @@ def make_repeaters_map(MyParams):
 	
 	ifile.close(); evfile1.close(); evfile2.close(); connectors.close();
 
-	call(['./GMT_scripts/map_view_repeaters.gmt',str(MyParams.station_coords[0]),str(MyParams.station_coords[1]),MyParams.station_name]);
+	call([mapping_code+'/map_view_repeaters.gmt',str(MyParams.station_coords[0]),str(MyParams.station_coords[1]),MyParams.station_name, mapping_data]);
 	call(['mv','Repeater_Locations.ps',MyParams.output_dir],shell=False);
 	call(['rm','event_connectors.txt','event_locations_first_hypodd.txt','event_locations_second_hypodd.txt','gmt.history']);
 	return;

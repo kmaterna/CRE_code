@@ -16,9 +16,9 @@ import get_summary_statistics
 
 def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, SNR_cutoff=5.0, Minimum_frequency_width=5.0):
 	output_dir=setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic);  # config step
-	sys.exit(0);
         define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
-	CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
+	sys.exit(0)
+        CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
 	cleaning_up(output_dir);  # Move everything to output directory
 	return;
 
@@ -52,10 +52,11 @@ def setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic):
 
 def make_input_dir(MyParams):
         # Move the "above_cutoff_results" and "snr_result" into a staging directory. 
-        # This might become a script soon if we need to remove directory headings etc. 
         call(['mkdir','-p',MyParams.stage1_results],shell=False);
         call('cp */*-above_cutoff_results.txt '+MyParams.stage1_results,shell=True);
         call('cp */*-snr_results.txt '+MyParams.stage1_results,shell=True);
+        call('sed -i \'s/.\/exist\///g\' '+MyParams.stage1_results+'/*_results.txt',shell=True);
+        call('sed -i \'s/.\/added\///g\' '+MyParams.stage1_results+'/*_results.txt',shell=True);
         return;
 
 def make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic):
@@ -76,7 +77,8 @@ def define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_meth
 	ifile=open(MyParams.station_locations);
 	for line in ifile:
 		given_station=line.split()[0]  # ex: 'B045' or 'JCC'
-		define_repeaters.define_repeaters(given_station, MyParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width, 0); # last bool = 'plot_all';
+		define_repeaters.define_repeaters(given_station, MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width, 0); # last bool = 'plot_all';
+                sys.exit(0);
 	ifile.close();
 	return;
 

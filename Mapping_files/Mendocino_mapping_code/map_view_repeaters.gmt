@@ -7,6 +7,8 @@
 #latS=40.25
 #latN=40.35
 
+mapping_files=$1
+
 lonW=-127
 lonE=-123
 latS=39.5
@@ -15,6 +17,7 @@ latN=41.5
 sta_lon=$1
 sta_lat=$2
 sta_name=$3
+mapping_data=$4
 
 range="$lonW/$lonE/$latS/$latN"
 projection="m2.3i"
@@ -26,10 +29,10 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack
 # Df = full resolution coastline
 
 # Add all the faults
-gmt psxy Mapping_files/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy Mapping_files/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
 
 # Plot all earthquakes
 #gmt psxy B046.PB.EHZ..D._lats_and_lons.txt -R$range -J$projection -Sc -Gblack -K -O >> $output
