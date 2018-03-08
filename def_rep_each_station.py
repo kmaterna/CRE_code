@@ -31,15 +31,13 @@ def CRE_post_analysis(MyParams,output_dir):
 
 	# # OPTIONAL IN ANY SEQUENCE: HISTOGRAMS, GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS
 	#mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
-	gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
-        # there's a few scripts in here that don't play nice with the current relative path scheme. Come back to this tomorrow. 
+	#gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
         
-       # view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
-        # Having an issue with finding filter_sac.sh in the code directory (oops, it doesn't really know that...). 
+        #view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
 
         # These two are right now very specific to Mendocino. 
-	# generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries);
-	# composite_slip.main_program(MyParams.time_window, MyParams.families_summaries); 	
+	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries);
+	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries); 	
 	return;
 
 
@@ -71,9 +69,9 @@ def make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic):
 		directory_name = MyParams.stage2_results+"/"+metric+"_"+str(cutoff)+"_"+freq_method+"_"+str(max_frequency)+"_"+statistic+"/";
 	print "Directory name is " +directory_name;
 	call(['mkdir','-p',directory_name],shell=False); # For the result directory
-	call(['mkdir','-p',directory_name+"Image_families/"],shell=False); # For the image directory
+	call(['mkdir','-p',directory_name+"Image_Families/"],shell=False); # For the image directory
 	delete_files_matching(directory_name+"*");
-	delete_files_matching(directory_name+"Image_families/*");
+	delete_files_matching(directory_name+"Image_Families/*");
 	return directory_name;
 
 

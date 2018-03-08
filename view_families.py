@@ -15,7 +15,8 @@ def view_families(time_window,families_list,families_summaries,station_locations
 	# Note: families=-1 is the default state, and means do all families. 
 	# Alternately: families = [0, 1, 2, 3] means only do a few stations
 	[summary_array,stations,station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,station_locations,mapping_data);
-	output_dir=output_dir+"Image_Families/";
+	cwd = os.getcwd();
+        output_dir=cwd+"/"+output_dir+"Image_Families/";
 	for i, myline in enumerate(summary_array):
 		if families[0]==-1:  # do all families
 			major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coords,time_window);
