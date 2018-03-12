@@ -45,7 +45,9 @@ int main(int argc, char *argv[]){
 
 	// CHOICES OF PARAMETERS FOR EVENT COMPARISON
 	float distance_cutoff = 30.0; // kilometers (above this event distance and we don't cross-correlate)
-	float eastern_cutoff = -123.3;  // We are less interested in events in Nevada and farther east. 
+	float eastern_cutoff = -110;  // We are less interested in events in Nevada and farther east. 
+        // we use -123.3. for Mendocino, since we don't want to look at events in Nevada and east. 
+        // we don't use this value for Anza. 
 
 
 	// LIST OF USEFUL INPUT FILES
@@ -383,6 +385,15 @@ int get_len_of_event_names(char station_name[])
 	if (strcmp(station_name,"KMR")==0){
 		len_of_event_names=43;
 	}
+	if (strcmp(station_name,"B081")==0){
+		len_of_event_names=44;
+	}
+	if (strcmp(station_name,"B082")==0){
+		len_of_event_names=44;
+	}
+	if (strcmp(station_name,"B084")==0){
+		len_of_event_names=44;
+	}
 	if (len_of_event_names==0){
 		printf("ERROR: %s is not one of the recognized stations.  Please check get_len_of_event_names.\n",station_name);
 	}
@@ -390,4 +401,5 @@ int get_len_of_event_names(char station_name[])
 	printf("The length of event names is: %d\n",len_of_event_names);
 	return len_of_event_names;
 }
+
 
