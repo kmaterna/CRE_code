@@ -6,6 +6,7 @@
 #include "sacio.h"
 #include "sac.h"
 #include "determine_ts_len.h"
+#include "get_len_of_event_name.h"
 #define MAXNUM 2048 // THIS is the approximate number of data points per earthquake. 
 #define NPS 512  // THIS is the number of points per segment (512 is good for vectors of ~2048 points)
 
@@ -120,6 +121,9 @@ int main(int argc, char *argv[]){
 	else{
 		printf("SUCCESS in opening: %s\n",list_file_name);
 	}
+        if (len_of_event_names == 0){
+                exit(1);
+        }
 
 	// Are we running in append mode, or full-compare mode? 
 	// Opens / appends to the output file. 
@@ -269,6 +273,8 @@ int main(int argc, char *argv[]){
 		// printf("Event 2 is %s.\n",event2);
 		// printf("Event 1 cut is %s; ",event1_cut);
 		// printf("Event 2 cut is %s.\n",event2_cut);
+                // break;
+                // printf("counter is:%d",i);
 
 		// ARE THE EVENTS VERY CLOSE IN TIME?  IF YES, THEN SKIP THEM.  
 		skip_close_events=close_events_in_time(event1,event2,seconds_apart);
@@ -431,61 +437,6 @@ int main(int argc, char *argv[]){
 	return(0);
 }
 
-
-/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-/*::    This function tells me the length of the                    :*/
-/*::  		sac files for each station we might use			        :*/
-/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-int get_len_of_event_names(char station_name[])
-{
-	int len_of_event_names=0;
-
-	if (strcmp(station_name,"B045")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B046")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B047")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B049")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B932")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B933")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B934")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"B935")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"KCT")==0){
-		len_of_event_names=43;
-	}
-	if (strcmp(station_name,"JCC")==0){
-		len_of_event_names=45;
-	}
-	if (strcmp(station_name,"KHMB")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"KMPB")==0){
-		len_of_event_names=44;
-	}
-	if (strcmp(station_name,"KMR")==0){
-		len_of_event_names=43;
-	}
-	if (len_of_event_names==0){
-		printf("ERROR: %s is not one of the recognized stations.  Please check get_len_of_event_names.\n",station_name);
-	}
-
-	printf("The length of event names is: %d\n",len_of_event_names);
-	return len_of_event_names;
-}
 
 
 

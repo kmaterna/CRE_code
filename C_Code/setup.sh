@@ -18,7 +18,7 @@ if [ $(find ./added/$station_name*.sac | wc -l) -eq 0 ] && [ $(find ./redos/$sta
        then
        echo "ERROR!  No new sac files in the 'added' or the 'redos' directory!  "
        echo "ERROR!  I have nothing to do.  Exiting now..."
-       exit 1
+       #exit 1
 fi
 
 
@@ -26,7 +26,7 @@ fi
 if [ $(find ./exist/$station_name*.sac | wc -l) -eq 0 ] 
 	then
 	echo "Starting from the top!  Beginning with empty result files and performing all computations..."
-	rm $station_name*.txt
+	#rm $station_name*.txt
 	exit 0
 fi
 exit 0
