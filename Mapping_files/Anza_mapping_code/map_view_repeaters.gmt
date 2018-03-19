@@ -1,18 +1,11 @@
 #! /bin/bash
-# Plot the repeaters at the Mendocino Transform Fault
+# Plot the repeaters at Anza
 # 1/2/2016 Kathryn Materna
 
-#lonW=-124.65
-#lonE=-124.35
-#latS=40.25
-#latN=40.35
-
--116.37 33.42154
-
 lonW=-117.2
-lonE=-115.8
-latS=33.0
-latN=34.0
+lonE=-115.5
+latS=32.9
+latN=34.1
 
 sta_lon=$1
 sta_lat=$2
@@ -20,12 +13,12 @@ sta_name=$3
 mapping_data=$4
 
 range="$lonW/$lonE/$latS/$latN"
-projection="m2.3i"
+projection="m4.3i"
 output="Repeater_Locations.ps"
 
 # Plot the coast of California. 
 # Insert horizontal scale bar, and title
-gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Repeating Earthquakes at the Mendocino Triple Junction": -K > $output
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Repeating Earthquakes at Anza": -K > $output
 # Df = full resolution coastline
 
 # Add all the faults

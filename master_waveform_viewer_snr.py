@@ -11,16 +11,19 @@ June 9, 2016.
 """
 from subprocess import call
 from sys import argv
-import glob
+import glob, os
 import make_coh_snr_plot
 
-def master_waveform_viewer_snr(station_name, event1,event2,f1=1,f2=15,snr_cutoff=5,raw_sac_dir="",output_dir=""):
+def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cutoff=5.0,raw_sac_dir="",output_dir=""):
 	# The events you want to look at
 	# print "Arguments should be: station_name, event1, event2, start_frequency, end_frequency, and snr_cutoff.  \n"
 	# f1: the frequency where SNR begins to get high.
 	# f2: the frequency where SNR is no longer high. 
 	# An example of raw_sac_dir: "../B046.EHZ.snr/"
 	# An example of event1     : "B045.PB.EHZ..D.2009.094.003131.71203430.sac"
+
+	# Find where the code lives
+	path_to_code=os.path.dirname(os.path.realpath(__file__));
 
 	# Setting up file names
 	event1_raw="RAW_"+event1
@@ -38,10 +41,10 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1,f2=15,snr_cutoff
 	# This will also write a temporary file with the FILTERED waveforms too. 
 	call("clear");
 	print "Gathering Data... Generating Raw and Filtered waveforms from SAC... \n";
-	call(["./make_a_raw_filtered_waveform.sh",raw_sac_dir,event1])
-	call(["./make_a_raw_filtered_waveform.sh",raw_sac_dir,event2])
+	call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event1,shell=True)
+	call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event2,shell=True)
 	print "Reading in data...  \n"
-	call("gcc -o coherence_setup coherence_setup_raw_and_filtered.c -L/$HOME/sac/lib  -lsacio -lsac", shell=True)
+	call("gcc -o coherence_setup "+path_to_code+"/coherence_setup_raw_and_filtered.c -L/share/apps/sac/lib  -lsacio -lsac -lm", shell=True)
 	print "./coherence_setup " + event1_raw +" "+ event2_raw 
 	call(["./coherence_setup",event1_raw,event2_raw,event1_fil,event2_fil,"-s"])
 	# -s means "perform shift" if the correlation is high; -n means "don't perform shift".
@@ -49,7 +52,7 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1,f2=15,snr_cutoff
 	# Run the coherence calculation
 	print "Running coherence calculation... "
 	pps_c=get_npfft('coh_input_temp.txt');
-	call(["gcc","-o","coherence","coherence.c"]);
+	call("gcc -o coherence "+path_to_code+"/coherence.c -lm",shell=True);
 	call("./coherence -i coh_input_temp.txt -f "+str(frequency)+" -n "+str(pps_c)+" > coh_output.txt", shell=True)
 	print "./coherence -i coh_input_temp.txt -f $frequency -n $pps > coh_output.txt"
 	print "Completed coherence calculation. \n"
@@ -57,14 +60,13 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1,f2=15,snr_cutoff
 
 	# Get the signal to noise ratio for each event
 	print "Running SNR calculation on " + event1 + "... "
-	call(["./noise_floor_VS_data.sh",event1])
-	call("gcc -o get_snr get_snr.c -L/$HOME/sac/lib  -lsacio -lsac",shell=True)
+	call([path_to_code+"/noise_floor_VS_data.sh",event1])
+	call("gcc -o get_snr "+path_to_code+"/get_snr.c -L/share/apps/sac/lib  -lsacio -lsac -lm",shell=True)
 	call(["./get_snr"])
 	call(["mv","SNR.txt","SNR1.txt"])
 
 	print "Running SNR calculation on " + event2 + "... "
-	call(["./noise_floor_VS_data.sh",event2])
-	call("gcc -o get_snr get_snr.c -L/$HOME/sac/lib  -lsacio -lsac",shell=True)
+	call([path_to_code+"/noise_floor_VS_data.sh",event2])
 	call(["./get_snr"])
 	call(["mv","SNR.txt","SNR2.txt"])
 
@@ -82,9 +84,9 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1,f2=15,snr_cutoff
 	clean_up_files_matching("coh_output.txt");
 	clean_up_files_matching("coh_input_temp.txt");
 	clean_up_files_matching("two_filtered_waveforms.txt");
-	clean_up_files_matching("coherence");
-	clean_up_files_matching("coherence_setup");
-	clean_up_files_matching("get_snr");
+	#clean_up_files_matching("coherence");
+	#clean_up_files_matching("coherence_setup");
+	#clean_up_files_matching("get_snr");
 	return;
 
 def clean_up_files_matching(match_string):

@@ -30,11 +30,11 @@ echo $station_name
 
 #echo "Merging any added files into the 'exist' directory for logical managing in the future"
 #merge_added_exist.sh $station_name # moves added files into 'exist' for logical managing in future
-make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
+# make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
 
-gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
-./major_computation.o $station_name append_mode
-exit(0);
+# gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
+# ./major_computation.o $station_name append_mode
+# exit(0);
 
 echo "Producing SNR solution file"
 python $where_is_code/update_solution_file_with_SNR.py $station_name $where_is_code  # only does computation for each "hit" from the last step (cc>0.6)

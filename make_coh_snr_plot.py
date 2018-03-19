@@ -36,6 +36,8 @@ def make_coh_snr_plot(output_dir,event1,event2,waveform_file_name,coh_file_name,
 	t=np.arange(0,len(waveform1)/inst_freq,1.0/inst_freq)   # 100 Hz data. 
 
 	# DOING XCORR JUST FOR KICKS
+	if len(waveform1)<256/4 or len(waveform2)<256/4:
+		N_xcorr=256/4;  # smaller window for smaller signals
 	[index, cc_max, fnct] = xcorr(waveform1, waveform2, shift_len=N_xcorr, full_xcorr=True)
 
 	# GRABBING EVENT MAGNITUDES, ALSO FOR KICKS
@@ -50,8 +52,10 @@ def make_coh_snr_plot(output_dir,event1,event2,waveform_file_name,coh_file_name,
 
 
 	# COMPUTE MEDIAN OF COHERENCE DATA IN SOME FREQUENCY RANGE
-	begin=int(len(c_coh)*min_freq/(inst_freq/2))
-	finish=int(len(c_coh)*max_freq/(inst_freq/2))
+	begin=int(len(c_coh)*min_freq/(inst_freq/2.0))
+	finish=int(len(c_coh)*max_freq/(inst_freq/2.0))
+	if finish==len(c_coh):
+		finish=finish-1;  # For python's 0-indexing. 
 	coherence_val = np.median(c_coh[begin:finish])
 
 	print "Length of C Coherence Vector:", len(c_coh), "\n"
