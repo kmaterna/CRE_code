@@ -23,8 +23,6 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack
 
 # Add all the faults
 gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
 gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
 
 # Plot all earthquakes

@@ -84,9 +84,9 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cu
 	clean_up_files_matching("coh_output.txt");
 	clean_up_files_matching("coh_input_temp.txt");
 	clean_up_files_matching("two_filtered_waveforms.txt");
-	#clean_up_files_matching("coherence");
-	#clean_up_files_matching("coherence_setup");
-	#clean_up_files_matching("get_snr");
+	clean_up_files_matching("coherence");
+	clean_up_files_matching("coherence_setup");
+	clean_up_files_matching("get_snr");
 	return;
 
 def clean_up_files_matching(match_string):

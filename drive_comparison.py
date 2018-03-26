@@ -3,6 +3,8 @@ MAIN PYTHON SCRIPT
 that compares CRE results under different cutoffs for coherence and cross-correlation. 
 Preferred recipe for Mendocino:
 'coh', 0.97, 'mean', 'snr_based', 15, SNR_cutoff=5.0, Minimum_freq_width=5.0.
+Preferred recipe for Anza:
+Unknown so far. 
 """
 
 import collections;
@@ -38,7 +40,7 @@ stage2_results="Stage2_Results"
 station_locations="station_locations.txt"
 Network_repeaters_list='Network_CRE_pairs_list.txt';
 mapping_code='/work/seismo85/kmaterna/CRE_detection/Mapping_files/Anza_mapping_code'  # you will want to change this if you're interested in a different place, like Mendocino, Anza, etc. 
-mapping_data='/work/seismo85/kmaterna/CRE_detection/Mapping_files/Mendocino_mapping_data'
+mapping_data='/work/seismo85/kmaterna/CRE_detection/Mapping_files/Anza_mapping_data'
 MyParams=TotalParams(Network_repeaters_list=Network_repeaters_list, families_list=families_list, families_summaries=families_summaries,
 	station_locations=station_locations,time_window=time_window, stage1_results=stage1_results, stage2_results=stage2_results, mapping_code=mapping_code, mapping_data=mapping_data);
 

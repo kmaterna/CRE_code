@@ -20,21 +20,20 @@ where_is_code="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # where does 
 
 station_name=$1
 echo $station_name
-#setup.sh $station_name         # Figure out what data we have; grab names of files, make safe copies of result files. 
-#delete_redos.sh $station_name  # If we are doing redos, delete existing comparisons before we re-do that station. 
+setup.sh $station_name         # Figure out what data we have; grab names of files, make safe copies of result files. 
+delete_redos.sh $station_name  # If we are doing redos, delete existing comparisons before we re-do that station. 
 
 # Compare existing files with everything in the add-on directory. 
 # flags are -L/$HOME/sac/lib -lsacio -lsac for personal machine (not BSL network)
-#gcc -o add_nearby.o $where_is_code/generate_nearby_add_ons_list.c -L/share/apps/sac/lib -lsacio -lsac -lm
-#./add_nearby.o $station_name
+gcc -o add_nearby.o $where_is_code/generate_nearby_add_ons_list.c -L/share/apps/sac/lib -lsacio -lsac -lm
+./add_nearby.o $station_name
 
-#echo "Merging any added files into the 'exist' directory for logical managing in the future"
-#merge_added_exist.sh $station_name # moves added files into 'exist' for logical managing in future
-# make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
+echo "Merging any added files into the 'exist' directory for logical managing in the future"
+merge_added_exist.sh $station_name # moves added files into 'exist' for logical managing in future
+make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
 
-# gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
-# ./major_computation.o $station_name append_mode
-# exit(0);
+gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
+./major_computation.o $station_name append_mode
 
 echo "Producing SNR solution file"
 python $where_is_code/update_solution_file_with_SNR.py $station_name $where_is_code  # only does computation for each "hit" from the last step (cc>0.6)
