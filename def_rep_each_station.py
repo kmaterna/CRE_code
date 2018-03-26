@@ -49,7 +49,7 @@ def CRE_post_analysis(MyParams,output_dir):
 # ----------- NOT LIKELY TO CHANGE BELOW THIS POINT ----------------- # 
 
 def setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic):
-        #make_input_dir(MyParams);  # if you haven't done this since updating, you want to copy the new stage1 results from the station directories. 
+        make_input_dir(MyParams);  # if you haven't done this since updating, you want to copy the new stage1 results from the station directories. 
         output_dir = make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic); 
         return output_dir;
 
@@ -83,7 +83,7 @@ def define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_meth
                 if given_station != "#":  # ignore comments. 
                        print "Defining repeaters for station: "+given_station;
 		       define_repeaters.define_repeaters(given_station, MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width, 0); # last bool = 'plot_all';
-                       break;  # only do one station for now. 
+                       #break;  # only do one station for now. 
 	ifile.close();
 	return;
 
