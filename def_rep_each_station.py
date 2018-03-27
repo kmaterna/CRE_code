@@ -49,7 +49,7 @@ def CRE_post_analysis(MyParams,output_dir):
 # ----------- NOT LIKELY TO CHANGE BELOW THIS POINT ----------------- # 
 
 def setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic):
-        make_input_dir(MyParams);  # if you haven't done this since updating, you want to copy the new stage1 results from the station directories. 
+        #make_input_dir(MyParams);  # if you haven't done this since updating, you want to copy the new stage1 results from the station directories. 
         output_dir = make_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic); 
         return output_dir;
 

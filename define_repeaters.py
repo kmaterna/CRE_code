@@ -48,9 +48,11 @@ Results_summary=collections.namedtuple('Results_summary',[
 
 def define_repeaters(station_name, inParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, snr_cutoff=5.0, Minimum_frequency_width=5.0, plot_all=0):
 	MyParams=configure(station_name, inParams.stage1_results, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
-	[Candidates_coh, Candidates_snr] = inputs(MyParams);
-	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
-	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
+	#[Candidates_coh, Candidates_snr] = inputs(MyParams);
+	#[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
+	Total_results=0;
+        CRE_results=0;
+        outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
 	return;
 
 
@@ -380,6 +382,37 @@ def determine_freqs_by_SNR(freq1, snr1, freq2, snr2, cutoff, max_frequency, lowe
 
 def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 
+	#write_outfiles(MyParams, Total_results, CRE_results);
+	
+	# # ------------- PLOTTING ------------ #
+	if CRE_results>=0: # should be len(CRE_results.name1) (during non-debug operation)
+
+		make_histograms_plots.make_repeaters_map(MyParams, mapping_data, mapping_code);   # making a gmt plot of repeating event locations. 
+		
+		if MyParams.plot_arg:
+			make_histograms_plots.make_repeater_seismograms(MyParams);
+                if CRE_results>=0:
+		#if len(CRE_results.name1)>1:
+			# Make histograms and scatter plots of coherence values / cross correlation values
+			if MyParams.metric=="corr":
+                              x=0;  #make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
+                        if MyParams.metric=="coh":
+			       x=0; #make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
+                               #make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
+			       #make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
+
+			# Make summary histograms of the repeaters we've found. 
+			make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
+			make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
+		
+		elif len(CRE_results.name1)==0:
+			print("No Repeaters Found: Cannot Make Plots!")
+	return; 
+
+
+
+def write_outfiles(MyParams, Total_results, CRE_results):
+
 	Header_string="Choices and Parameters: cutoff="+str(MyParams.cutoff)+"; snr_cutoff="+str(MyParams.snr_cutoff)+"; magnitude_difference="+str(MyParams.magnitude_difference_tolerance)+"; statistic = "+MyParams.statistic+"; Available frequencies = "+str(MyParams.lowest_chosen_frequency)+" to "+str(MyParams.highest_chosen_frequency)+".\n"
 	ofile=open(MyParams.total_out_filename,'w');
 	ofile.write(Header_string);
@@ -409,31 +442,8 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 				CRE_results.min_freq[i],CRE_results.max_freq[i], CRE_results.mag2[i], CRE_results.dist2[i], CRE_results.mag1[i], CRE_results.dist1[i]));
 	ofile.close();
 
-	
-	# # ------------- PLOTTING ------------ #
-	if len(CRE_results.name1)>0:
+        return;
 
-		make_histograms_plots.make_repeaters_map(MyParams, mapping_data, mapping_code);   # making a gmt plot of repeating event locations. 
-		
-		if MyParams.plot_arg:
-			make_histograms_plots.make_repeater_seismograms(MyParams);
-
-		if len(CRE_results.name1)>1:
-			# Make histograms and scatter plots of coherence values / cross correlation values
-			if MyParams.metric=="corr":
-                               make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
-                        if MyParams.metric=="coh":
-			       make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
-                               make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
-			       make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
-
-			# Make summary histograms of the repeaters we've found. 
-			make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
-			make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
-		
-		elif len(CRE_results.name1)==0:
-			print("No Repeaters Found: Cannot Make Plots!")
-	return; 
 
 
 	# ------------ UTILITY FUNCTIONS ---------- #
