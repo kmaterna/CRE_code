@@ -16,9 +16,16 @@ import util_general_functions
 
 def mendocino_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
 	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data);
-	familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
+	mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
 	cleaning_up();
 	return;
+
+def anza_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
+	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data);
+	anza_familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
+	cleaning_up();
+	return;
+
 
 
 def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_data):
@@ -107,7 +114,7 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 
 
 
-def familywise_gmt(families_summaries, mapping_code, mapping_data):
+def mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data):
 	input_file=open(families_summaries,'r');
 	outputfile1=open("Families_xy_hypodd.txt",'w');
 	outputfile2=open("Families_xy_ncss.txt",'w');
@@ -150,6 +157,51 @@ def familywise_gmt(families_summaries, mapping_code, mapping_data):
 	call([mapping_code+'/very_zoomed_in_plus_historical.gmt',mapping_data],shell=False)  # makes the zoomed in graph with M5s. 
 	call([mapping_code+'/slip_rates.gmt',mapping_data],shell=False)
 	call([mapping_code+'/zoomed_in_slip_rates.gmt',mapping_data],shell=False)
+
+	return;
+
+def anza_familywise_gmt(families_summaries, mapping_code, mapping_data):
+	input_file=open(families_summaries,'r');
+	outputfile1=open("Families_xy_hypodd.txt",'w');
+	outputfile2=open("Families_xy_ncss.txt",'w');
+	depthfile1=open("Families_xz_hypodd.txt",'w');
+	depthfile2=open("Families_xz_ncss.txt",'w');
+	outputfile3=open("Families_xyz_hypodd.txt",'w');
+	outputfile4=open("Families_xyz_ncss.txt",'w');
+	output_nums=open("Families_number_of_events.txt",'w');
+
+	for line in input_file:
+
+		[fam_lon, fam_lat, fam_time, fam_mag, fam_depth, fam_loctype, mean_lon, mean_lat, mean_depth, slip_rate] = util_general_functions.read_family_line(line);
+		
+		if slip_rate>-1.0:
+			if "hypodd" in fam_loctype:
+				# Writing to output file if we have a good slip rate: 
+				outputfile1.write(str(mean_lon)+" "+str(mean_lat)+" "+str(slip_rate)+" \n");
+				depthfile1.write(str(mean_lon)+" -"+str(mean_depth)+" "+str(slip_rate)+"\n");
+				outputfile3.write(str(mean_lon)+" "+str(mean_lat)+" -"+str(mean_depth)+" "+str(slip_rate)+"\n");	
+			else:	
+				outputfile2.write(str(mean_lon)+" "+str(mean_lat)+" "+str(slip_rate)+" \n");
+				depthfile2.write(str(mean_lon)+" -"+str(mean_depth)+" "+str(slip_rate)+"\n");
+				outputfile4.write(str(mean_lon)+" "+str(mean_lat)+" -"+str(mean_depth)+" "+str(slip_rate)+"\n");				
+			output_nums.write(str(mean_lon)+" "+str(mean_lat)+" "+str(mean_depth)+" "+str(len(fam_lon))+" \n");
+
+	depthfile1.close();
+	outputfile1.close();
+	depthfile2.close();
+	outputfile2.close();
+	outputfile3.close();
+	outputfile4.close();
+	output_nums.close();
+	input_file.close();
+
+	#call([mapping_code+'/microseismicity_map.gmt',mapping_data],shell=False)   # makes the depth profile of red dots for repeaters. 
+	#call([mapping_code+'/zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
+	#call([mapping_code+'/zoomed_in_num_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
+	#call([mapping_code+'/very_zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate. 
+	#call([mapping_code+'/cross_section_plus_historical.gmt',mapping_data],shell=False)  # makes the depth profile and adds recent M5 events. 
+	#call([mapping_code+'/very_zoomed_in_plus_historical.gmt',mapping_data],shell=False)  # makes the zoomed in graph with M5s. 
+	#call([mapping_code+'/slip_rates.gmt',mapping_data],shell=False)
 
 	return;
 

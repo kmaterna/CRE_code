@@ -17,7 +17,6 @@ import get_summary_statistics
 def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, SNR_cutoff=5.0, Minimum_frequency_width=5.0):
 	output_dir=setup_dirs(MyParams, metric,cutoff,freq_method,max_frequency,statistic);  # config step
         define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
-        sys.exit(0);
         CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
 	cleaning_up(output_dir);  # Move everything to output directory
 	return;
@@ -34,11 +33,11 @@ def CRE_post_analysis(MyParams,output_dir):
 	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
 	
         # These are moderately specific to Mendocino; small changes necessary for Anza. 
-        gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
-        view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[8]);
+        gmt_plotting.anza_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
+        view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[-1]);
         # These two are right now very specific to Mendocino. 
-	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
-	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data); 	
+	#generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
+	#composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data); 	
 	return;
 
 
