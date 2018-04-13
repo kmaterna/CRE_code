@@ -28,7 +28,7 @@ delete_redos.sh $station_name  # If we are doing redos, delete existing comparis
 gcc -o add_nearby.o $where_is_code/generate_nearby_add_ons_list.c -L/share/apps/sac/lib -lsacio -lsac -lm
 ./add_nearby.o $station_name
 
-echo "Merging any added files into the 'exist' directory for logical managing in the future"
+#echo "Merging any added files into the 'exist' directory for logical managing in the future"
 merge_added_exist.sh $station_name # moves added files into 'exist' for logical managing in future
 make_cut_files.sh $station_name  # makes cut files for files in exist directory that we're comparing (saves time). 
 

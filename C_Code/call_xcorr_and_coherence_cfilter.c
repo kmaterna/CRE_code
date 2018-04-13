@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
 
 	// ****** THESE ARE THE PARAMETERS YOU CARE ABOUT AND CHOICES YOU WANT TO MAKE ******* // 	
 	int seconds_apart = 10;                  // we don't compare events that are within 10 seconds of each other
-	float cross_correlation_cutoff = 0.60;   // if xcorr is greater than this, we care about shifting the arrays and doing coherence that way
+	float cross_correlation_cutoff = 0.70;   // if xcorr is greater than this, we care about shifting the arrays and doing coherence that way
 	int maxdelay = 250;                      // for cross-correlation, we shift this many hundredths of a second in each direction (NOT MORE THAN 250!).
 
 
