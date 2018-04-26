@@ -1,0 +1,106 @@
+#! /bin/bash
+# Plot the repeaters at Anza
+# 1/2/2016 Kathryn Materna
+
+lonW=-117.2
+lonE=-115.5
+latS=32.9
+latN=34.1
+
+
+mapping_data=$1
+
+station_loc_file="station_locations.txt"
+range="$lonW/$lonE/$latS/$latN"
+projection="m3.1i"
+output="Cross_Section.ps"
+
+
+Cx=-116.5
+Cx_start=-117.2
+Cx_end=-115.5
+Cy=33.5
+azimuth=-35
+lmin=-55
+lmax=55
+width_min=-18
+width_max=18
+
+maxdepth=-25
+twice_length=$(echo $lmax - $lmin | bc)  # for the full profile
+brange="$Cx_start/$Cx_end/$maxdepth/0" # The edges of the eventual cross-section (in km)
+bprojection="x7.9/0.27"
+
+
+# ---------------------------------------- #
+# A cross section of repeaters and seismicity
+
+# Make a color scale from 0 to 8 cm / year. This is for plotting slip rates. 
+gmt makecpt -T0/6.0/0.5 -Cjet > mycpt.cpt
+
+# Make a projection of seismicity with depth. 
+#awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+gmt project Families_xyz_hypodd.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis1.tmp
+gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis2.tmp
+gmt project Families_all_xyz_hypodd.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis3.tmp
+gmt project Families_all_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis4.tmp
+# F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
+# C: center
+# A: Azimuth
+# Q: put km units
+
+# Establish the cross-section in a new box
+gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.25a0.5:"":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+# B2: annotate the axes every 2 km
+# X and Y: move this axis relative to map
+
+# Plot the HypoDD hypocenters and slab on the cross section profile 
+#awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.06 -Ggray -V >> $output
+
+# Including the repeaters! WITH SLIP RATES. 
+awk '{print $1, $3*(1.0), $4}' !tseis3.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.1 -Gblack -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis4.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.1 -Gblack -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis1.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Cmycpt -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Cmycpt -Wthinnest,black >> $output
+
+# ---------------------------------------- #
+# Plot the map of California and the DD catalog above. 
+
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-116.5/33.05/33.05/40+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Depth of Repeating Earthquakes at Anza": -P -O -K -X0 -Y9 --FORMAT_GEO_MAP="ddd.xx">> $output
+# Df = full resolution coastline; 
+# N1=country boundaries; N2=state boundaries. 
+# -B means border box
+# -P means portrait mode
+# -X0 -Y9 means shift up by 9 inches
+
+# Add the fault map
+gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+
+# Add double differenced background seismicity
+#awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray36 -P -K -O >> $output
+# COMMENT: 2 = lon, 3 = lat
+
+
+# Make the cross-section annotations (SJ means rotated rectangle)
+gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,blue << EOF >>$output
+$Cx $Cy $azimuth $(echo $lmax - $lmin | bc) $(echo $width_max - $width_min | bc) 
+EOF
+# The pipe bc is for adding floating point numbers
+
+
+# Plot the scale for the slip rate colors
+gmt psscale -R -J -DjTR+w4c/0.5c+o-1.5/1.5 -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr: -P -O -K >> $output
+# D: Dimensions (MUST BE IN inches / centimeters)
+
+# # Plot the repeating earthquake families WITH SLIP RATES. 
+awk '{print $1, $2}' Families_all_xyz_hypodd.txt | gmt psxy -R$range -J$projection -Sc0.1 -Gblack -Wthinnest,black -P -K -O >> $output   # even families without slip rates. 
+awk '{print $1, $2}' Families_all_xyz_ncss.txt | gmt psxy -R$range -J$projection -Sc0.1 -Gblack -Wthinnest,black -P -K -O >> $output   # even families without slip rates. 
+awk '{print $1, $2, $4}' Families_xyz_hypodd.txt | gmt psxy -R$range -J$projection -Sc0.2 -Cmycpt -Wthinnest,black -P -K -O >> $output   # if you want colors for slip rates. 
+awk '{print $1, $2, $4}' Families_xyz_ncss.txt | gmt psxy -R$range -J$projection -Sc0.2 -Cmycpt -Wthinnest,black -P -K -O >> $output   # if you want colors for slip rates.  
+
+
+rm gmt.history
+
+echo "file made:"
+echo $output

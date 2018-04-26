@@ -1,0 +1,59 @@
+#! /bin/bash
+# Plot the repeaters at Anza
+# 1/2/2016 Kathryn Materna
+
+lonW=-117.2
+lonE=-115.5
+latS=32.9
+latN=34.1
+
+mapping_data=$1
+
+station_loc_file="station_locations.txt"
+range="$lonW/$lonE/$latS/$latN"
+projection="m4.3i"
+output="Network_Repeaters_depth.ps"
+
+# Plot the coast of California. 
+# Insert horizontal scale bar, and title
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-116.5/33.05/33.05/40+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Depth of Repeating Earthquakes at Anza": -K > $output
+# Df = full resolution coastline
+
+# Add all the faults
+gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+
+
+# Plot all earthquakes and depths
+gmt makecpt -T0/20/4 -Cjet -Z > mycpt.cpt
+gmt psxy repeaters_xyzm_hypodd.txt -i0,1,2,3s2.0 -R$range -J$projection -O -K -Scp -Cmycpt.cpt >> $output
+gmt psxy repeaters_xyzm_ncss.txt -i0,1,2,3s2.5 -R$range -J$projection -O -K -Ssp -Cmycpt.cpt >> $output
+gmt psxy event_connectors.txt -R$range -J$projection -Wthinner,white -K -O >> $output
+# Sc: circles (p means points)
+# C: color scale
+# -i0,1,2,3: tells the program to read the columns in this order, and to scale up the values of Col3 by a scale factor
+
+# Plot the stations
+awk '{print $2, $3}' $station_loc_file | gmt psxy -R$range -J$projection -Si0.3 -Gblue -Wthin,black -O -K >> $output
+awk '{print $2, $3, $1}' $station_loc_file | gmt pstext -R$range -J$projection -F+f8 -X-0.2i -O -K >> $output
+
+gmt psscale -D0.5i/1.1i/-4c/0.6c -Cmycpt.cpt -B10:"EQ Depth":/:km: -O -K >> $output
+# D: Dimensions (MUST BE IN inches / centimeters)
+# B: Scale has 5km boxes.  I just copied the syntax on the annotation.  
+
+# Making a legend. 
+gmt pslegend -R$range -J$projection -F+pthin,black+gazure2 -DjTR+w6.0+jTR+l1.2 -C0.1i/0.1i -K -O <<EOF >> $output
+
+G -0.0i
+#H 16 Helvetica Seismometers at MTJ
+G 0.05i
+S 0.1i c 0.12i black 0.70p 0.3i HypoDD Location
+S 0.1i s 0.14i black 0.70p 0.3i NCSS Location
+S 0.1i i 0.14i blue 0.70p 0.3i Seismometer
+G 0.05i
+EOF
+
+echo "file made:"
+echo $output
+
+
