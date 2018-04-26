@@ -18,7 +18,7 @@ output="Repeater_Locations.ps"
 
 # Plot the coast of California. 
 # Insert horizontal scale bar, and title
-gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-126/39.7/39.7/50+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Repeating Earthquakes at Anza": -K > $output
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-116.5/33.05/33.05/40+jt+u -Wblack -Slightblue -Glightgray -B1.0:."Repeating Earthquakes at Anza": -K > $output
 # Df = full resolution coastline
 
 # Add all the faults

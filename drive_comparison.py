@@ -46,8 +46,9 @@ MyParams=TotalParams(Network_repeaters_list=Network_repeaters_list, families_lis
 
 
 # # Preferred
-# def_rep_each_station.full_CRE_analysis(MyParams,'coh', 0.97, 'mean', 'snr_based', 15, SNR_cutoff[0], Minimum_freq_width[0]);
-def_rep_each_station.full_CRE_analysis(MyParams,"corr", 0.96);
+#def_rep_each_station.full_CRE_analysis(MyParams,'coh', 0.98, 'mean', 'snr_based', 20, SNR_cutoff[0], Minimum_freq_width[0]);
+def_rep_each_station.full_CRE_analysis(MyParams,"corr", 0.99);
+def_rep_each_station.full_CRE_analysis(MyParams,"corr", 0.97);
 
 # COHERENCE
 # for limit in Cutoff:  # try different cutoffs
