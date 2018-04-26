@@ -1,19 +1,15 @@
 # CRE_detection
 
-WHAT YOU NEED:
+WHAT THIS CONTAINS:
 
 --Raw Data Dirs (for each station)
 
 --Code Dir
 
 	--Code (python, bash, c)
-	--"CRE_Candidates" (inputs to this process)
-		--*_above_cutoff_results.txt
-		--*_snr_results.txt
-		--station_locations.txt (file that contains NAME LON LAT data_dir, for each station)
-	—“Mapping_files”
+	—“Mapping_data”
 		--Faults, seismicity, etc. 
-	—“GMT_Scripts”
+	—“Mapping_code”
 		--just GMT code
 
 
