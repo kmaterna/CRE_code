@@ -4,6 +4,10 @@
 
 station_name=$1
 
+# Making necessary directories. 
+mkdir -p exist
+mkdir -p redos
+
 # Create file_list.txts
 echo "Making exist_file_list.txt, added_file_list.txt, and redos_file_list.txt"
 find ./exist/$station_name*.sac | wc -l > exist/exist_file_list.txt
@@ -18,7 +22,7 @@ if [ $(find ./added/$station_name*.sac | wc -l) -eq 0 ] && [ $(find ./redos/$sta
        then
        echo "ERROR!  No new sac files in the 'added' or the 'redos' directory!  "
        echo "ERROR!  I have nothing to do.  Exiting now..."
-       #exit 1
+       exit 1
 fi
 
 
@@ -26,7 +30,6 @@ fi
 if [ $(find ./exist/$station_name*.sac | wc -l) -eq 0 ] 
 	then
 	echo "Starting from the top!  Beginning with empty result files and performing all computations..."
-	#rm $station_name*.txt
 	exit 0
 fi
-exit 0
+exit 1

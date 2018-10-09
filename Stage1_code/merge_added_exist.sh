@@ -13,12 +13,8 @@ fi
 
 echo $four_char_base
 starting_name=$four_char_base
-ending_name=$four_char_base
 starting_name+=-nearby_30_km.txt
-ending_name+=-nearby_30_km_b4merge.txt
 
-
-#cp $starting_name $ending_name  # gives us a copy, whose only purpose is for debugging. 
 if [ $? -eq 1 ]
      then
      echo "ERROR!  Never got stations_nearby_30_km.txt file!"
