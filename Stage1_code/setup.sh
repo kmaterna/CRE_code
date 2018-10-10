@@ -5,6 +5,7 @@
 station_name=$1
 
 # Making necessary directories. 
+echo "Making necessary directories for $station_name"
 mkdir -p exist
 mkdir -p redos
 
@@ -25,11 +26,9 @@ if [ $(find ./added/$station_name*.sac | wc -l) -eq 0 ] && [ $(find ./redos/$sta
        exit 1
 fi
 
-
-# are we starting with no existing files? then delete any obsolete result files. 
+# are we starting with no existing files? then start from the top.
 if [ $(find ./exist/$station_name*.sac | wc -l) -eq 0 ] 
 	then
 	echo "Starting from the top!  Beginning with empty result files and performing all computations..."
-	exit 0
 fi
-exit 1
+exit 0

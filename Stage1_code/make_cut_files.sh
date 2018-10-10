@@ -1,11 +1,12 @@
 #!/bin/bash
 
 station_name=$1
+input_filename=$2
 
 cd exist
 
 number_of_existing_events=`find . -name "$station_name*.sac" | wc -l`
-number_of_comparisons=`cat ../*-nearby_30_km.txt | wc -l`
+number_of_comparisons=`cat ../$input_filename | wc -l`
 
 if [ "$number_of_existing_events" -gt "$number_of_comparisons" ]; then # the shortest way to do this is by reading the nearby_30_km file:
 	echo "Processing only the sac files in the nearby list!"

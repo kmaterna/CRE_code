@@ -13,7 +13,7 @@ if [ $(find ./redos/$station_name*.sac | wc -l) -gt 0 ]
 	
 	# The delete function. 
 	# This overwrites the station_name_above_cutoff_results.txt file. 
-	python  ../../C_CREs/delete_event_pairs.py $station_name
+	python  ../../CRE_code/Stage1_code/delete_event_pairs.py $station_name
 	
 	mv redos/$station_name*.sac added # add files to "added"
 	find ./added/$station_name*.sac | wc -l > added/added_file_list.txt  # remake the added_file_list.txt

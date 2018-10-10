@@ -11,16 +11,12 @@
 #define NPS 512  // THIS is the number of points per segment (512 is good for vectors of ~2048 points)
 
 /****************************
-This code is the result of many types of analysis.  
-It is the synthesis of many things, and it's pretty smart. 
-It combines cross-correlation and coherence into one output file. 
+This code performs cross-correlation and coherence of sac files, and writes the outputs into one output file. 
 
-This code reads a list of nearby event-pairs (e. g. B046_nearby_30km.txt)
+This code reads from a list of nearby event-pairs (e.g. B046_nearby.txt)
 and generates coherence and cross-correlation values for each event pair in that file.  
 It throws away event pairs that occurred within some nominal time (10 seconds) of each other. 
-
-The kicker with this version is that it handles unfiltered data so that we can go as high 
-as 50 Hz in our coherence (if we want). 
+It handles unfiltered data so that we can go as high as 50 Hz in our coherence (if we want). 
 
 Before we run this, we run a simple SAC script (make_cut_files.sh) to 
 cut out a 20-second window near each event. 
@@ -29,18 +25,12 @@ Inside this script, we filter from 2-24 Hz using the code from sac.h file.
 We use the filtered waveform for cross-correlating and we save this value.  
 
 When events have a high maximum cross-correlation (for example above 0.6), then we use the 
-index of the maximum cross-correlation value to shift the filtered and raw arrays relative to one another, 
-removing the problem of the P-wave picker having slightly different results for individual earthquakes.  
-Then we re-compute the coherence for the optimally-shifted RAW waveforms.
+index of the maximum cross-correlation value to shift the filtered and raw arrays relative to one another.
+Then we re-compute the coherence for the optimally-shifted unfiltered waveforms.
 
-We write the summary values for cross-correlation and coherence (0-50Hz: The real deal!) 
-to a SINGLE output file. 
-
+We write the summary values for cross-correlation and coherence (0-50Hz) to a single output file. 
 We only save the cross-correlation and coherence data for events with xcorr>cutoff.  
 We avoid saving mostly garbage that way.  
-
-For B046, it looks like there will be about 800,000 event pairs compared, with about 5000 actually saved.  
-It takes about an hour, and generates a pretty small (5Mb) file of event pairs.  
 
 COMPILE WITH THIS LINE RIGHT HERE!!!
 gcc -o major_computation source_name.c -L/$HOME/sac/lib  -lsacio -lsac
@@ -62,10 +52,12 @@ void fft842();  // seems like declaring the types of the arguments here is optio
 void sample_coherence();   // this is where we implement our criteria for summarizing coherence values
 int get_len_of_event_names(char[]); // Ex: gets "B045"; returns 45 (since the sac file names are 45 characters long)
 
-
-// GLOBAL VARIABLES: George Moody's code had a lot of them :(
-double *xx, *yy, *gxx, *gyy, *gxyre, *gxyim, *phi, *weight;
+// USER DEFINED GLOBAL VARIABLES: George Moody's code had a lot of them :(
 double sampfreq = 100.0;  // Defined from the seismic instrument we're using (Hz). 
+
+
+// OTHER GLOBAL VARIABLES: George Moody's code had a lot of them :(
+double *xx, *yy, *gxx, *gyy, *gxyre, *gxyim, *phi, *weight;
 int time_shift = 0;      // This variable is used when time-series arrays need shifting relative to each other. 
 int npfft = NPS;	/* points per Fourier transform segment (a power of 2) */
 FILE * ifile = NULL;    // for reading the two-column input file. 
@@ -73,18 +65,15 @@ FILE * output_file = NULL;    // the output file needs to be global so that we c
 char input_file_name[] = "coh_input_temp.txt";                  // file for putting sac data (re-written each time we loop)
 char output_file_name[] = "____-above_cutoff_results.txt";
 char summary_file_name[] = "____-process_summary.txt";     // the file for summarizing what we're doing
-char list_file_name[] = "____-nearby_30_km.txt";  // file for getting event pairs
 
-// CONTROL PROGRAM FLOW: Where do you start and stop doing coherence/xcorr? 
-int small_number = 0*1000;  // if you want to start at a certain index value. 
-int big_number = 1000*1000*100;   // the coherence/xcorr loop won't go more than this many times.
+
 
 
 int main(int argc, char *argv[]){
 
-	if( argc != 3 ){   // check if you have provided a station name
+	if( argc != 4 ){   // check if you have provided a station name
 		printf("Oops! You have provided the wrong number of arguments.\n");
-		printf("We want something like ./computation station_name append_mode.\n");
+		printf("We want something like ./computation station_name list_file append_mode.\n");
 		exit(1);
 	}
 
@@ -92,18 +81,30 @@ int main(int argc, char *argv[]){
 	int seconds_apart = 10;                  // we don't compare events that are within 10 seconds of each other
 	float cross_correlation_cutoff = 0.70;   // if xcorr is greater than this, we care about shifting the arrays and doing coherence that way
 	int maxdelay = 250;                      // for cross-correlation, we shift this many hundredths of a second in each direction (NOT MORE THAN 250!).
+	// CONTROL PROGRAM FLOW: Where do you start and stop doing coherence/xcorr? 
+	int small_number = 0*1000;  // if you want to start at a certain index value. 
+	int big_number = 1000*1000*100;   // the coherence/xcorr loop won't go more than this many times.	
 
 
 	// ****** BORING VARIABLES AND PROCEDURES YOU DON'T CARE ABOUT ******* // 
 	
-	// Please sanitize the name of the station (3 characters or 4 characters?). 
+	// Please parse the name of the station (3 characters or 4 characters?). 
 	int len_of_station_name;  // this is just for naming the output files correctly. 
 	len_of_station_name=strlen(argv[1]);  // the length of a null-terminated string from the user. 	
 	char station_name[len_of_station_name+1];  // get the name of the station, which is null-terminated. 
 	memcpy(station_name,argv[1],len_of_station_name+1);  // save the name of the argument/station (usually 3 or 4 characters)
+
+	// input file
+	int len_of_list_file;                              // this is just for naming the file correctly. 
+	len_of_list_file=strlen(argv[2]);                  // the length of a null-terminated string from the user. 
+	char list_file_name[len_of_list_file+1];             // get the name of the output_file, which is null-terminated. 
+	memcpy(list_file_name,argv[2],len_of_list_file+1);  // save the name of the argument
+
+	// Hard-coded output files
 	memcpy(output_file_name,station_name,len_of_station_name);  // change the top 3 or 4 characters on the output_file_name
-	memcpy(summary_file_name,station_name,len_of_station_name);
-	memcpy(list_file_name,station_name,len_of_station_name);
+	memcpy(summary_file_name,station_name,len_of_station_name);	
+
+	// WILL FIX EVENT NAMES SOON. 
 	int len_of_event_names;                                  // the event file names are 44 or 45 characters long, depending on the station.
 	len_of_event_names = get_len_of_event_names(station_name); 
 	int len_of_full_event_names = len_of_event_names+8;			 // these files have the directories ( 8 extra characters = ./added/ or ./exist/)
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]){
 	// Opens / appends to the output file. 
 	// We are almost always running in append mode, but I'm just keeping the functionality in there just in case. 
 	char append_flag[11];
-	memcpy(append_flag,argv[2],11);
+	memcpy(append_flag,argv[3],11);
 	append_flag[11]=(char)0;   
 
 	if (strcmp(append_flag,"append_mode")==0){
@@ -255,6 +256,9 @@ int main(int argc, char *argv[]){
 				event2_cut[j] = buffer[j-4+len_of_full_event_names];
 			}
 		}
+
+		printf("event1:%s\n",event1);
+		printf("event2:%s\n",event2);
 
 		char test_for_break[9]; // have we reached the end of the input file?  
 		memcpy(test_for_break,event1,9);

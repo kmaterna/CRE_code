@@ -4,7 +4,6 @@
 #include <math.h>
 #include <time.h>
 #include "sacio.h"
-#include "get_len_of_event_name.h"
 
 // User defined values
 #define MAXIMUM 11200   // Maximum length of the data array. 
@@ -12,8 +11,8 @@
 #define pi 3.14159265358979323846 
 
 // COMPILE WITH THIS LINE RIGHT HERE!!!
-// gcc -o exec_name source_name.c -L/$HOME/sac/lib  -lsacio -lsac
-// gcc -o exec_name source_name.c -L/share/apps/sac/lib -lsacio -lsac -lm 
+// gcc -o exec_name source_name.c -L/$HOME/sac/lib  -lsacio -lsac (mac machines)
+// gcc -o exec_name source_name.c -L/share/apps/sac/lib -lsacio -lsac -lm (linux machines)
 // This script takes the list of existing and add-on files, and generates a list of 
 // event pairs that need comparing.  Added-to-exist and Added-to-added will be compared. 
 
@@ -94,7 +93,9 @@ int main(int argc, char *argv[]){
 
 	// Please declare strings of the right length to hold our file name data. 
 	char event1[len_of_event_names]; // getting ready to hold names of files during the computations. 
-	char event2[len_of_event_names];	
+	char event2[len_of_event_names];
+	char event1_exist[len_of_event_names]; // getting ready to hold names of files during the computations. 
+	char event2_exist[len_of_event_names];
 	
 	// GRAB THE NAMES AND NUMBER OF EVENTS IN THE LIST FILES
 	char * buffer;
@@ -167,10 +168,10 @@ int main(int argc, char *argv[]){
 			comparisons += 1;  // How many distances did we compute?
 			if(distance>=0 && distance<distance_cutoff){
 				hits += 1;    // We've found a nearby pair
-				// for(n=0; n<len_of_event_names_long;n++){
-				// 	short_name1[n]=event1[n];
-				// 	short_name2[n]=event2[n];
-				// }
+				strcpy(event1_exist,event1);
+				strcpy(event2_exist,event2);
+				memcpy(event1_exist,"./exist/",8);  // save the name of the file in the exist directory
+				memcpy(event2_exist,"./exist/",8);  // save the name of the file in the exist directory
 				fprintf(outptr,"%s %s\n", event1, event2);
 			} // end less-than-cutoff-km if statement
 
@@ -198,12 +199,12 @@ int main(int argc, char *argv[]){
 			distance=compare_two_events(event1,event2,distance_cutoff);
 			comparisons += 1;  // How many distances did we compute?
 			if(distance>=0 && distance<distance_cutoff){
-				hits += 1; // We've found a nearby pair
-				// for(n=0; n<len_of_event_names_long;n++){
-				// 	short_name1[n]=event1[n];
-				// 	short_name2[n]=event2[n];
-				// }
-				fprintf(outptr,"%s %s\n", event1, event2);
+				hits += 1; // We've found a nearby pair				
+				strcpy(event1_exist,event1);
+				strcpy(event2_exist,event2);
+				memcpy(event1_exist,"./exist/",8);  // save the name of the file in the exist directory
+				memcpy(event2_exist,"./exist/",8);  // save the name of the file in the exist directory
+				fprintf(outptr,"%s %s\n", event1_exist, event2_exist);
 			} // end less-than-cutoff-km if statement
 		}
 	}
