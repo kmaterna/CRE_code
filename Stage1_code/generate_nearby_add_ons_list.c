@@ -7,7 +7,7 @@
 
 // User defined values
 #define MAXIMUM 11200   // Maximum length of the data array. 
-#define FILENAME_SIZE 60  // Maximum number of characters in filename
+#define FILENAME_SIZE 60  // Maximum number of characters in a sac filename
 #define pi 3.14159265358979323846 
 
 // COMPILE WITH THIS LINE RIGHT HERE!!!
@@ -32,16 +32,16 @@ float compare_two_events(char[], char[], float);
 
 int main(int argc, char *argv[]){
 
+	// PARAMETERS CHANGED BY THE USER
+	float distance_cutoff = 10.0; // kilometers (above this event distance and we don't cross-correlate)
+    // we use a smaller distance cutoff (1-2km instead of 30km) for Anza. 
+
+	// PARSING PROGRAM ARGUMENTS
 	if( argc != 3 ){   // check if you have provided a station name
 		printf("Oops! You have provided the wrong number of arguments.\n");
 		printf("We want something like ./nearby station_name list_file (Ex: ./nearby B046 B046_nearby_list.txt). \n");
 		exit(1);
 	}
-
-	// PARAMETERS CHANGED BY THE USER
-	float distance_cutoff = 10.0; // kilometers (above this event distance and we don't cross-correlate)
-    // we use a smaller distance cutoff (1-2km instead of 30km) for Anza. 
-
 
 	// LIST OF USEFUL INPUT FILES
 	FILE * exist_flist;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 	char output_name[len_of_output_file+1];             // get the name of the output_file, which is null-terminated. 
 	memcpy(output_name,argv[2],len_of_output_file+1);  // save the name of the argument
 
-	// Please open an output file
+	// Please open the output file
 	FILE * outptr;  // the output file pointer
 	outptr = fopen(output_name,"w");                       // detailed output file
 	printf("Station name is: %s\n",station_name);

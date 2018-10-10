@@ -6,7 +6,8 @@
 #include "sacio.h"
 #include "sac.h"
 #include "determine_ts_len.h"
-#define MAXNUM 2048 // THIS is the approximate number of data points per earthquake. 
+#define INITMAXNUM 12000 // THIS is the number of data points that might be in the SAC file
+#define MAXNUM 2048 // THIS is the number of data points we want to process per earthquake. 
 #define NPS 512  // THIS is the number of points per segment (512 is good for vectors of ~2048 points)
 #define FILENAME_SIZE 80  // Maximum number of characters in sac filename
 
@@ -19,6 +20,8 @@ It throws away event pairs that occurred within some nominal time (10 seconds) o
 This script reads unfiltered sac files. 
 However, inside this script, we filter from 2-24 Hz using the code from sac.h file. 
 We use the filtered waveform for cross-correlating and we save this value.  
+If the events are small, there is a scaling function (determine_ts_len.h) to use less than the full time window 
+for the coherence calculation. 
 
 When events have a high maximum cross-correlation (for example above 0.6), then we use the 
 index of the maximum cross-correlation value to shift the filtered and raw arrays relative to one another.
@@ -62,22 +65,31 @@ char summary_file_name[] = "____-process_summary.txt";     // the file for summa
 
 int main(int argc, char *argv[]){
 
-	if( argc != 4 ){   // check if you have provided a station name
-		printf("Oops! You have provided the wrong number of arguments.\n");
-		printf("We want something like ./computation station_name list_file append_mode.\n");
-		exit(1);
-	}
 
-	// ****** THESE ARE THE PARAMETERS YOU CARE ABOUT AND CHOICES YOU WANT TO MAKE ******* // 	
+	// ****** THESE ARE THE PARAMETERS YOU CARE ABOUT AND CHOICES YOU MIGHT WANT TO MAKE ******* // 	
 	int seconds_apart = 10;                  // we don't compare events that are within 10 seconds of each other
 	float cross_correlation_cutoff = 0.70;   // if xcorr is greater than this, we care about shifting the arrays and doing coherence that way
 	int maxdelay = 250;                      // for cross-correlation, we shift this many hundredths of a second in each direction (NOT MORE THAN 250!).
 	int small_number = 0*1000;  // CONTROL PROGRAM FLOW: if you want to start at a certain index value. 
 	int big_number = 1000*1000*100;   // CONTROL PROGRAM FLOW: the coherence/xcorr loop won't go more than this many times.	
 	double sampfreq = 100.0;  // Defined from the seismic instrument we're using (Hz). 
-
+    float before_t5 = 1.0;      // When we cut the sac file, how much do we take before T5? 
+    float after_t5 = (MAXNUM/sampfreq)-before_t5;  // This ensures that the cut file is exactly MAXNUM long. EX: 19.48s for a 20.48s recording. 
+    double low=2.0;       // band pass filter lower limit (Hz) for the filter used in cross-correlation
+    double high=24.0;     // band pass filter upper limit (Hz) for the filter used in cross-correlation
+    int passes = 2;       // For the filter
+    int order  = 4;       // For the filter
+    double transition_bandwidth = 0.0; // for the filter (I usually don't change)
+    double attenuation = 0.0;          // for the filter (I usually don't change)
 
 	// ****** BORING VARIABLES AND PROCEDURES YOU DON'T CARE ABOUT ******* // 
+
+	// PARSING PROGRAM ARGUMENTS
+	if( argc != 4 ){   // check if you have provided a station name
+		printf("Oops! You have provided the wrong number of arguments.\n");
+		printf("We want something like ./computation station_name list_file append_mode (or owrite_mode).\n");
+		exit(1);
+	}
 
 	// Please parse the name of the station (3 characters or 4 characters?). 
 	int len_of_station_name;  // this is just for naming the output files correctly. 
@@ -120,10 +132,10 @@ int main(int argc, char *argv[]){
 		summary_file = fopen(summary_file_name,"a");
 		printf("Output files opened in APPEND mode.\n");  // in append mode. 
 	}
-	else if (strcmp(append_flag,"fullsq_mode")==0){
+	else if (strcmp(append_flag,"owrite_mode")==0){
 		output_file  = fopen(output_file_name,"w+");
 		summary_file = fopen(summary_file_name,"w+");
-		printf("Output files opened in WRITE mode.\n");   // in over-write mode. 
+		printf("Output files opened in OVERWRITE mode.\n");   // in over-write mode. 
 	}
 	else{
 		printf("Append Flag is %s\n",append_flag);
@@ -138,15 +150,22 @@ int main(int argc, char *argv[]){
 	}
 	time_t rawtime;           // for getting the start-time and end-time of the process
 	struct tm * timeinfo;
-	float yarray1_cut[MAXNUM];  // for raw sac files, 20.47 seconds long
+	char event1[FILENAME_SIZE];    // the array that will hold event1 filename
+	char event2[FILENAME_SIZE];    // the array that will hold event2 filename
+	float yarray1[INITMAXNUM];
+	float yarray2[INITMAXNUM];    // for reading sac files, up to INITMAXNUM long
+	float yarray1_cut[MAXNUM];  // for unfiltered sac files, 20.47 seconds long
 	float yarray2_cut[MAXNUM];
 	float yarray1_filtered[MAXNUM]; // for filtered sac files, 20.47 seconds long
 	float yarray2_filtered[MAXNUM];
+	float start_time, end_time; 
 	float beg, del;
 	int nlen, nerr;
-	int max = MAXNUM;
+	int max = INITMAXNUM;
 	int i, j;
 	float mag1, mag2, dist1, dist2;
+	float t5, B, E;
+	int yarray_counter;
 	int skip_close_events=0;
 	int counter = 0;  // the number of event pairs we have compared
 	double max_xcorr;
@@ -154,6 +173,7 @@ int main(int argc, char *argv[]){
 	int len_of_ts; 
 	int adjusted_len_of_ts;
 	float * yarray1_subevent, * yarray2_subevent;   // this is used when we shorten the time-series below 20.48 seconds (nearby or small events)
+
 
 	// starting with noting the time at the beginning, and labeling column headers.  
 	fprintf(summary_file,"SUMMARY FILE FOR COMPARISON OF WAVEFORMS\n\n");
@@ -168,27 +188,9 @@ int main(int argc, char *argv[]){
 
 	
 
-
 	// ******* THE MEAT OF THE PROGRAM: ******** //
 	// LOOP THROUGH EVENT PAIRS TO COHERE THEM.  FIRST GRAB THE NAMES OF EVENTS IN THE LIST FILE.
-	char event1[FILENAME_SIZE];    // the array that will hold event1 
-	char event2[FILENAME_SIZE];    // the array that will hold event2 
-	char event1_cut[FILENAME_SIZE];    // the array that will hold event1 
-	char event2_cut[FILENAME_SIZE];    // the array that will hold event2 
-	char cut_prefix[]="CUT_";
 
-	// TIME TO TRY filering using C code that comes with SAC. 
-    double low, high, attenuation, transition_bandwidth;;
-    int order, passes;
-    low    = 2.00;
-    high   = 24.00;
-    passes = 2;
-    order  = 4;
-    transition_bandwidth = 0.0;
-    attenuation = 0.0;
-
-
-	// LOOPS THROUGH A LOT OF TIMES
 	for(i=0; i<big_number; i++){  
 
 		counter+=1;
@@ -211,21 +213,6 @@ int main(int argc, char *argv[]){
 			break;
 		}
 
-		for( j = 0; j < FILENAME_SIZE; j++){
-			if (j<8){
-				event1_cut[j] = event1[j];
-				event2_cut[j] = event2[j];
-			}
-			else if (j<12){
-				event1_cut[j] = cut_prefix[j-8];
-				event2_cut[j] = cut_prefix[j-8];
-			}
-			else if (j>=12){
-				event1_cut[j] = event1[j-4];
-				event2_cut[j] = event2[j-4];
-			}
-		}
-
 		//Debugging code
 		// printf("event1:%s\n",event1);
 		// printf("event2:%s\n",event2);
@@ -235,16 +222,52 @@ int main(int argc, char *argv[]){
 		if(skip_close_events)
 			continue;
 
-		// NOW WE READ THE SAC FILES FOR DATA AND METADATA (MAGNITUDE AND DISTANCE)
-		rsac1( event1_cut, yarray1_cut, &nlen, &beg, &del, &max, &nerr, strlen( event1_cut ) ) ;
+
+		// READING IN THE FIRST SAC FILE
+		rsac1( event1, yarray1, &nlen, &beg, &del, &max, &nerr, strlen( event1 ) ) ;
 		if ( nerr != 0 ) {
 			printf("%d",nerr);
-			printf("Error reading in #1 SAC file: [%s]\n", event1_cut);
+			printf("Error reading in #1 SAC file: [%s]\n", event1);
 			//continue;
 			exit ( nerr ) ;
 		}
 		//printf("Success in reading file %s, and ",event1);
 
+		getfhv ( "T5" , & t5 , & nerr , strlen("T5MARKER") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: t5\n");
+			exit(-1);
+		}
+		getfhv ( "B" , & B , & nerr , strlen("B") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: B\n");
+			exit(-1);
+		}
+		getfhv ( "E" , & E , & nerr , strlen("E") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: E\n");
+			exit(-1);
+		}
+
+		// Now we cut the file to the proper time relative to T5. 
+		// We produce yarray1_cut.
+		start_time = t5-before_t5;
+		end_time = t5+after_t5;
+		yarray_counter=0;
+		for(j=0; j<nlen;j++){
+			if(B+(j*1.0/sampfreq)>(start_time-1.0/sampfreq)){  // if the time is after the beginning time window:
+				yarray1_cut[yarray_counter]=yarray1[j];
+				yarray_counter+=1;
+				if(yarray_counter==MAXNUM){
+					break;
+				}
+			}
+		}
+
+		// NOW WE READ THE METADATA (MAGNITUDE AND DISTANCE)
 		getfhv ( "MAG" , & mag1 , & nerr , strlen("MAG") ) ;
 		// Check the Return Value 
 		if ( nerr != 0 ) {
@@ -258,15 +281,51 @@ int main(int argc, char *argv[]){
 			exit(-1);
 		}
 
-		strtok(event2_cut, "\n");
-		rsac1( event2_cut, yarray2_cut, &nlen, &beg, &del, &max, &nerr, strlen( event2_cut ) ) ;
+
+
+		// READING IN THE SECOND SAC FILE
+		rsac1( event2, yarray2, &nlen, &beg, &del, &max, &nerr, strlen( event2 ) ) ;
 		if ( nerr != 0 ) {
 			printf("%d",nerr);
-			printf("Error reading in #2 SAC file: [%s]\n", event2_cut);
+			printf("Error reading in #1 SAC file: [%s]\n", event2);
 			//continue;
 			exit ( nerr ) ;
 		}
-		//printf("Success in reading file %s\n",event2);
+		//printf("Success in reading file %s, and ",event1);
+
+		getfhv ( "T5" , & t5 , & nerr , strlen("T5MARKER") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: t5\n");
+			exit(-1);
+		}
+		getfhv ( "B" , & B , & nerr , strlen("B") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: B\n");
+			exit(-1);
+		}
+		getfhv ( "E" , & E , & nerr , strlen("E") ) ;
+		// Check the Return Value 
+		if ( nerr != 0 ) {
+			fprintf(stderr, "Error getting header variable: E\n");
+			exit(-1);
+		}
+
+		// Now we cut the file to the proper time relative to T5. 
+		start_time = t5-before_t5;
+		end_time = t5+after_t5;
+		yarray_counter=0;
+		for(j=0; j<nlen;j++){
+			if(B+(j*1.0/sampfreq)>(start_time-1.0/sampfreq)){  // if the time is after the beginning time window:
+				yarray2_cut[yarray_counter]=yarray2[j];
+				yarray_counter+=1;
+				if(yarray_counter==MAXNUM){
+					break;
+				}
+			}
+		}
+
 		getfhv ( "MAG" , & mag2 , & nerr , strlen("MAG") ) ;
 		// Check the Return Value 
 		if ( nerr != 0 ) {
@@ -708,13 +767,6 @@ double sampfreq; /*instrument sampling frequency*/
 		if (gxx[i] == 0.0 || gyy[i] == 0.0) xx[i] = 1.0;
 		else xx[i] = phi[i] / (gxx[i]*gyy[i]);
 
-		// THIS IS HOW WE OUTPUT THE COHERENCE VALUES
-		// (void)printf("%9.4lf  %9.4lf  %10.4lf  %10.4lf  %10.4lf\n",
-		// 	     df*i, xx[i],
-		// 	     (phi[i] > 1.0e-10 ? 5.0*log10(phi[i]) : -50.0),
-		// 	     (gxx[i] > 1.0e-10 ? 10.0*log10(gxx[i]) : -100.0),
-		// 	     (gyy[i] > 1.0e-10 ? 10.0*log10(gyy[i]) : -100.0));
-
     }
 	sample_coherence(sampfreq);
 	return;
@@ -730,7 +782,7 @@ void sample_coherence(double sampfreq)
 	// print the entire range of coherence values from min_freq to max_freq hertz (for analysis later)
 
 	double min_freq=0; // Hz
-	double max_freq=sampfreq/2.0;
+	double max_freq=sampfreq/2.0; // By default, goes up to the Nyquist frequency
 
 	double freq_interval = (sampfreq)/(npfft);   // the interval of frequencies in the coherence function x-axis	
 	int first_index = round(min_freq / freq_interval);

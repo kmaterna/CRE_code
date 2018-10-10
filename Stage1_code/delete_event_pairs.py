@@ -17,8 +17,8 @@ copy_of_results_file =station_name+"-before_del_results_file.txt";        # This
 working_results_file =station_name+"-working_deleting_results_file.txt";  # This one you keep reading, then writing over the next time
 write_to_results_file=station_name+"-above_cutoff_results.txt";           # This one you keep writing each time. 
 
-call("cp "+existing_results_file+" "+copy_of_results_file, shell=True);   # just a copy; don't touch. 
-call("cp "+existing_results_file+" "+working_results_file, shell=True);   # this one's gonna keep getting smaller and smaller. 
+call(["cp",existing_results_file,copy_of_results_file], shell=False);   # just a copy; don't touch. 
+call(["cp",existing_results_file,working_results_file], shell=False);   # this one's gonna keep getting smaller and smaller. 
 
 filelist=open("redos/redos_file_list.txt",'r');
 filelist.readline()
@@ -41,7 +41,7 @@ for line in filelist:
 	readfile.close();
 	writefile.close();
 
-	call("cp "+write_to_results_file+" "+working_results_file, shell=True);   # for each re-do, create a new slightly-smaller results file. 
+	call(["cp",write_to_results_file,working_results_file], shell=False);   # for each re-do, create a new slightly-smaller results file. 
 
-call("rm "+working_results_file, shell=True);   # want to clean up?
-call("rm "+copy_of_results_file, shell=True);   # want to clean up?
+call(["rm",working_results_file], shell=False);   # want to clean up?
+call(["rm",copy_of_results_file], shell=False);   # want to clean up?
