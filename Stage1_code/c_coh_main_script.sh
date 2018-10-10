@@ -38,7 +38,7 @@ gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/
 # gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c -L/share/apps/sac/lib -lsacio -lsac -lm
 ./major_computation.o $station_name $compare_list_file append_mode
 
-echo "Producing SNR solution file"
-python $where_is_code/update_solution_file_with_SNR.py $station_name $where_is_code  # only does computation for each "hit" from the last step (cc>0.6)
+# echo "Producing SNR solution file"
+# python $where_is_code/update_solution_file_with_SNR.py $station_name $where_is_code  # only does computation for each "hit" from the last step (cc>0.6)
 
-cleaning_up.sh $station_name
+# cleaning_up.sh $station_name

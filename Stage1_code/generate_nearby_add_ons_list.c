@@ -210,8 +210,6 @@ int main(int argc, char *argv[]){
 	}
 
 
-    fprintf(outptr,"BREAKFILE\n");
-
 	// WRITE ENDING INFORMATION TO THE SCREEN
 	printf("Number of Existing Waveforms: %d\n", num_exist_events);
 	printf("Number of New Waveforms: %d\n", num_added_events);

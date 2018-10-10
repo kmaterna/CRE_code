@@ -6,22 +6,18 @@
 #include "sacio.h"
 #include "sac.h"
 #include "determine_ts_len.h"
-#include "get_len_of_event_name.h"
 #define MAXNUM 2048 // THIS is the approximate number of data points per earthquake. 
 #define NPS 512  // THIS is the number of points per segment (512 is good for vectors of ~2048 points)
+#define FILENAME_SIZE 80  // Maximum number of characters in sac filename
 
 /****************************
-This code performs cross-correlation and coherence of sac files, and writes the outputs into one output file. 
-
-This code reads from a list of nearby event-pairs (e.g. B046_nearby.txt)
+This code performs cross-correlation and coherence of sac files.
+It reads from a list of nearby event-pairs (e.g. B046_nearby.txt)
 and generates coherence and cross-correlation values for each event pair in that file.  
 It throws away event pairs that occurred within some nominal time (10 seconds) of each other. 
-It handles unfiltered data so that we can go as high as 50 Hz in our coherence (if we want). 
 
-Before we run this, we run a simple SAC script (make_cut_files.sh) to 
-cut out a 20-second window near each event. 
-
-Inside this script, we filter from 2-24 Hz using the code from sac.h file. 
+This script reads unfiltered sac files. 
+However, inside this script, we filter from 2-24 Hz using the code from sac.h file. 
 We use the filtered waveform for cross-correlating and we save this value.  
 
 When events have a high maximum cross-correlation (for example above 0.6), then we use the 
@@ -34,9 +30,8 @@ We avoid saving mostly garbage that way.
 
 COMPILE WITH THIS LINE RIGHT HERE!!!
 gcc -o major_computation source_name.c -L/$HOME/sac/lib  -lsacio -lsac
-On the school computers:
+On the BSL linux computers:
 gcc -o exec_name source_name.c -L/share/apps/sac/lib -lsacio -lsac -lm
-
 ****************************/
 
 
@@ -49,23 +44,19 @@ void coherence();
 int load();
 void lremv();
 void fft842();  // seems like declaring the types of the arguments here is optional. 
-void sample_coherence();   // this is where we implement our criteria for summarizing coherence values
+void sample_coherence(double);   // this is where we implement our criteria for summarizing coherence values
 int get_len_of_event_names(char[]); // Ex: gets "B045"; returns 45 (since the sac file names are 45 characters long)
 
-// USER DEFINED GLOBAL VARIABLES: George Moody's code had a lot of them :(
-double sampfreq = 100.0;  // Defined from the seismic instrument we're using (Hz). 
 
-
-// OTHER GLOBAL VARIABLES: George Moody's code had a lot of them :(
+// GLOBAL VARIABLES YOU DON'T TOUCH: George Moody's code had a lot of them :(
 double *xx, *yy, *gxx, *gyy, *gxyre, *gxyim, *phi, *weight;
-int time_shift = 0;      // This variable is used when time-series arrays need shifting relative to each other. 
 int npfft = NPS;	/* points per Fourier transform segment (a power of 2) */
+int time_shift = 0;      // This variable is used when time-series arrays need shifting relative to each other. 
 FILE * ifile = NULL;    // for reading the two-column input file. 
 FILE * output_file = NULL;    // the output file needs to be global so that we can write to it from anywhere. 
 char input_file_name[] = "coh_input_temp.txt";                  // file for putting sac data (re-written each time we loop)
 char output_file_name[] = "____-above_cutoff_results.txt";
 char summary_file_name[] = "____-process_summary.txt";     // the file for summarizing what we're doing
-
 
 
 
@@ -81,13 +72,13 @@ int main(int argc, char *argv[]){
 	int seconds_apart = 10;                  // we don't compare events that are within 10 seconds of each other
 	float cross_correlation_cutoff = 0.70;   // if xcorr is greater than this, we care about shifting the arrays and doing coherence that way
 	int maxdelay = 250;                      // for cross-correlation, we shift this many hundredths of a second in each direction (NOT MORE THAN 250!).
-	// CONTROL PROGRAM FLOW: Where do you start and stop doing coherence/xcorr? 
-	int small_number = 0*1000;  // if you want to start at a certain index value. 
-	int big_number = 1000*1000*100;   // the coherence/xcorr loop won't go more than this many times.	
+	int small_number = 0*1000;  // CONTROL PROGRAM FLOW: if you want to start at a certain index value. 
+	int big_number = 1000*1000*100;   // CONTROL PROGRAM FLOW: the coherence/xcorr loop won't go more than this many times.	
+	double sampfreq = 100.0;  // Defined from the seismic instrument we're using (Hz). 
 
 
 	// ****** BORING VARIABLES AND PROCEDURES YOU DON'T CARE ABOUT ******* // 
-	
+
 	// Please parse the name of the station (3 characters or 4 characters?). 
 	int len_of_station_name;  // this is just for naming the output files correctly. 
 	len_of_station_name=strlen(argv[1]);  // the length of a null-terminated string from the user. 	
@@ -104,12 +95,6 @@ int main(int argc, char *argv[]){
 	memcpy(output_file_name,station_name,len_of_station_name);  // change the top 3 or 4 characters on the output_file_name
 	memcpy(summary_file_name,station_name,len_of_station_name);	
 
-	// WILL FIX EVENT NAMES SOON. 
-	int len_of_event_names;                                  // the event file names are 44 or 45 characters long, depending on the station.
-	len_of_event_names = get_len_of_event_names(station_name); 
-	int len_of_full_event_names = len_of_event_names+8;			 // these files have the directories ( 8 extra characters = ./added/ or ./exist/)
-	int len_of_full_cut_event_names = len_of_event_names+8+4; 	 // these files are CUT_file_name (4 characters longer than the raw ones)
-
 	FILE * input_file   = NULL;    // points to the same file as ifile, but this is for writing
 	FILE * list_file    = NULL;
 	FILE * summary_file = NULL;
@@ -122,9 +107,6 @@ int main(int argc, char *argv[]){
 	else{
 		printf("SUCCESS in opening: %s\n",list_file_name);
 	}
-        if (len_of_event_names == 0){
-                exit(1);
-        }
 
 	// Are we running in append mode, or full-compare mode? 
 	// Opens / appends to the output file. 
@@ -149,6 +131,7 @@ int main(int argc, char *argv[]){
 	}
 
 
+	// Starting the process of opening the input file. 
 	if(list_file==NULL){
 		printf("Could Not Open List of Nearby Event Pairs\nExiting Program...\n");
 		exit(0);       
@@ -188,10 +171,10 @@ int main(int argc, char *argv[]){
 
 	// ******* THE MEAT OF THE PROGRAM: ******** //
 	// LOOP THROUGH EVENT PAIRS TO COHERE THEM.  FIRST GRAB THE NAMES OF EVENTS IN THE LIST FILE.
-	char event1[len_of_full_event_names];    // the array that will hold event1 
-	char event2[len_of_full_event_names];    // the array that will hold event2 
-	char event1_cut[len_of_full_cut_event_names];    // the array that will hold event1 
-	char event2_cut[len_of_full_cut_event_names];    // the array that will hold event2 
+	char event1[FILENAME_SIZE];    // the array that will hold event1 
+	char event2[FILENAME_SIZE];    // the array that will hold event2 
+	char event1_cut[FILENAME_SIZE];    // the array that will hold event1 
+	char event2_cut[FILENAME_SIZE];    // the array that will hold event2 
 	char cut_prefix[]="CUT_";
 
 	// TIME TO TRY filering using C code that comes with SAC. 
@@ -204,32 +187,17 @@ int main(int argc, char *argv[]){
     transition_bandwidth = 0.0;
     attenuation = 0.0;
 
-	size_t bufsize=80;
-	size_t linesize;
-	char * buffer; 
-	buffer = (char *)malloc(bufsize * sizeof(char));
-	if( buffer == NULL)
-	{
-		perror("Unable to allocate buffer");
-		exit(1);
-	}  //checking for an unusual error in allocating memory. 
-
 
 	// LOOPS THROUGH A LOT OF TIMES
 	for(i=0; i<big_number; i++){  
 
 		counter+=1;
-		linesize = getline(&buffer, &bufsize, list_file);
 
 		if(i<small_number)  // This is part of controlling the flow of the program for debugging. 
 		{
 			continue;
 		}
 
-		if((int)buffer[0]==0){
-			printf("END OF FILE REACHED\n");
-			break;
-		}  // test to see if we've reached the end of the file. 
 		if(i==big_number-1)
 		{
 			printf("OOPS!  WE REACHED %d AND DIDN'T FINISH ALL THE EVENT PAIRS.\n", big_number);
@@ -238,47 +206,29 @@ int main(int argc, char *argv[]){
 
 		// Set the program up to see the filtered and raw files
 		// Read in the names of sac files from our list_file. Create the cut_sac_file names. 
-		for( j = 0; j < len_of_full_cut_event_names; j++){
-			if (j<len_of_full_event_names){
-				event1[j] = buffer[j];
-				event2[j] = buffer[j+len_of_full_event_names];
-			}
+		fscanf(list_file, "%s %s", &event1, &event2);
+		if(feof(list_file)){
+			break;
+		}
+
+		for( j = 0; j < FILENAME_SIZE; j++){
 			if (j<8){
-				event1_cut[j] = buffer[j];
-				event2_cut[j] = buffer[j+len_of_full_event_names];				
+				event1_cut[j] = event1[j];
+				event2_cut[j] = event2[j];
 			}
 			else if (j<12){
 				event1_cut[j] = cut_prefix[j-8];
 				event2_cut[j] = cut_prefix[j-8];
 			}
 			else if (j>=12){
-				event1_cut[j] = buffer[j-4];
-				event2_cut[j] = buffer[j-4+len_of_full_event_names];
+				event1_cut[j] = event1[j-4];
+				event2_cut[j] = event2[j-4];
 			}
 		}
 
-		printf("event1:%s\n",event1);
-		printf("event2:%s\n",event2);
-
-		char test_for_break[9]; // have we reached the end of the input file?  
-		memcpy(test_for_break,event1,9);
-        if(strcmp(test_for_break,"BREAKFILE")==0){
-        	counter=counter-1;  // to offset the fact that we incremented the counter at the top of the loop. 
-            printf("END OF FILE REACHED.\n");
-            break;
-        }
-        //continue;
-
-		event1[len_of_full_event_names-1]=(char)0;   // make sure the garbage end-line characters don't get in there. 
-		event2[len_of_full_event_names-1]=(char)0;   // make sure the garbage end-line characters don't get in there. 
-		event1_cut[len_of_full_cut_event_names-1]=(char)0;   // make sure the garbage end-line characters don't get in there. 
-		event2_cut[len_of_full_cut_event_names-1]=(char)0;   // make sure the garbage end-line characters don't get in there. 
-		// printf("Event 1 is %s; ",event1);
-		// printf("Event 2 is %s.\n",event2);
-		// printf("Event 1 cut is %s; ",event1_cut);
-		// printf("Event 2 cut is %s.\n",event2_cut);
-                // break;
-                // printf("counter is:%d",i);
+		//Debugging code
+		// printf("event1:%s\n",event1);
+		// printf("event2:%s\n",event2);
 
 		// ARE THE EVENTS VERY CLOSE IN TIME?  IF YES, THEN SKIP THEM.  
 		skip_close_events=close_events_in_time(event1,event2,seconds_apart);
@@ -407,7 +357,7 @@ int main(int argc, char *argv[]){
 
 
 			// Call coherence and write to output file. 
-			call_coherence();    // generate coherence values (reads input from two-column file)
+			call_coherence(sampfreq);    // generate coherence values (reads input from two-column file)
 
 			time_shift=0;  // setting this to zero for safety. 
 			number_of_shifts+=1;
@@ -616,7 +566,7 @@ double xcorr(float x[], float y[], int n, int maxdelay){
 
 
 
-void call_coherence()
+void call_coherence(double sampfreq)
 {
     int pps = npfft;
     double sfx = 1.0, sfy = 1.0;
@@ -649,7 +599,7 @@ void call_coherence()
 	;
 	
 	//printf("pps is: %d\n", pps);
-    coherence(pps, sfx, sfy);
+    coherence(pps, sfx, sfy, sampfreq);
     fclose(ifile);
     //printf("Successful Coherence.\n");
 
@@ -682,9 +632,10 @@ void call_coherence()
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
 
 
-void coherence(nnn, sfx, sfy)
+void coherence(nnn, sfx, sfy, sampfreq)
 int nnn;	/* number of points per segment */
 double sfx, sfy;/* scale factors for input data */
+double sampfreq; /*instrument sampling frequency*/
 {
     double df, dt, sf, temp1, temp2, temp3, temp4;
     int i, nd2;
@@ -765,21 +716,21 @@ double sfx, sfy;/* scale factors for input data */
 		// 	     (gyy[i] > 1.0e-10 ? 10.0*log10(gyy[i]) : -100.0));
 
     }
-	sample_coherence();
+	sample_coherence(sampfreq);
 	return;
 }
 
 
 
 
-void sample_coherence()
+void sample_coherence(double sampfreq)
 // written by K. Materna.  This function write the entire coherence function between two waveforms. 
 // The entire function is written out for further analysis later. 
 {	
 	// print the entire range of coherence values from min_freq to max_freq hertz (for analysis later)
 
 	double min_freq=0; // Hz
-	double max_freq=50;
+	double max_freq=sampfreq/2.0;
 
 	double freq_interval = (sampfreq)/(npfft);   // the interval of frequencies in the coherence function x-axis	
 	int first_index = round(min_freq / freq_interval);
