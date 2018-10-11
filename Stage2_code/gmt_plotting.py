@@ -58,13 +58,13 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 	station=[]
 	my_file.readline();
 	for line in my_file:
-			temp=line.split()
-			event1.append(temp[0])
-			event2.append(temp[1])
-			temp_station=temp[2];
-			if temp_station[-1]=='_':
-				temp_station=temp_station[0:3]; # Remove the trailing underscore. 
-			station.append(temp_station)
+		temp=line.split()
+		event1.append(temp[0])
+		event2.append(temp[1])
+		temp_station=temp[2];
+		if temp_station[-1]=='_':
+			temp_station=temp_station[0:3]; # Remove the trailing underscore. 
+		station.append(temp_station)
 
 
 	# Read in position data for event1 and event2
@@ -108,7 +108,7 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 	call(mapping_code+'/map_view_repeaters.gmt 0 0 0 '+mapping_data,shell=True)  # this is to allow the script to handle both single-station and multi-station files. 
 	call(mapping_code+'/xyzm_repeaters.gmt '+mapping_data,shell=True)
 
-	print "Maps of repeating earthquakes generated!"
+	print("Maps of repeating earthquakes generated!");
 	return;
 
 

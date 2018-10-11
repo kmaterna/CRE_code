@@ -16,7 +16,7 @@ def view_families(time_window,families_list,families_summaries,station_locations
 	# Alternately: families = [0, 1, 2, 3] means only do a few stations
 	[summary_array,stations,station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,station_locations,mapping_data);
 	cwd = os.getcwd();
-        output_dir=cwd+"/"+output_dir+"Image_Families/";
+	output_dir=cwd+"/"+output_dir+"Image_Families/";
 	for i, myline in enumerate(summary_array):
 		if families[0]==-1:  # do all families
 			major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coords,time_window);
@@ -79,7 +79,7 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 	for i in range(5,5+number_of_events):
 		event_names.append(temp[i]);
 	best_station=temp[-(2+number_of_events)]
-	print "\nPrinting Family # "+str(family_number);
+	print("\nPrinting Family # %d" %(family_number));
 
 	# # READ IN NON-REPEATERS DATA AT THE BEST STATION
 	[ev1_non_repeaters, ev2_non_repeaters, xcorr_non_repeaters, coherence_non_repeaters] = read_event_comparison(best_station+'_total_list.txt');
@@ -104,8 +104,8 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 	a1=axarr[0,0]
 	#a1.set_ylim([39, 42])  # MENDOCINO
 	#a1.set_xlim([-127, -122])
-        a1.set_ylim([31, 35.5])  # ANZA
-        a1.set_xlim([-119, -114.9])
+	a1.set_ylim([31, 35.5])  # ANZA
+	a1.set_xlim([-119, -114.9])
 	a1.set(adjustable='box-forced', aspect='equal')
 	a1.set_xlabel("Longitude")
 	a1.set_ylabel("Latitude")

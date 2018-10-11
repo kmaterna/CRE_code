@@ -40,9 +40,7 @@ def inputs(inputfile):
 def compute(time_window, event1, event2):
 	start_time=time_window[0];
 	end_time=time_window[1];
-	print "Starting time and ending time are: "
-	print start_time
-	print end_time
+	print("Starting time and ending time are: %f , %f" % (start_time, end_time) );
 
 	# Cut the arrays to the appropriate time window. 
 	event1_cut=[]; event2_cut=[];
@@ -71,8 +69,8 @@ def make_unique_events_list(event1, event2):
 		if event2[i] not in unique_events:
 			unique_events.append(event2[i]);
 		counter+=1
-	print "Length of Event Pairs Vector is: " + str(counter);
-	print "Length of Unique Events Vector is: " + str(len(unique_events));
+	print("Length of Event Pairs Vector is: %d" %(counter) );
+	print("Length of Unique Events Vector is: %d" %(len(unique_events)) );
 	return unique_events;
 
 def make_connectivity_matrix(event1, event2, unique_events):
@@ -87,8 +85,8 @@ def make_connectivity_matrix(event1, event2, unique_events):
 
 def connected_component_analysis(M):
 	integer, labels=ssp.csgraph.connected_components(M, directed=False, connection='weak', return_labels=True)
-	print labels;
-	print "The " + str(len(M)) + " unique events fall into " + str(integer) + " connected components."
+	print(labels);
+	print("The %d unique events fall into %d connected components." % (len(M), integer) );
 	return integer, labels;
 
 

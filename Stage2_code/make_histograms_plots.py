@@ -31,7 +31,7 @@ def make_inter_event_time_histogram(station_name,filename,output_dir):
 		event_time2=float(name2[0:4])+float(name2[5:8])/365.24+float(name2[9:11])/(24*365.24)+float(name2[11:13])/(24*60*365.24)+float(name2[13:15])/(24*60*60*365.24)
 		intervals.append(event_time2 - event_time1)
 	my_file.close();
-	print "Making inter event time histogram...\n"
+	print("Making inter event time histogram...\n");
 
 	plt.figure()
 	plt.hist(intervals,30)
@@ -54,7 +54,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 		dist.append((dist1[i]+dist2[i])/2)   # Record mean magnitude. 
 		Diff_M.append(abs(mag1[i]-mag2[i]))   # Record magnitude differences. 
 
-	print "Making Distances histogram...\n"
+	print("Making Distances histogram...\n");
 	plt.figure();
 	plt.hist(dist);
 	plt.xlabel('Mean Distance From Station (km)');
@@ -63,7 +63,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	plt.savefig(directory+"_distances_histogram.jpg")
 	plt.close();
 	
-	print "Making Magnitudes histogram...\n"
+	print("Making Magnitudes histogram...\n");
 	plt.figure();
 	plt.hist(Mean_M);
 	plt.xlabel('Mean Magnitude');
@@ -72,7 +72,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	plt.savefig(directory+"_magnitudes_histogram.jpg")
 	plt.close()
 
-	print "Making Magnitude Differences histogram...\n"
+	print("Making Magnitude Differences histogram...\n");
 	plt.figure();
 	plt.hist(Diff_M);
 	plt.xlabel('Magnitude Difference');
@@ -157,7 +157,7 @@ def make_repeaters_map(MyParams, mapping_data, mapping_code):
 	evfile2=open('event_locations_second_hypodd.txt','w')
 	connectors=open('event_connectors.txt','w')
 
-	print "Making GMT map of repeaters... \n"
+	print("Making GMT map of repeaters... \n");
 	ifile.readline();   # skip the first line. 
 	for line in ifile:
 		temp=line.split()

@@ -50,7 +50,7 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 	MyParams=configure(station_name, inParams.stage1_results, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
 	[Candidates_coh, Candidates_snr] = inputs(MyParams);
 	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
-        outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
+	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
 	return;
 
 
@@ -70,8 +70,8 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 	four_char=station_name;
 	if len(station_name)==3:
 		four_char=station_name+"_"
-        u = station_name.decode("utf-8-sig");
-        station_name = u.encode("utf-8");
+		u = station_name.decode("utf-8-sig");
+		station_name = u.encode("utf-8");
 	
 	# This is where we have put the results of the C calculation with all the candidates (xcorr > 0.60). 
 	data_input_file = candidate_input_dir+'/'+four_char+'-above_cutoff_results.txt'
@@ -91,8 +91,8 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 	ifile=open(station_location_file,'r');
 	for line in ifile:
 		temp=line.split();
-                u=temp[0].decode("utf-8-sig");
-                s=u.encode("utf-8");  # issues with the first line of the text file and its utf-8 encoding. 
+		u=temp[0].decode("utf-8-sig");
+		s=u.encode("utf-8");  # issues with the first line of the text file and its utf-8 encoding. 
 		if s==station_name:
 			station_coords=[float(temp[1]), float(temp[2])];
 			raw_sac_dir=temp[3];
@@ -110,29 +110,29 @@ def configure(station_name, candidate_input_dir, stage2_dir, station_location_fi
 
 def print_out_statements(MyParams):
 	if MyParams.metric=="coh":
-		print "\n-------------------------------------"
-		print "DEFINING REPEATING EARTHQUAKES FOR STATION "+MyParams.station_name
-		print "\nYou have chosen to define repeaters as: "
-		print "The "+MyParams.statistic.upper()+" of all coherence values where SNR > "+str(MyParams.snr_cutoff)+"."
-		print "Coherence cutoff = "+str(MyParams.cutoff)+"."
-		print "Available frequencies = "+str(MyParams.lowest_chosen_frequency)+" to "+str(MyParams.highest_chosen_frequency)+" Hz."
-		print "Repeaters must have magnitudes less than "+str(MyParams.magnitude_difference_tolerance)+" magnitude units apart."
+		print("\n-------------------------------------");
+		print("DEFINING REPEATING EARTHQUAKES FOR STATION %s" % MyParams.station_name);
+		print("\nYou have chosen to define repeaters as: ");
+		print("The %s of all coherence values where SNR > %f ." % (MyParams.statistic.upper(),MyParams.snr_cutoff) );
+		print("Coherence cutoff = %f." % (MyParams.cutoff) );
+		print("Available frequencies = %f to %f Hz." % (MyParams.lowest_chosen_frequency, MyParams.highest_chosen_frequency) );
+		print("Repeaters must have magnitudes less than %f magnitude units apart." % MyParams.magnitude_difference_tolerance );
 		if MyParams.plot_arg==1:
-			print "You have chosen to view plots of all of your repeaters.  "
-		print "-------------------------------------\n"
+			print("You have chosen to view plots of all of your repeaters.  ");
+		print("-------------------------------------\n");
 	elif MyParams.metric=="corr":
-		print "\n-------------------------------------"
-		print "DEFINING REPEATING EARTHQUAKES FOR STATION "+MyParams.station_name
-		print "\nYou have chosen to define repeaters as: "
-		print "XCorr cutoff = "+str(MyParams.cutoff)+"."
+		print("\n-------------------------------------");
+		print("DEFINING REPEATING EARTHQUAKES FOR STATION %s " % MyParams.station_name);
+		print("\nYou have chosen to define repeaters as: ");
+		print("XCorr cutoff = %f." % MyParams.cutoff);
 		if MyParams.plot_arg==1:
-			print "You have chosen to view plots of all of your repeaters.  "
-		print "-------------------------------------\n"
+			print("You have chosen to view plots of all of your repeaters.  ");
+		print("-------------------------------------\n");
 	else:
-		print "\n-------------------------------------"
-		print "ERROR!  Your metric is not valid.  Please choose metric from the choices: "
-		print "[corr, coh]"
-		print "-------------------------------------\n"
+		print("\n-------------------------------------");
+		print("ERROR!  Your metric is not valid.  Please choose metric from the choices: ");
+		print("[corr, coh]");
+		print("-------------------------------------\n");
 	return;
 
 
@@ -146,11 +146,11 @@ def inputs(MyParams):
 
 
 def read_data_input_file(filename):
-        filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
-        filename_inner=filename.split('/')[1];
-        u = filename_inner.decode("utf-8-sig");
-        s = u.encode("utf-8");
-        t=filename_split[0]+"/"+s;
+	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
+	filename_inner=filename.split('/')[1];
+	u = filename_inner.decode("utf-8-sig");
+	s = u.encode("utf-8");
+	t=filename_split[0]+"/"+s;
 	ifile=open(t,'r');
 	event1name=[]; event2name=[]; ev1mag=[]; ev2mag=[]; ev1dist=[]; ev2dist=[]; xcorr=[]; coh_collection=[];
 	for line in ifile:
@@ -173,11 +173,11 @@ def read_data_input_file(filename):
 def read_snr_input_file(filename):
 	# Read in the SNR information. 
 	
-        filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
-        filename_inner=filename.split('/')[1];
-        u = filename_inner.decode("utf-8-sig");
-        s = u.encode("utf-8");
-        t=filename_split[0]+"/"+s;
+	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
+	filename_inner=filename.split('/')[1];
+	u = filename_inner.decode("utf-8-sig");
+	s = u.encode("utf-8");
+	t=filename_split[0]+"/"+s;
 	ifile=open(t,'r');
 
 	f_axis1=[]; snr1=[]; 
@@ -243,99 +243,97 @@ def compute(MyParams, Candidates_coh, Candidates_snr):
 	for i in range(len(Candidates_coh.event1name)):
 
 		# CHECKS AND BALANCES:
-                if MyParams.metric=="coh":
+		if MyParams.metric=="coh":
 			if Candidates_coh.event1name[i] != Candidates_snr.event1name[i]:
-				print("We have a problem! "+Candidates_coh.event1name[i]+" and "+Candidates_snr.event1name[i]+" do not match. Go check the input files!\n")
-				continue
+				print("We have a problem! "+Candidates_coh.event1name[i]+" and "+Candidates_snr.event1name[i]+" do not match. Go check the input files!\n");
+				continue;
 			if Candidates_coh.event2name[i] != Candidates_snr.event2name[i]:
-				print("We have a problem! "+Candidates_coh.event2name[i]+" and "+Candidates_snr.event2name[i]+" do not match. Go check the input files!\n")
-				continue
-		distance=(Candidates_coh.ev1dist[i]+Candidates_coh.ev2dist[i])/2   # mean distance
-		if Candidates_coh.ev1dist[i]>3000:
-			distance=Candidates_coh.ev2dist[i];
-		if Candidates_coh.ev2dist[i]>3000:
-			distance=Candidates_coh.ev1dist[i];
-		if Candidates_coh.ev1dist[i]>3000 and Candidates_coh.ev2dist[i]>3000:
-			print("We have a problem!  "+Candidates_coh.event1name[i]+" and "+Candidates_coh.event2name[i]+" are both located too far away.\n");
-			distance=25;   # THIS IS A TOTAL GUESS.  WE FOUND ONE EVENT WHERE THIS IS NEEDED.  
+				print("We have a problem! "+Candidates_coh.event2name[i]+" and "+Candidates_snr.event2name[i]+" do not match. Go check the input files!\n");
+				continue;
+			distance=(Candidates_coh.ev1dist[i]+Candidates_coh.ev2dist[i])/2   # mean distance
+			if Candidates_coh.ev1dist[i]>3000:
+				distance=Candidates_coh.ev2dist[i];
+			if Candidates_coh.ev2dist[i]>3000:
+				distance=Candidates_coh.ev1dist[i];
+			if Candidates_coh.ev1dist[i]>3000 and Candidates_coh.ev2dist[i]>3000:
+				print("We have a problem!  "+Candidates_coh.event1name[i]+" and "+Candidates_coh.event2name[i]+" are both located too far away.\n");
+				distance=25;   # THIS IS A TOTAL GUESS.  WE FOUND ONE EVENT WHERE THIS IS NEEDED.  
 
 
-		# Determined the maximum frequency we're looking at for a pair of events (Mean magnitude only, nothing to do with SNR);
-		if MyParams.metric=="corr":  # these parameters are set to default values if using corr, because they don't matter. 
-			min_freq=MyParams.min_freq_inst;
-			max_freq=MyParams.max_freq_inst;
-		elif MyParams.freq_method=="hard_coded":
-			min_freq=1;
-			max_freq=MyParams.highest_chosen_frequency;
-		elif MyParams.freq_method=="snr_based":  # Now determine the available frequencies based on SNR. 
-			min_freq, max_freq = determine_freqs_by_SNR(Candidates_snr.f_axis1[i], Candidates_snr.snr1[i], Candidates_snr.f_axis2[i], Candidates_snr.snr2[i], MyParams.snr_cutoff, MyParams.highest_chosen_frequency, MyParams.lowest_chosen_frequency);
-			#print "Minimum and maximum frequencies = %f Hz, %f Hz" %(min_freq, max_freq)
-		elif MyParams.freq_method=="magnitude_based":
-			min_freq=1; 
-			max_freq = determine_freqs_by_magnitude(M, MyParams.highest_chosen_frequency); 
+			# Determined the maximum frequency we're looking at for a pair of events (Mean magnitude only, nothing to do with SNR);
+			if MyParams.metric=="corr":  # these parameters are set to default values if using corr, because they don't matter. 
+				min_freq=MyParams.min_freq_inst;
+				max_freq=MyParams.max_freq_inst;
+			elif MyParams.freq_method=="hard_coded":
+				min_freq=1;
+				max_freq=MyParams.highest_chosen_frequency;
+			elif MyParams.freq_method=="snr_based":  # Now determine the available frequencies based on SNR. 
+				min_freq, max_freq = determine_freqs_by_SNR(Candidates_snr.f_axis1[i], Candidates_snr.snr1[i], Candidates_snr.f_axis2[i], Candidates_snr.snr2[i], MyParams.snr_cutoff, MyParams.highest_chosen_frequency, MyParams.lowest_chosen_frequency);
+				#print "Minimum and maximum frequencies = %f Hz, %f Hz" %(min_freq, max_freq)
+			elif MyParams.freq_method=="magnitude_based":
+				min_freq=1; 
+				max_freq = determine_freqs_by_magnitude(M, MyParams.highest_chosen_frequency); 
 
-		# Cut to the range of useful frequencies.  	
-		coh=Candidates_coh.coh_array[i];
-		index_1=int(np.round(len(coh)*(min_freq-MyParams.min_freq_inst)/(MyParams.max_freq_inst-MyParams.min_freq_inst)));
-		index_top=int(np.round(len(coh)*(max_freq-MyParams.min_freq_inst)/(MyParams.max_freq_inst-MyParams.min_freq_inst)));
-		# pathological case in which the two indeces are the same:
-		if index_1==index_top:
-			index_top+=1;
+			# Cut to the range of useful frequencies.  	
+			coh=Candidates_coh.coh_array[i];
+			index_1=int(np.round(len(coh)*(min_freq-MyParams.min_freq_inst)/(MyParams.max_freq_inst-MyParams.min_freq_inst)));
+			index_top=int(np.round(len(coh)*(max_freq-MyParams.min_freq_inst)/(MyParams.max_freq_inst-MyParams.min_freq_inst)));
+			# pathological case in which the two indeces are the same:
+			if index_1==index_top:
+				index_top+=1;
 
-		# !!!!!! Define the measure of coherence (usually mean or median)
-		if MyParams.statistic=='mean':
-			coh_statistic=np.mean(coh[index_1:index_top])
-		if MyParams.statistic=='median':
-			coh_statistic=np.median(coh[index_1:index_top])
-		if str(coh_statistic)=='nan':
-			print "OMG NAN!!!"		
+			# !!!!!! Define the measure of coherence (usually mean or median)
+			if MyParams.statistic=='mean':
+				coh_statistic=np.mean(coh[index_1:index_top])
+			if MyParams.statistic=='median':
+				coh_statistic=np.median(coh[index_1:index_top])
+			if str(coh_statistic)=='nan':
+				print("NAN!!!");
 
 
-		if (max_freq - min_freq) <=MyParams.Minimum_frequency_width:  # these are events where there's very little usable signal anyway
-			low_signal_counter+=1; 
-			continue;
-		else:
-			# Summary statistics for all comparisons (for making plots)
-			name1_all.append(Candidates_coh.event1name[i])
-			name2_all.append(Candidates_coh.event2name[i])
-			coh_all.append(coh_statistic)
-			xcorr_all.append(Candidates_coh.xcorr[i])
-			dist1_all.append(Candidates_coh.ev1dist[i])
-			dist2_all.append(Candidates_coh.ev2dist[i])
-			mag1_all.append(Candidates_coh.ev1mag[i])
-			mag2_all.append(Candidates_coh.ev2mag[i])
-			min_freq_all.append(min_freq);
-			max_freq_all.append(max_freq);			
-			
-			if abs(Candidates_coh.ev1mag[i]-Candidates_coh.ev2mag[i])<=MyParams.magnitude_difference_tolerance:  # if we have similar magnitudes
-				if MyParams.metric=="coh":
-					similarity_value=coh_statistic;
-				elif MyParams.metric=="corr":
-					similarity_value=Candidates_coh.xcorr[i]
-			
-				# WE HAVE A REPEATER!!!  WRITE IT DOWN!!! 
-				if similarity_value>MyParams.cutoff:
-					name1_cre.append(Candidates_coh.event1name[i])
-					name2_cre.append(Candidates_coh.event2name[i])
-					coh_cre.append(coh_statistic)
-					xcorr_cre.append(Candidates_coh.xcorr[i])
-					dist1_cre.append(Candidates_coh.ev1dist[i])
-					dist2_cre.append(Candidates_coh.ev2dist[i])
-					mag1_cre.append(Candidates_coh.ev1mag[i])
-					mag2_cre.append(Candidates_coh.ev2mag[i])
-					min_freq_cre.append(min_freq);
-					max_freq_cre.append(max_freq);
-					repeater_nflag += 1;
-				# if coh_statistic>0.90 and xcorr<0.80:
-					# print "Anomaly: "+event1_data+ " "+event2_data;
+			if (max_freq - min_freq) <=MyParams.Minimum_frequency_width:  # these are events where there's very little usable signal anyway
+				low_signal_counter+=1; 
+				continue;
+			else:
+				# Summary statistics for all comparisons (for making plots)
+				name1_all.append(Candidates_coh.event1name[i])
+				name2_all.append(Candidates_coh.event2name[i])
+				coh_all.append(coh_statistic)
+				xcorr_all.append(Candidates_coh.xcorr[i])
+				dist1_all.append(Candidates_coh.ev1dist[i])
+				dist2_all.append(Candidates_coh.ev2dist[i])
+				mag1_all.append(Candidates_coh.ev1mag[i])
+				mag2_all.append(Candidates_coh.ev2mag[i])
+				min_freq_all.append(min_freq);
+				max_freq_all.append(max_freq);			
+				
+				if abs(Candidates_coh.ev1mag[i]-Candidates_coh.ev2mag[i])<=MyParams.magnitude_difference_tolerance:  # if we have similar magnitudes
+					if MyParams.metric=="coh":
+						similarity_value=coh_statistic;
+					elif MyParams.metric=="corr":
+						similarity_value=Candidates_coh.xcorr[i]
+				
+					# WE HAVE A REPEATER!!!  WRITE IT DOWN!!! 
+					if similarity_value>MyParams.cutoff:
+						name1_cre.append(Candidates_coh.event1name[i])
+						name2_cre.append(Candidates_coh.event2name[i])
+						coh_cre.append(coh_statistic)
+						xcorr_cre.append(Candidates_coh.xcorr[i])
+						dist1_cre.append(Candidates_coh.ev1dist[i])
+						dist2_cre.append(Candidates_coh.ev2dist[i])
+						mag1_cre.append(Candidates_coh.ev1mag[i])
+						mag2_cre.append(Candidates_coh.ev2mag[i])
+						min_freq_cre.append(min_freq);
+						max_freq_cre.append(max_freq);
+						repeater_nflag += 1;
 	
 	Total_results=Results_summary(name1=name1_all, name2=name2_all, xcorr_value=xcorr_all, coh_value=coh_all, min_freq=min_freq_all, max_freq=max_freq_all, dist1=dist1_all, dist2=dist2_all, mag1=mag1_all, mag2=mag2_all);
 	CRE_results=Results_summary(name1=name1_cre, name2=name2_cre, xcorr_value=xcorr_cre, coh_value=coh_cre, min_freq=min_freq_cre, max_freq=max_freq_cre, dist1=dist1_cre, dist2=dist2_cre, mag1=mag1_cre, mag2=mag2_cre);
 
-	print "\nSTATION "+MyParams.station_name+":\n"
-	print str(len(CRE_results.name1))+" Repeaters Found"
-	print "Out of " + str(len(Total_results.name1))+" possible event pairs."
-	print str(low_signal_counter)+" event pairs had low SNR (below SNR="+str(MyParams.snr_cutoff)+").\n"
+	print("\nSTATION "+MyParams.station_name+":\n");
+	print("%d Repeaters Found" % (len(CRE_results.name1)) );
+	print("Out of %d possible event pairs." % len(Total_results.name1));
+	print("%d event pairs had low SNR (below SNR=%f).\n" % (low_signal_counter, MyParams.snr_cutoff) );
 
 	return [Total_results, CRE_results];
 
@@ -392,16 +390,16 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 		if len(CRE_results.name1)>1:
 			# Make histograms and scatter plots of coherence values / cross correlation values
 			if MyParams.metric=="corr":
-                              make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
-                        if MyParams.metric=="coh":
-			       #make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
-                               make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
-			       #make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
+				make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
+			if MyParams.metric=="coh":
+				make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
+				#make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
+				#make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
 
 			# Make summary histograms of the repeaters we've found. 
 			make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
 			make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
-		
+
 		elif len(CRE_results.name1)==0:
 			print("No Repeaters Found: Cannot Make Plots!")
 	return; 
@@ -438,8 +436,7 @@ def write_outfiles(MyParams, Total_results, CRE_results):
 			ofile.write("%s %s %f %f %f %f %f %f %f %f \n" % (CRE_results.name2[i],CRE_results.name1[i],CRE_results.xcorr_value[i],CRE_results.coh_value[i],
 				CRE_results.min_freq[i],CRE_results.max_freq[i], CRE_results.mag2[i], CRE_results.dist2[i], CRE_results.mag1[i], CRE_results.dist1[i]));
 	ofile.close();
-
-        return;
+	return;
 
 
 

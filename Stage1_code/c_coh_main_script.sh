@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# This script will take additional files in the "added" directory and compare them to: 
+# This script will take any files in the "added" directory and compare them to: 
 # 1. the files in the exist directory, and 
 # 2. the other files in the added directory. 
-# It will APPEND the coherence and SNR results to the end of the results files. 
+# By default, it will APPEND the coherence and SNR results to the end of the results files. 
 # It can also handle re-dos that have already been included, but for some reason need to be deleted and re-added. 
 # It should be called from B045/ or parallel directory. 
 

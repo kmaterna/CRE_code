@@ -87,7 +87,7 @@ def main_program(time_window,families_list,families_summaries,station_location_f
 		slip_rate = round(100*max(slip)/(end_time-start_time))/100;
 
 
-	    # WRITE RELEVANT INFORMATION FOR EACH FAMILY INTO SUMMARY FILE
+		# WRITE RELEVANT INFORMATION FOR EACH FAMILY INTO SUMMARY FILE
 
 		outfile.write("Family "+str(family_of_interest)+" with "+str(number_of_events)+" events: ");
 		for i in range(number_of_events):
@@ -118,7 +118,7 @@ def main_program(time_window,families_list,families_summaries,station_location_f
 
 		family_of_interest+=1;
 
-	print "Summary of families made\n";
+	print("Summary of families made\n");
 	family_infile.close();
 	outfile.close();
 	return;

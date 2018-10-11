@@ -28,7 +28,7 @@ def main_program(time_window,family_summaries, mapping_data):
 	# More complicated, colored by depth, zoomed in and zoomed out: 
 	time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 35], dont_plot_family,time_window[0],time_window[1], mapping_data, colorlist);
 
-	print "Space-Time Diagrams Created!"
+	print("Space-Time Diagrams Created!");
 	return;
 
 
@@ -63,8 +63,8 @@ def plot_M5p7_eq(ax): # M5.7 rupture patch
 	rupture_length = 8.5; # km total. 
 	rupture_start = hypocenter_x - (rupture_length / multiplier)/2.0;  # the western edge of rupture
 	rupture_end = hypocenter_x + (rupture_length /  multiplier)/2.0;  # the eastern edge of rupture
-	print rupture_start; 
-	print rupture_end; 
+	print(rupture_start); 
+	print(rupture_end); 
 	ax.plot([rupture_start, rupture_end],[2015.07,2015.07],'k',linewidth=3.5);
 	return ax;
 

@@ -30,7 +30,7 @@ def main_program(time_window,Family_Summaries, mapping_data):
 	make_composite_plot(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History All Depths",0);
 	# make_map(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History All Depths");
 
-	print "Composite Slip Diagrams created!"
+	print("Composite Slip Diagrams created!");
 	return;
 
 
@@ -157,14 +157,14 @@ def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_d
 	a1=axarr[1];  # go plot the cumulative seismicity on a different axis. 
 	# Make the y-axis label and tick labels match the line color.
 	for tl in a1.get_yticklabels():
-	    tl.set_color('b')
+		tl.set_color('b')
 	a1.set_ylabel("Averaged Repeater Slip (mm)",color='b');
 
 	a2 = a1.twinx()
 	a2.plot(total_eq_ts, n_total_eq, 'r')
 	a2.set_ylabel('Total Earthquakes', color='r')
 	for tl in a2.get_yticklabels():
-	    tl.set_color('r')
+		tl.set_color('r')
 	a1.set_xlim([start_time,end_time+0.5])
 	a2.set_xlim([start_time,end_time+0.5])
 
@@ -215,7 +215,7 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
 	ts.append(end_time);
 	max_slip=max(slip);
 	slip_rate = round(10*max(slip)/(end_time-start_time))/10;
-	print number_of_families;
+	print(number_of_families);
 
 	# Writing output so that we can make an estimate of slip rate slope and uncertainty.
 	# going to use scipy curve fitting. 
@@ -237,7 +237,7 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
 	a1.get_xaxis().get_major_formatter().set_useOffset(False)
 	a1.set_xlim([start_time-0.2,end_time+0.2])
 	a1.set_ylabel("Magnitude");
-	a1.set_ylim([0,5]);		
+	a1.set_ylim([0,5]);	
 	a1.set_title(plot_name);
 
 	# Plot the slip histories. 

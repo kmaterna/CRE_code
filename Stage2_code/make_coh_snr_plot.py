@@ -45,9 +45,9 @@ def make_coh_snr_plot(output_dir,event1,event2,waveform_file_name,coh_file_name,
 	data_directory=""
 	sacfile1=data_directory+event1
 	sacfile2=data_directory+event2
-	print "Event 1: "
+	print("Event 1: ");
 	[mag1, dist1] = get_mag_dist_from_sac(sacfile1);
-	print "Event 2: "
+	print("Event 2: ");
 	[mag2, dist2] = get_mag_dist_from_sac(sacfile2);
 
 
@@ -58,7 +58,7 @@ def make_coh_snr_plot(output_dir,event1,event2,waveform_file_name,coh_file_name,
 		finish=finish-1;  # For python's 0-indexing. 
 	coherence_val = np.median(c_coh[begin:finish])
 
-	print "Length of C Coherence Vector:", len(c_coh), "\n"
+	print("Length of C Coherence Vector: %d \n" % len(c_coh) );
 
 
 	if show_overlay:
@@ -156,9 +156,9 @@ def get_mag_dist_from_sac(sacfile):
 	mag1 = d1['mag']
 	dist1 = d1['dist']
 	depth1 = d1['evdp']
-	print "Magnitude of Event is: ", mag1
-	print "Depth of Event is: ", depth1
-	print "Distance of Event is: ", dist1, "\n-------------------------"
+	print("Magnitude of Event is: %f " % mag1 );
+	print("Depth of Event is: %f" % depth1);
+	print("Distance of Event is: %f \n-------------------------" % dist1);
 	mag1=round(float(mag1),2)
 	dist1=round(float(dist1),2)
 	return [mag1, dist1];

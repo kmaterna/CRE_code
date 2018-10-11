@@ -54,7 +54,7 @@ def generate_histograms(repeaters_file,station_location_file):
 	plt.savefig('interval_histogram.eps');
 	plt.close();
 
-	print "Histogram of Inter-Event Times Plotted!"
+	print("Histogram of Inter-Event Times Plotted!");
 
 
 	plt.figure()
@@ -78,5 +78,5 @@ def generate_histograms(repeaters_file,station_location_file):
 	plt.savefig("magnitude_differences_histogram.eps");
 	plt.close()
 
-	print "Histogram of Magnitudes Plotted!"
-	print "Histogram of Magnitude Differences Plotted!"
+	print("Histogram of Magnitudes Plotted!");
+	print("Histogram of Magnitude Differences Plotted!");
