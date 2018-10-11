@@ -10,7 +10,7 @@
 
 lonW=-127
 lonE=-123
-latS=39.5
+latS=39.0
 latN=41.5
 
 sta_lon=$1
@@ -19,7 +19,7 @@ sta_name=$3
 mapping_data=$4
 
 range="$lonW/$lonE/$latS/$latN"
-projection="m2.3i"
+projection="m2.0i"
 output="Repeater_Locations.ps"
 
 # Plot the coast of California. 

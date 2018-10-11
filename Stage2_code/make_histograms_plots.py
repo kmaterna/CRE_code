@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from obspy import read
 from subprocess import call
-import glob
+import glob, sys
 import master_waveform_viewer_snr
 
 
@@ -162,11 +162,13 @@ def make_repeaters_map(MyParams, mapping_data, mapping_code):
 	for line in ifile:
 		temp=line.split()
 		event1=temp[0]
-		[evlo1, evla1]=get_event_location(MyParams.raw_sac_dir+event1);
+		event1_base=event1.split('/')[-1];  # something like B045.PB.EHZ..D.2012.127.091831.71776880.sac without the directory
+		[evlo1, evla1]=get_event_location(MyParams.raw_sac_dir+event1_base);
 		evfile1.write(str(evlo1)+" "+str(evla1)+" 0.20\n");  # write longitude, latitude, marker size
 
 		event2=temp[1]
-		[evlo2, evla2]=get_event_location(MyParams.raw_sac_dir+event2);
+		event2_base=event2.split('/')[-1];  
+		[evlo2, evla2]=get_event_location(MyParams.raw_sac_dir+event2_base);
 		evfile2.write(str(evlo2)+" "+str(evla2)+" 0.20\n");  # write longitude, latitude, marker size
 
 		connectors.write(str(evlo1)+" "+str(evla1)+"\n"+str(evlo2)+" "+str(evla2)+"\n>\n");  # write ev1, ev2, > (for white lines between events)
@@ -174,8 +176,10 @@ def make_repeaters_map(MyParams, mapping_data, mapping_code):
 	ifile.close(); evfile1.close(); evfile2.close(); connectors.close();
 
 	call([mapping_code+'/map_view_repeaters.gmt',str(MyParams.station_coords[0]),str(MyParams.station_coords[1]),MyParams.station_name, mapping_data]);
-	call(['mv','Repeater_Locations.ps',MyParams.output_dir],shell=False);
+	call(['mv','Repeater_Locations.ps',MyParams.output_dir+'Repeater_Locations.ps'],shell=False);	
 	call(['rm','event_connectors.txt','event_locations_first_hypodd.txt','event_locations_second_hypodd.txt','gmt.history']);
 	return;
+
+
 
 
