@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
 	int small_number = 0*1000;  // CONTROL PROGRAM FLOW: if you want to start at a certain index value. 
 	int big_number = 1000*1000*100;   // CONTROL PROGRAM FLOW: the coherence/xcorr loop won't go more than this many times.	
 	double sampfreq = 100.0;  // Defined from the seismic instrument we're using (Hz). 
-    float before_t5 = 1.0;      // When we cut the sac file, how much do we take before T5? 
+    float before_t5 = 1.0;      // When we cut the sac file, how much do we take before T5? In seconds. 
     float after_t5 = (MAXNUM/sampfreq)-before_t5;  // This ensures that the cut file is exactly MAXNUM long. EX: 19.48s for a 20.48s recording. 
     double low=2.0;       // band pass filter lower limit (Hz) for the filter used in cross-correlation
     double high=24.0;     // band pass filter upper limit (Hz) for the filter used in cross-correlation
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 	// PARSING PROGRAM ARGUMENTS
 	if( argc != 4 ){   // check if you have provided a station name
 		printf("Oops! You have provided the wrong number of arguments.\n");
-		printf("We want something like ./computation station_name list_file append_mode (or owrite_mode).\n");
+		printf("We want something like ./computation station_name list_file append_mode (or owrite_mode for overwrite).\n");
 		exit(1);
 	}
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]){
 	}
 	else{
 		printf("Append Flag is %s\n",append_flag);
-		printf("Please specify either 'append_mode' or 'fullsq_mode' for the second program option.");
+		printf("Please specify either 'append_mode' or 'owrite_mode' for the second program option.");
 	}
 
 
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]){
 			//continue;
 			exit ( nerr ) ;
 		}
-		//printf("Success in reading file %s, and ",event1);
+		// printf("Success in reading file %s \n",event1);
 
 		getfhv ( "T5" , & t5 , & nerr , strlen("T5MARKER") ) ;
 		// Check the Return Value 
@@ -254,11 +254,12 @@ int main(int argc, char *argv[]){
 
 		// Now we cut the file to the proper time relative to T5. 
 		// We produce yarray1_cut.
+		// This performs the function of the SAC function 'cut'
 		start_time = t5-before_t5;
 		end_time = t5+after_t5;
 		yarray_counter=0;
 		for(j=0; j<nlen;j++){
-			if(B+(j*1.0/sampfreq)>(start_time-1.0/sampfreq)){  // if the time is after the beginning time window:
+			if(B+(j*1.0/sampfreq)>(start_time-0.5/sampfreq)){  // if the time is after the beginning time window:
 				yarray1_cut[yarray_counter]=yarray1[j];
 				yarray_counter+=1;
 				if(yarray_counter==MAXNUM){
@@ -291,7 +292,7 @@ int main(int argc, char *argv[]){
 			//continue;
 			exit ( nerr ) ;
 		}
-		//printf("Success in reading file %s, and ",event1);
+		// printf("Success in reading file %s \n",event2);
 
 		getfhv ( "T5" , & t5 , & nerr , strlen("T5MARKER") ) ;
 		// Check the Return Value 
@@ -313,11 +314,12 @@ int main(int argc, char *argv[]){
 		}
 
 		// Now we cut the file to the proper time relative to T5. 
+		// This performs the function of the SAC function 'cut'
 		start_time = t5-before_t5;
 		end_time = t5+after_t5;
 		yarray_counter=0;
 		for(j=0; j<nlen;j++){
-			if(B+(j*1.0/sampfreq)>(start_time-1.0/sampfreq)){  // if the time is after the beginning time window:
+			if(B+(j*1.0/sampfreq)>(start_time-0.5/sampfreq)){  // if the time is after the beginning time window:
 				yarray2_cut[yarray_counter]=yarray2[j];
 				yarray_counter+=1;
 				if(yarray_counter==MAXNUM){
@@ -343,8 +345,8 @@ int main(int argc, char *argv[]){
 		// MAKING FILTERED VERSIONS OF THE WAVEFORMS. THANK YOU SAC.  
 		memcpy(yarray1_filtered,yarray1_cut, MAXNUM * sizeof(float));
 		memcpy(yarray2_filtered,yarray2_cut, MAXNUM * sizeof(float));
-		xapiir(yarray1_filtered, nlen, SAC_BUTTERWORTH, transition_bandwidth, attenuation, order, SAC_BANDPASS, low, high, del, passes);
-		xapiir(yarray2_filtered, nlen, SAC_BUTTERWORTH, transition_bandwidth, attenuation, order, SAC_BANDPASS, low, high, del, passes);
+		xapiir(yarray1_filtered, MAXNUM, SAC_BUTTERWORTH, transition_bandwidth, attenuation, order, SAC_BANDPASS, low, high, del, passes);
+		xapiir(yarray2_filtered, MAXNUM, SAC_BUTTERWORTH, transition_bandwidth, attenuation, order, SAC_BANDPASS, low, high, del, passes);
 
 
 		// FIRST WE PERFORM XCORR AND SEE IF WE NEED TO SHIFT THE TIME SERIES. 
@@ -417,6 +419,9 @@ int main(int argc, char *argv[]){
 
 			// Call coherence and write to output file. 
 			call_coherence(sampfreq);    // generate coherence values (reads input from two-column file)
+
+			// printf("yarray1: %.12f %.12f %.12f\n", yarray1_cut[0], yarray1_cut[1], yarray1_cut[2]);
+			// printf("yarray2: %.12f %.12f %.12f\n", yarray2_cut[0], yarray2_cut[1], yarray2_cut[2]);
 
 			time_shift=0;  // setting this to zero for safety. 
 			number_of_shifts+=1;
