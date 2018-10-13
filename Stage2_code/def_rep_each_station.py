@@ -29,9 +29,11 @@ def CRE_post_analysis(MyParams,output_dir):
 	make_family_summaries.main_program(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations);
 	get_summary_statistics.get_summary_statistics(MyParams.families_summaries);  # This changes for Mendocino vs. other places. 
 
-	# # OPTIONAL IN ANY SEQUENCE: HISTOGRAMS, GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS
+	# # OPTIONAL IN ANY SEQUENCE: 
+	# HISTOGRAMS
 	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
 
+	# GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS 
 	# These are moderately specific to Mendocino; small changes necessary for Anza. 
 	gmt_plotting.anza_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
 	view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);

@@ -9,9 +9,8 @@ It gives us a graph with five things:
 5. SNR for each waveform
 June 9, 2016.
 """
-from subprocess import call
-from sys import argv
-import glob, os
+import subprocess
+import glob, os, sys
 import make_coh_snr_plot
 
 def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cutoff=5.0,raw_sac_dir="",output_dir=""):
@@ -22,14 +21,28 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cu
 	# An example of raw_sac_dir: "../B046.EHZ.snr/"
 	# An example of event1     : "B045.PB.EHZ..D.2009.094.003131.71203430.sac"
 
-	# Find where the code lives
+	# Find where the code lives. 
+	# Find whether you're on linux (BSL machines) or Mac
+
 	path_to_code=os.path.dirname(os.path.realpath(__file__));
+	try:
+		am_i_linux=subprocess.check_output(['uname','-a','|','grep','Linux'],shell=False);
+		print("I am a linux machine; operating like a BSL computer");
+		compiler_arguments="-L/share/apps/sac/lib  -lsacio -lsac -lm";
+	except subprocess.CalledProcessError as exc:
+		am_i_linux=[];
+		print("I am a Mac");
+		compiler_arguments=" -L/$HOME/sac/lib -lsacio -lsac";
+
+
+	event1_base=event1.split('/')[-1];  # something like B045.PB.EHZ..D.2012.127.091831.71776880.sac without the directory
+	event2_base=event2.split('/')[-1];  # something like B045.PB.EHZ..D.2012.127.091831.71776880.sac without the directory
 
 	# Setting up file names
-	event1_raw="RAW_"+event1
-	event2_raw="RAW_"+event2
-	event1_fil="FIL_"+event1
-	event2_fil="FIL_"+event2
+	event1_raw="RAW_"+event1_base
+	event2_raw="RAW_"+event2_base
+	event1_fil="FIL_"+event1_base
+	event2_fil="FIL_"+event2_base
 
 	frequency=100.0  # frequency of seismic data (Hz)
 	pps_c=512       # points per sample (reading into coherence.c)
@@ -39,43 +52,43 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cu
 
 	# Set up the coherence between the RAW waveforms (based on the xcorr of the filtered waveforms)
 	# This will also write a temporary file with the FILTERED waveforms too. 
-	call("clear");
+	subprocess.call("clear");
 	print("Gathering Data... Generating Raw and Filtered waveforms from SAC... \n");
-	call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event1,shell=True)
-	call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event2,shell=True)
+	subprocess.call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event1_base,shell=True)
+	subprocess.call(path_to_code+"/make_a_raw_filtered_waveform.sh "+raw_sac_dir+" "+event2_base,shell=True)
 	print("Reading in data...  \n");
-	call("gcc -o coherence_setup "+path_to_code+"/coherence_setup_raw_and_filtered.c -L/share/apps/sac/lib  -lsacio -lsac -lm", shell=True)
+	subprocess.call("gcc -o coherence_setup "+path_to_code+"/coherence_setup_raw_and_filtered.c "+compiler_arguments, shell=True)
 	print("./coherence_setup " + event1_raw +" "+ event2_raw);
-	call(["./coherence_setup",event1_raw,event2_raw,event1_fil,event2_fil,"-s"])
+	subprocess.call(["./coherence_setup",event1_raw,event2_raw,event1_fil,event2_fil,"-s"])
 	# -s means "perform shift" if the correlation is high; -n means "don't perform shift".
 
 	# Run the coherence calculation
 	print("Running coherence calculation... ");
 	pps_c=get_npfft('coh_input_temp.txt');
-	call("gcc -o coherence "+path_to_code+"/coherence.c -lm",shell=True);
-	call("./coherence -i coh_input_temp.txt -f "+str(frequency)+" -n "+str(pps_c)+" > coh_output.txt", shell=True)
+	subprocess.call("gcc -o coherence "+path_to_code+"/coherence.c -lm",shell=True);
+	subprocess.call("./coherence -i coh_input_temp.txt -f "+str(frequency)+" -n "+str(pps_c)+" > coh_output.txt", shell=True)
 	print("./coherence -i coh_input_temp.txt -f $frequency -n $pps > coh_output.txt");
 	print("Completed coherence calculation. \n");
 
 
 	# Get the signal to noise ratio for each event
-	print("Running SNR calculation on " + event1 + "... ");
-	call([path_to_code+"/noise_floor_VS_data.sh",event1])
-	call("gcc -o get_snr "+path_to_code+"/get_snr.c -L/share/apps/sac/lib  -lsacio -lsac -lm",shell=True)
-	call(["./get_snr"])
-	call(["mv","SNR.txt","SNR1.txt"])
+	print("Running SNR calculation on " + event1_base + "... ");
+	subprocess.call([path_to_code+"/noise_floor_VS_data.sh",event1_base])
+	subprocess.call("gcc -o get_snr "+path_to_code+"/get_snr.c "+compiler_arguments,shell=True)
+	subprocess.call(["./get_snr"])
+	subprocess.call(["mv","SNR.txt","SNR1.txt"])
 
-	print("Running SNR calculation on " + event2 + "... ");
-	call([path_to_code+"/noise_floor_VS_data.sh",event2])
-	call(["./get_snr"])
-	call(["mv","SNR.txt","SNR2.txt"])
+	print("Running SNR calculation on " + event2_base + "... ");
+	subprocess.call([path_to_code+"/noise_floor_VS_data.sh",event2_base])
+	subprocess.call(["./get_snr"])
+	subprocess.call(["mv","SNR.txt","SNR2.txt"])
 
 	# Run a python code to plot things.
 	# Arguments: event1, event2, waveform_file, c_coherence_file, instrument_frequency, min_frequency, max_frequency, station, show_overlay
 	print("Running a Python code to graph coherence...");
 	plot_overlay = 0; # make the overlay show up (doesn't save overlay)
 	pretty_plot=0;  # how pretty are we making this plot?
-	make_coh_snr_plot.make_coh_snr_plot(output_dir,event1,event2,"two_filtered_waveforms.txt","coh_output.txt",frequency,min_freq,max_freq,snr_cutoff,plot_overlay,pretty_plot);
+	make_coh_snr_plot.make_coh_snr_plot(output_dir,event1_base,event2_base,"two_filtered_waveforms.txt","coh_output.txt",frequency,min_freq,max_freq,snr_cutoff,plot_overlay,pretty_plot);
 
 	print("All done!\n");
 	clean_up_files_matching("SNR*.txt");
@@ -92,7 +105,7 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cu
 def clean_up_files_matching(match_string):
 	clear_list=glob.glob(match_string);
 	for item in clear_list:
-		call(['rm',item],shell=False); 	
+		subprocess.call(['rm',item],shell=False); 	
 	return;	
 
 

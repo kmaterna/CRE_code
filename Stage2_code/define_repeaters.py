@@ -51,7 +51,6 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 	[Candidates_coh, Candidates_snr] = inputs(MyParams);
 	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
 	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code);
-	sys.exit(0);
 	return;
 
 
@@ -393,7 +392,7 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 
 		make_histograms_plots.make_repeaters_map(MyParams, mapping_data, mapping_code);   # making a gmt plot of repeating event locations. 
 
-		if MyParams.plot_arg:
+		if MyParams.plot_arg == 1:
 			make_histograms_plots.make_repeater_seismograms(MyParams);
 		if len(CRE_results.name1)>=1:
 			# Make histograms and scatter plots of coherence values / cross correlation values
