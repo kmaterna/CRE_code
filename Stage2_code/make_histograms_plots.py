@@ -49,6 +49,14 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	dist=[];
 	Mean_M=[];
 	Diff_M=[];
+
+	# Dealing with the one-element case. 
+	if type(mag1)!=type([]):
+		mag1=list([mag1]);
+		dist1=list([dist1]);
+		mag2=list([mag2]);
+		dist2=list([dist2]);
+
 	for i in range(len(dist1)):
 		Mean_M.append((mag1[i]+mag2[i])/2)   # Record mean magnitude. 
 		dist.append((dist1[i]+dist2[i])/2)   # Record mean magnitude. 
@@ -116,7 +124,9 @@ def make_coherence_histogram(coh_all, coh_keepers, station_name, save_path):
 def make_xcorr_histogram(xcorr_all, xcorr_keepers, station_name, save_path):
 	# Make a histogram of cross correlation values
 	plt.figure();
-	plt.hist(xcorr_all, bins=40, histtype='stepfilled', color='b', label='All')
+	plt.hist(xcorr_all, bins=40, histtype='stepfilled', color='b', label='All');
+	plt.hist(xcorr_keepers, bins=40, histtype='stepfilled', color='r', label='CREs');
+	plt.xlim([0.6, 1]);
 	plt.title('Cross Correlation Values for Station '+station_name);
 	plt.legend();
 	plt.savefig(save_path+station_name+'_xcorr_hist.eps');

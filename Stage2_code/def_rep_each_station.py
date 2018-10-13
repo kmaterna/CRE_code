@@ -64,8 +64,8 @@ def define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_meth
 	ifile=open(MyParams.station_locations);
 	for line in ifile:
 		given_station=line.split()[0]  # ex: 'B045' or 'JCC'
+		print("Defining repeaters for station: %s" % given_station);
 		if given_station != "#":  # ignore comments. 
-			print("Defining repeaters for station: %s" % given_station);
 			define_repeaters.define_repeaters(given_station, MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width, 0); # last bool = 'plot_all';
 			#break;  # only do one station for now. 
 	ifile.close();

@@ -50,7 +50,7 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 	MyParams=configure(station_name, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
 	[Candidates_coh, Candidates_snr] = inputs(MyParams);
 	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
-	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code );
+	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code);
 	sys.exit(0);
 	return;
 
@@ -58,6 +58,7 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 # ------------------ CONFIGURE ------------------- # 
 
 def configure(station_name, stage2_dir, station_location_file, metric, cutoff, statistic, freq_method, highest_chosen_frequency, snr_cutoff, Minimum_frequency_width, plot_all):
+	print(station_name);
 
 	# Decisions that you rarely change:
 	magnitude_difference_tolerance = 3.0;    # We ignore event pairs that have very disparate magnitudes.  
@@ -88,14 +89,18 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
 	call(['mkdir','-p',output_dir_inner],shell=False);
 
 	# Get the station directory and location info. 
+	raw_sac_dir=[];
 	ifile=open(station_location_file,'r');
 	for line in ifile:
 		temp=line.split();
-		u=temp[0];
-		s=u.encode("utf-8");  # issues with the first line of the text file and its utf-8 encoding. 
-		if s==station_name.encode("utf-8"):
+
+		if temp[0]==station_name:
 			station_coords=[float(temp[1]), float(temp[2])];
 			raw_sac_dir=temp[3];
+	print(raw_sac_dir);
+	if raw_sac_dir==[]:
+		print("ERROR! Unable to find %s in %s" % (station_name, station_location_file) );
+		sys.exit(1);
 	ifile.close();
 
 	MyParams=Params(station_name=station_name,metric=metric,cutoff=cutoff,statistic=statistic,freq_method=freq_method,snr_cutoff=snr_cutoff,
@@ -151,8 +156,6 @@ def read_data_input_file(filename):
 	# The coherence and xcorr information.
 	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
 	filename_inner=filename.split('/')[1];
-	# u = filename_inner.decode("utf-8-sig");
-	# s = u.encode("utf-8");
 	s=filename_inner;
 	t=filename_split[0]+"/"+s;
 	ifile=open(t,'r');
@@ -179,8 +182,6 @@ def read_snr_input_file(filename):
 	# Read in the SNR information. 	
 	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
 	filename_inner=filename.split('/')[1];
-	# u = filename_inner.decode("utf-8-sig");
-	# s = u.encode("utf-8");
 	s=filename_inner;
 	t=filename_split[0]+"/"+s;
 	ifile=open(t,'r');
@@ -394,7 +395,7 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 
 		if MyParams.plot_arg:
 			make_histograms_plots.make_repeater_seismograms(MyParams);
-		if len(CRE_results.name1)>1:
+		if len(CRE_results.name1)>=1:
 			# Make histograms and scatter plots of coherence values / cross correlation values
 			if MyParams.metric=="corr":
 				make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
