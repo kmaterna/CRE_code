@@ -22,8 +22,8 @@ See parameters in the tops of generate_nearby_add_ons_list.c and call_xcorr_and_
 
 
 6. Run Stage2: 
-    Stage2 will create a new folder called Stage2. Inside, CREs_by_station will be created and rewritten. 
-A new directory for each criterion is made. This is not fully up to speed yet. 
+    Run python Stage2_code/drive_comparison.py from your main directory that contains the data directories. Stage2 will create a new folder called Stage2_results or similar. Inside, CREs_by_station will be created and rewritten. 
+A new directory for each criterion is made. 
 
 
 WHAT WILL BE CREATED: 
