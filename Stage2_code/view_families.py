@@ -102,10 +102,10 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 	#*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
 	# WHERE ARE THE EVENTS LOCATED ALONG THE PLATE BOUNDARY?
 	a1=axarr[0,0]
-	#a1.set_ylim([39, 42])  # MENDOCINO
-	#a1.set_xlim([-127, -122])
-	a1.set_ylim([31, 35.5])  # ANZA
-	a1.set_xlim([-119, -114.9])
+	a1.set_ylim([39, 42])  # MENDOCINO
+	a1.set_xlim([-127, -122])
+	#a1.set_ylim([31, 35.5])  # ANZA
+	#a1.set_xlim([-119, -114.9])
 	a1.set(adjustable='box-forced', aspect='equal')
 	a1.set_xlabel("Longitude")
 	a1.set_ylabel("Latitude")

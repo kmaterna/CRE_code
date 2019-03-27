@@ -37,7 +37,7 @@ def make_similarity_matrix(number_of_events, event_names,ev1_non_repeaters,ev2_n
 
 			place_in_coh_list=np.intersect1d(set1,set2);
 			if len(place_in_coh_list)>0:
-				keep_value=similarity_values_non_repeaters[place_in_coh_list];
+				keep_value=similarity_values_non_repeaters[place_in_coh_list[0]];
 				z[i,j]=keep_value;
 				z[j,i]=keep_value;
 				del keep_value;

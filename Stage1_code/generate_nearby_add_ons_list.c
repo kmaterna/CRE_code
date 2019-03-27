@@ -24,7 +24,7 @@ double deg2rad(double);
 double rad2deg(double);
 int get_len_of_event_names(char[]);
 float compare_two_events(char[], char[], float);
-
+int within_box(char[], float, float);
 
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
 /*::  Main Program                                                  :*/
@@ -34,7 +34,9 @@ int main(int argc, char *argv[]){
 
 	// PARAMETERS CHANGED BY THE USER
 	float distance_cutoff = 10.0; // kilometers (above this event distance and we don't cross-correlate)
-    // we use a smaller distance cutoff (1-2km instead of 30km) for Anza. 
+    // we use a smaller distance cutoff (1-2km instead of 30km) for Anza.
+       float eastern_cutoff = -123.3;
+       float western_cutoff = -127.0; 
 
 	// PARSING PROGRAM ARGUMENTS
 	if( argc != 3 ){   // check if you have provided a station name
@@ -90,6 +92,8 @@ int main(int argc, char *argv[]){
 	int hits = 0;             // the number of nearby pairs	
 	float distance;
 	int len_of_event_names=FILENAME_SIZE;
+        int within_box_flag1 = 1;
+        int within_box_flag2 = 1;
 
 	// Please declare strings of the right length to hold our file name data. 
 	char event1[len_of_event_names]; // getting ready to hold names of files during the computations. 
@@ -166,6 +170,11 @@ int main(int argc, char *argv[]){
 
 			distance=compare_two_events(event1,event2, distance_cutoff);  // will you write them to the file? 
 			comparisons += 1;  // How many distances did we compute?
+                        within_box_flag1=within_box(event1, eastern_cutoff, western_cutoff);
+                        within_box_flag2=within_box(event2, eastern_cutoff, western_cutoff);
+                        if(within_box_flag1==0 || within_box_flag2==0){
+                            continue;
+                        }
 			if(distance>=0 && distance<distance_cutoff){
 				hits += 1;    // We've found a nearby pair
 				strcpy(event1_exist,event1);
@@ -198,6 +207,11 @@ int main(int argc, char *argv[]){
 
 			distance=compare_two_events(event1,event2,distance_cutoff);
 			comparisons += 1;  // How many distances did we compute?
+                        within_box_flag1=within_box(event1, eastern_cutoff, western_cutoff);
+                        within_box_flag2=within_box(event2, eastern_cutoff, western_cutoff);
+                        if(within_box_flag1==0 || within_box_flag2==0){
+                            continue;
+                        }
 			if(distance>=0 && distance<distance_cutoff){
 				hits += 1; // We've found a nearby pair				
 				strcpy(event1_exist,event1);
@@ -225,6 +239,41 @@ int main(int argc, char *argv[]){
 	fclose(outptr);
 	return(0);
 } // end main
+
+/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+/*::  This function takes two events and decides to compare         :*/
+/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+int within_box(char event1[], float eastern_cutoff, float western_cutoff)
+{
+       int flag = 0;
+       float evla1, evlo1;
+       float beg, del;
+       int nlen, nerr; 
+       int max = MAXIMUM;
+       float yarray1[MAXIMUM];
+       // Read the file and their latitudes/longitudes
+       rsac1( event1, yarray1, &nlen, &beg, &del, &max, &nerr, strlen( event1 ) ) ;
+       if ( nerr != 0 ) {
+              printf("%d",nerr);
+              printf("Error reading in SAC file: %s\n", event1);
+              exit ( nerr ) ;
+        }
+        getfhv ( "EVLA" , & evla1 , & nerr , strlen("EVLA") ) ;
+        if ( nerr != 0 ) {
+              fprintf(stderr, "Error getting header variable: evla\n");
+              exit(-1);
+         }
+        getfhv ( "EVLO" , & evlo1 , & nerr , strlen("EVLO") ) ;
+        if ( nerr != 0 ) {
+              fprintf(stderr, "Error getting header variable: evlo\n");
+              exit(-1);
+        }
+        if(evlo1<=eastern_cutoff && evlo1>=western_cutoff){
+              flag=1;
+        }
+        return(flag);
+}	
+
 
 
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/

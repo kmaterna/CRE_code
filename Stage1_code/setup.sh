@@ -30,5 +30,6 @@ fi
 if [ $(find ./exist/$station_name*.sac | wc -l) -eq 0 ] 
 	then
 	echo "Starting from the top!  Beginning with empty result files and performing all computations..."
+        rm $station_name-above_cutoff_results.txt
 fi
 exit 0

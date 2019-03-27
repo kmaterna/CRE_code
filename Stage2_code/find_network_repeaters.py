@@ -7,6 +7,7 @@ It writes an output file with elements like:
 
 
 import glob as glob
+import sys
 from subprocess import call
 import collections
 
@@ -29,6 +30,7 @@ def network_repeaters_two_more_stations(Network_repeaters_list,stage2_results):
 def configure(Network_repeaters_list,stage2_results):
 	call(['rm',Network_repeaters_list],shell=False);
 	copy_list=glob.glob(stage2_results+'/CREs_by_station/*/*_*_list.txt');
+        #print(copy_list);
 	for item in copy_list:
 		call(['cp',item,'.'],shell=False); 
 	filelist=glob.glob("*_repeaters_list.txt");

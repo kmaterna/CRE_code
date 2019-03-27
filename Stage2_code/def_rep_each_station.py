@@ -16,7 +16,7 @@ import get_summary_statistics
 
 def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, SNR_cutoff=5.0, Minimum_frequency_width=5.0):
 	output_dir=setup_output_dir(MyParams, metric,cutoff,freq_method,max_frequency,statistic);  # config step
-	define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
+	#define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
 	CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
 	cleaning_up(output_dir);  # Move everything to output directory
 	return;
@@ -31,15 +31,15 @@ def CRE_post_analysis(MyParams,output_dir):
 
 	# # OPTIONAL IN ANY SEQUENCE: 
 	# HISTOGRAMS
-	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
+	#mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
 
 	# GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS 
 	# These are moderately specific to Mendocino; small changes necessary for Anza. 
-	gmt_plotting.anza_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
-	view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
+	gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries, MyParams.station_locations, MyParams.mapping_code, MyParams.mapping_data);  
+	view_families.view_families(MyParams.time_window,MyParams.families_list,MyParams.families_summaries,MyParams.station_locations,MyParams.mapping_data,output_dir,families=[-1]);  # 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
 	# These two are right now very specific to Mendocino. 
-	#generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
-	#composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
+	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
+	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data);
 	return;
 
 
@@ -50,6 +50,7 @@ def CRE_post_analysis(MyParams,output_dir):
 
 def setup_output_dir(MyParams,metric,cutoff,freq_method,max_frequency,statistic):
 	# Place outputs in specific folder
+        print("Setting up output directories...");
 	if metric=="corr":
 		directory_name = MyParams.stage2_results+"/"+metric+"_"+str(cutoff)+"/";
 	else:
@@ -69,7 +70,7 @@ def define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_meth
 		print("Defining repeaters for station: %s" % given_station);
 		if given_station != "#":  # ignore comments. 
 			define_repeaters.define_repeaters(given_station, MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width, 0); # last bool = 'plot_all';
-			#break;  # only do one station for now. 
+			# break;  # only do one station for now. 
 	ifile.close();
 	return;
 

@@ -17,22 +17,23 @@ fi
 
 # Defining variables
 station_name=$1
-compiler_list=" -L/$HOME/sac/lib -lsacio -lsac" # FOR MAC
-# compiler_list=" -L/share/apps/sac/lib -lsacio -lsac -lm" # FOR BSL LINUX
+# compiler_list=" -L/$HOME/sac/lib -lsacio -lsac" # FOR MAC
+compiler_list=" -L/share/apps/sac/lib -lsacio -lsac -lm" # FOR BSL LINUX
 compare_list_file=$station_name"_nearby_list.txt"  # something like "B045_nearby_list.txt"
 where_is_code="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # where does the c code live on this machine? 
 
 # # Initial processing
-setup.sh $station_name         # Figure out what data we have; grab names of files, make safe copies of result files. 
-delete_redos.sh $station_name  # If we are doing redos, delete existing comparisons before we re-do that station. 
+#setup.sh $station_name         # Figure out what data we have; grab names of files, make safe copies of result files. 
+#delete_redos.sh $station_name  # If we are doing redos, delete existing comparisons before we re-do that station. 
 
 # # Compare existing files with everything in the added directory. 
-gcc -o add_nearby.o $where_is_code/generate_nearby_add_ons_list.c $compiler_list
-./add_nearby.o $station_name $compare_list_file
-mv added/*.sac exist/
+#gcc -o add_nearby.o $where_is_code/generate_nearby_add_ons_list.c $compiler_list
+#./add_nearby.o $station_name $compare_list_file
+#mv added/*.sac exist/
+#sed -i 's/added/exist/g' $compare_list_file
 
-gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c $compiler_list
-./major_computation.o $station_name $compare_list_file append_mode
+#gcc -o major_computation.o $where_is_code/call_xcorr_and_coherence_cfilter.c $compiler_list
+#./major_computation.o $station_name $compare_list_file append_mode
 
 gcc -o get_snr.o $where_is_code/get_snr.c $compiler_list
 echo "Producing SNR solution file"

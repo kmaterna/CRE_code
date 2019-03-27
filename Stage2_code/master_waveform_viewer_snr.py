@@ -25,11 +25,12 @@ def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cu
 	# Find whether you're on linux (BSL machines) or Mac
 
 	path_to_code=os.path.dirname(os.path.realpath(__file__));
-	try:
-		am_i_linux=subprocess.check_output(['uname','-a','|','grep','Linux'],shell=False);
+        am_i_linux=subprocess.check_output(['uname','-a'],shell=False);
+        print(am_i_linux);
+        if "Linux" in am_i_linux:
 		print("I am a linux machine; operating like a BSL computer");
 		compiler_arguments="-L/share/apps/sac/lib  -lsacio -lsac -lm";
-	except subprocess.CalledProcessError as exc:
+	else:
 		am_i_linux=[];
 		print("I am a Mac");
 		compiler_arguments=" -L/$HOME/sac/lib -lsacio -lsac";

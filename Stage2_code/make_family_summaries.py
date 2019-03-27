@@ -149,6 +149,8 @@ def get_best_station_for_family(event_names,available_filelist):
 		fileid.close();
 
 	best_station=best_station.split("_")[0];
+        best_station=best_station.decode('utf-8-sig');
+        best_station=best_station.encode('utf-8');
 	return best_station; 
 
 

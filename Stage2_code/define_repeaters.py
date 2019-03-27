@@ -57,7 +57,6 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 # ------------------ CONFIGURE ------------------- # 
 
 def configure(station_name, stage2_dir, station_location_file, metric, cutoff, statistic, freq_method, highest_chosen_frequency, snr_cutoff, Minimum_frequency_width, plot_all):
-	print(station_name);
 
 	# Decisions that you rarely change:
 	magnitude_difference_tolerance = 3.0;    # We ignore event pairs that have very disparate magnitudes.  
@@ -68,6 +67,8 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
 	max_freq_inst=50.0;
 	lowest_chosen_frequency=1;    # This is a CHOICE.  Set to 0-50 if you want every frequency. 
 
+        station_name=station_name.decode('utf-8-sig');
+        station_name=station_name.encode('utf-8');
 	four_char=station_name;
 	if len(station_name)==3:
 		four_char=station_name+"_"
@@ -96,7 +97,7 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
 		if temp[0]==station_name:
 			station_coords=[float(temp[1]), float(temp[2])];
 			raw_sac_dir=temp[3];
-	print(raw_sac_dir);
+	print("Station %s with SAC files located in %s" % (station_name, raw_sac_dir) );
 	if raw_sac_dir==[]:
 		print("ERROR! Unable to find %s in %s" % (station_name, station_location_file) );
 		sys.exit(1);
@@ -153,11 +154,10 @@ def inputs(MyParams):
 
 def read_data_input_file(filename):
 	# The coherence and xcorr information.
-	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
-	filename_inner=filename.split('/')[1];
-	s=filename_inner;
-	t=filename_split[0]+"/"+s;
-	ifile=open(t,'r');
+        print("Reading file %s" % filename);
+        s=filename.decode('utf-8-sig');
+        u=s.encode('utf-8');  # the UTF-8 BOM issue
+	ifile=open(u,'r');
 	event1name=[]; event2name=[]; ev1mag=[]; ev2mag=[]; ev1dist=[]; ev2dist=[]; xcorr=[]; coh_collection=[];
 	for line in ifile:
 		coh=[];
@@ -179,11 +179,10 @@ def read_data_input_file(filename):
 
 def read_snr_input_file(filename):
 	# Read in the SNR information. 	
-	filename_split=filename.split('/');  # ran into utf8-BOM after the slash.  
-	filename_inner=filename.split('/')[1];
-	s=filename_inner;
-	t=filename_split[0]+"/"+s;
-	ifile=open(t,'r');
+        print("Reading file %s" % filename);
+        s=filename.decode('utf-8-sig');
+        u=s.encode('utf-8');  # the UTF-8 BOM issue
+	ifile=open(u,'r');
 
 	f_axis1=[]; snr1=[]; 
 	f_axis2=[]; snr2=[];
@@ -398,14 +397,14 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 			# Make histograms and scatter plots of coherence values / cross correlation values
 			if MyParams.metric=="corr":
 				make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
-			if MyParams.metric=="coh":
-				make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
+			#if MyParams.metric=="coh":
+				#make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
 				#make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
 				#make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
 
 			# Make summary histograms of the repeaters we've found. 
-			make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
-			make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
+			#make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
+			#make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
 
 		elif len(CRE_results.name1)==0:
 			print("No Repeaters Found: Cannot Make Plots!")
@@ -430,6 +429,7 @@ def write_outfiles(MyParams, Total_results, CRE_results):
 				Total_results.min_freq[i],Total_results.max_freq[i], Total_results.mag2[i], Total_results.dist2[i], Total_results.mag1[i], Total_results.dist1[i]));
 	ofile.close();
 
+	print("Writing CRE results in %s " %MyParams.CRE_out_filename );
 	ofile=open(MyParams.CRE_out_filename,'w');
 	ofile.write(Header_string);
 	for i in range(len(CRE_results.name1)):

@@ -29,6 +29,7 @@ def generate_histograms(repeaters_file,station_location_file):
 		use_station=temp[2]   # read use_station from the list in network_repeaters_list.txt
 		if use_station[-1]=="_":
 			use_station=use_station[0:-1];
+                #print(use_station);
 		event_time1=util_general_functions.get_float_time_from_name(name1);
 		event_time2=util_general_functions.get_float_time_from_name(name2);
 		intervals.append(event_time2 - event_time1)
