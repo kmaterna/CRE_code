@@ -38,7 +38,7 @@ def make_inter_event_time_histogram(station_name,filename,output_dir):
 	plt.ylabel('Number of Event Pairs');
 	plt.xlabel('Time (years)');
 	plt.title('Intervals between Repeating Event Pairs at ' + station_name + "; N_total = "+str(len(intervals)));
-	plt.savefig(output_dir+"_intervals_histogram.jpg");
+	plt.savefig(output_dir+"_intervals_histogram.png");
 	plt.close()
 	return;
 
@@ -68,7 +68,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	plt.xlabel('Mean Distance From Station (km)');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Distance of Repeating Event Pairs")
-	plt.savefig(directory+"_distances_histogram.jpg")
+	plt.savefig(directory+"_distances_histogram.png")
 	plt.close();
 	
 	print("Making Magnitudes histogram...\n");
@@ -77,7 +77,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	plt.xlabel('Mean Magnitude');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Magnitudes of Repeating Event Pairs")
-	plt.savefig(directory+"_magnitudes_histogram.jpg")
+	plt.savefig(directory+"_magnitudes_histogram.png")
 	plt.close()
 
 	print("Making Magnitude Differences histogram...\n");
@@ -86,7 +86,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	plt.xlabel('Magnitude Difference');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Magnitude Differences of Repeating Event Pairs");
-	plt.savefig(directory+"_magnitude_differences_histogram.jpg");
+	plt.savefig(directory+"_magnitude_differences_histogram.png");
 	plt.close()
 	return;
 

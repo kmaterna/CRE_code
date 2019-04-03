@@ -90,7 +90,7 @@ def make_waveform_plot(family_of_interest, event_names, magnitude, station, sac_
 		if i==0:
 			axarr[i].set_title("Family "+str(family_of_interest)+" at "+station)
 	plt.xticks(fontsize=14)
-	plt.savefig(save_path+'Family_'+str(family_of_interest)+'.jpg');
+	plt.savefig(save_path+'Family_'+str(family_of_interest)+'.png');
 	plt.close();
 	return;
 

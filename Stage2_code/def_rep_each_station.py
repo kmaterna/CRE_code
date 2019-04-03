@@ -16,7 +16,7 @@ import get_summary_statistics
 
 def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method='hard_coded', max_frequency=25.0, SNR_cutoff=5.0, Minimum_frequency_width=5.0):
 	output_dir=setup_output_dir(MyParams, metric,cutoff,freq_method,max_frequency,statistic);  # config step
-	#define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
+	define_repeaters_each_station(MyParams, metric, cutoff, statistic, freq_method, max_frequency, SNR_cutoff, Minimum_frequency_width);  # define repeaters
 	CRE_post_analysis(MyParams,output_dir);  # do CRE family analysis
 	cleaning_up(output_dir);  # Move everything to output directory
 	return;
@@ -31,7 +31,7 @@ def CRE_post_analysis(MyParams,output_dir):
 
 	# # OPTIONAL IN ANY SEQUENCE: 
 	# HISTOGRAMS
-	#mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
+	mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list,MyParams.station_locations);
 
 	# GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS 
 	# These are moderately specific to Mendocino; small changes necessary for Anza. 
@@ -82,13 +82,14 @@ def cleaning_up(output_dir):
 	delete_files_matching("*.pyc");
 	delete_files_matching("filtfile.sac");
 	move_files_matching('*.ps',output_dir);
+	move_files_matching('*.png',output_dir);
 	move_files_matching('*.jpg',output_dir);
 	move_files_matching('*.eps',output_dir);
 	move_files_matching('*_list.txt',output_dir);
 	move_files_matching('*_Summaries.txt',output_dir);
 	move_files_matching('summary*.txt',output_dir);
 	copy_files_matching('CREs_by_station/B046/*.eps',output_dir);
-	copy_files_matching('CREs_by_station/B046/*.jpg',output_dir);
+	copy_files_matching('CREs_by_station/B046/*.png',output_dir);
 	return;
 
 

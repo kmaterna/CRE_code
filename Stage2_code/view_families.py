@@ -137,7 +137,7 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 	a1.scatter(event_time, magnitude,c=depth, cmap=plt.cm.cool)
 
 	cbar_ax = g.add_axes([0.92, 0.62, 0.02, 0.25])
-	sm = plt.cm.ScalarMappable(cmap='cool', norm=plt.normalize(dmin, dmax))
+	sm = plt.cm.ScalarMappable(cmap='cool', norm=plt.Normalize(dmin, dmax))
 	sm.set_array(depth)
 	cbar=plt.colorbar(sm,cbar_ax)
 	cbar.set_label('Depth (km)', rotation=270, labelpad=15.5)
@@ -199,11 +199,11 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 
 	# Coloring the boxes and circles
 	cbar_ax = g.add_axes([0.90, 0.12, 0.02, 0.20])
-	sm = plt.cm.ScalarMappable( norm=plt.normalize(0.5, 1),cmap='jet')
+	sm = plt.cm.ScalarMappable( norm=plt.Normalize(0.5, 1),cmap='jet')
 	sm.set_array([0,1,2,3,4])
 	cbar=plt.colorbar(sm,cbar_ax)
 
-	plt.savefig(output_dir+"Family_"+str(family_number)+"_Metadata.jpg")
+	plt.savefig(output_dir+"Family_"+str(family_number)+"_Metadata.png")
 	plt.close()
 		
 
@@ -231,7 +231,7 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 		a1.set_title("Family " + str(family_number));
 
 		cbar_ax = g.add_axes([0.92, 0.62, 0.02, 0.25])
-		sm = plt.cm.ScalarMappable(cmap='cool', norm=plt.normalize(dmin, dmax))
+		sm = plt.cm.ScalarMappable(cmap='cool', norm=plt.Normalize(dmin, dmax))
 		sm.set_array(depth)
 		cbar=plt.colorbar(sm,cbar_ax)
 		cbar.set_label('Depth (km)', rotation=270, labelpad=15.5)
@@ -266,7 +266,7 @@ def major_plots(myline,stations,station_paths,output_dir, ca_coords, plate_coord
 		plt.xticks(fontsize=14)
 
 
-		plt.savefig(output_dir+"Family_"+str(family_number)+"_Slip_History.jpg")
+		plt.savefig(output_dir+"Family_"+str(family_number)+"_Slip_History.png")
 		plt.close()
 
 	return;

@@ -397,14 +397,14 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
 			# Make histograms and scatter plots of coherence values / cross correlation values
 			if MyParams.metric=="corr":
 				make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value, MyParams.station_name,MyParams.output_dir);
-			#if MyParams.metric=="coh":
-				#make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
-				#make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
-				#make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
+			if MyParams.metric=="coh":
+				make_histograms_plots.make_coherence_histogram(Total_results.coh_value, CRE_results.coh_value, MyParams.station_name,MyParams.output_dir);
+				make_histograms_plots.make_xcorr_histogram(Total_results.xcorr_value, CRE_results.xcorr_value,MyParams.station_name,MyParams.output_dir);
+				make_histograms_plots.make_scatter_coh_xcorr(Total_results.xcorr_value, Total_results.coh_value, CRE_results.xcorr_value, CRE_results.coh_value, Total_results.dist1, MyParams.station_name,MyParams.output_dir);
 
 			# Make summary histograms of the repeaters we've found. 
-			#make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
-			#make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
+			make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making inter-event time histogram. 
+			make_histograms_plots.make_mag_dist_histograms(MyParams.station_name,MyParams.CRE_out_filename,MyParams.output_dir);   # making magnitudes histogram. 
 
 		elif len(CRE_results.name1)==0:
 			print("No Repeaters Found: Cannot Make Plots!")

@@ -255,7 +255,7 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
 		axarr=add_fancy_labels(axarr);
 
 	#plt.xlim([2013.7, 2015.0])
-	plt.savefig(plot_name+".jpg")
+	plt.savefig(plot_name+".png")
 	plt.close()
 	return;
 
@@ -328,7 +328,7 @@ def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep
 	ax1.set_xlabel("Longitude")
 	ax1.set_ylabel("Depth (km)")
 	ax1.set_xlim([xmin, xmax])
-	plt.savefig("Map_View_"+plot_name+".jpg");
+	plt.savefig("Map_View_"+plot_name+".png");
 	plt.close();
 
 
