@@ -6,14 +6,15 @@
 # AND PLOT THE SLIP RATES. 
 # 9/08/2016
 
-mapping_data=$1
+mapping_data_general=$1
+mapping_data_specific=$2
 
 lonW=-124.75
 lonE=-124
 latS=40.1
 latN=40.55
 range="$lonW/$lonE/$latS/$latN"
-projection="m7.1i"
+projection="M5.7i"
 
 
 Cx=-124.38
@@ -32,7 +33,7 @@ maxdepth=-50
 twice_length=$(echo $lmax - $lmin | bc)  # for the full profile
 brange="$Cx_start/$Cx_end/$maxdepth/0" # The edges of the eventual cross-section (in km)
 # set so that the coastline is at zero. 
-bprojection="x18.0/0.12"
+bprojection="X6.5/3.12"
 
 
 # Make a color scale from 0 to 8 cm / year. This is for plotting slip rates. 
@@ -40,7 +41,7 @@ gmt makecpt -T0/8.0/0.5 -Cjet > mycpt.cpt
 
 
 # Make a projection of seismicity with depth. 
-awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+awk '{print $2, $3, $4, $5}' $mapping_data_specific/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
 gmt project Families_xyz_hypodd.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis1.tmp
 gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis2.tmp
 # F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
@@ -49,21 +50,21 @@ gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -
 # Q: put km units
 
 # Project the cascadia subduction zone model from Slab1p0 into the depth profile. 
-gmt project $mapping_data/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W-1/1 -Q -V >!tslab.tmp
+gmt project $mapping_data_specific/cascadia_s1p0.xyz -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W-1/1 -Q -V >!tslab.tmp
 
 
 # Establish the cross-section in a new box
-gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.10a0.5:"Depth Profile ":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+gmt psxy $mapping_data_specific/box_dim -R${brange} -J${bprojection} -Bf0.10a0.5:"Depth Profile ":/f10a10:"Depth (km)":WesN -P -K -V >$output
 # B2: annotate the axes every 2 km
 # X and Y: move this axis relative to map
 
 
 # Plot the hypocenters on the cross section profile 
-awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.06 -Ggray >> $output
+awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.04i -Ggray >> $output
 awk '{print $1, $3*(1.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthickest,green -V >> $output
 # Including the repeaters! WITH SLIP RATES. 
-awk '{print $1, $3*(1.0), $4}' !tseis1.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Cmycpt -Wthinnest,black >> $output
-awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Cmycpt -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis1.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.1i -Cmycpt -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.1i -Cmycpt -Wthinnest,black >> $output
 #gmt psxy Families_xz_hypodd.txt -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Cmycpt -Wthinnest,black >> $output  # if you want colors for slip rates. 
 #gmt psxy Families_xz_ncss.txt -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Cmycpt -Wthinnest,black >> $output  # if you want colors for slip rates. 
 
@@ -72,9 +73,9 @@ awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brang
 # ---------------------------------------- #
 # Plot the coast of California and the DD catalog above. 
 
-gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -B0.25:."Repeater Slip Rates at MTJ":WeSN -P -K -O -X0 -Y9 >> $output
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -B0.25:."Repeater Slip Rates at MTJ":WeSN -P -K -O -X0 -Y4.5 >> $output
 # Df = full resolution coastline; N1=country boundaries; N2=stat boundaries. 
-awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Gblack -P -K -O >> $output # Plot all earthquakes
+awk '{print $2, $3, $4, $5}' $mapping_data_specific/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.015i -Gblack -P -K -O >> $output # Plot all earthquakes
 
 # Make the cross-section annotations (SJ means rotated rectangle)
 gmt psxy -R$range -J$projection -P -O -K -SJ -Wthick,blue << EOF >>$output
@@ -83,11 +84,11 @@ EOF
 # The pipe bc is for adding floating point numbers
 
 # # Plot the repeating earthquake families WITH SLIP RATES. 
-gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
-gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.1i -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.1i -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
 
 # Plot the scale for the slip rate colors
-gmt psscale -R -J -DjTR+w4c/0.5c+o-1.5/1.5 -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr: -P -O -K >> $output
+gmt psscale -R -J -DjTR+w4c/0.5c+o-0.5/0.5 -Cmycpt.cpt -B1.0:"Slip rate":/:cm/yr: -P -O -K >> $output
 # D: Dimensions (MUST BE IN inches / centimeters)
 # B: Scale has 5km boxes.  I just copied the syntax on the annotation.  
 
