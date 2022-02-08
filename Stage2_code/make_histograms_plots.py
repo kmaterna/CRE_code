@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from obspy import read
 from subprocess import call
 import glob, sys
+sys.path.append(".");   # add current directory to python path
 import master_waveform_viewer_snr
 
 
@@ -190,7 +191,4 @@ def make_repeaters_map(MyParams, mapping_data_general, mapping_data_specific, ma
 	call(['mv','Repeater_Locations.ps',MyParams.output_dir+'Repeater_Locations.ps'],shell=False);	
 	call(['rm','event_connectors.txt','event_locations_first_hypodd.txt','event_locations_second_hypodd.txt','gmt.history']);
 	return;
-
-
-
 

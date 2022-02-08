@@ -6,9 +6,11 @@ Script that makes a handful of plots about waveforms and metadata.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+sys.path.append(".");   # add current directory to python path
 import util_functions_for_viewing_families
 import util_general_functions
-import os
+
 
 
 def view_families(time_window,families_list,families_summaries,station_locations,mapping_data,output_dir,families=[-1]):

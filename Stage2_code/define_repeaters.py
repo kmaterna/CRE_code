@@ -12,6 +12,7 @@ import numpy as np
 import collections
 from subprocess import call 
 import os, io, sys
+sys.path.append(".");   # add current directory to python path
 import make_histograms_plots
 
 Params=collections.namedtuple('Params',[

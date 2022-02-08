@@ -109,7 +109,3 @@ def outputs(unique_events, integer, labels, output_file):
 	outfile.close()
 	return;
 
-
-
-
-

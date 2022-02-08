@@ -13,7 +13,6 @@ from subprocess import call
 import os
 
 
-
 # ------- COEFFICIENT OF VARIATION ------- #
 def CVar(event_times):
 	""" The coefficient of Variation: IF CV = 0 , the events are periodic.  IF CV > 0, the events are random.  """
@@ -93,6 +92,3 @@ def make_waveform_plot(family_of_interest, event_names, magnitude, station, sac_
 	plt.savefig(save_path+'Family_'+str(family_of_interest)+'.png');
 	plt.close();
 	return;
-
-
-

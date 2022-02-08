@@ -2,6 +2,7 @@
 
 from subprocess import call
 import glob, os, sys
+sys.path.append(".");   # add current directory to python path
 import define_repeaters
 import find_network_repeaters
 import connected_component_analysis
@@ -42,9 +43,6 @@ def CRE_post_analysis(MyParams,output_dir):
 	generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data_specific);
 	composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data_specific);
 	return;
-
-
-
 
 
 # ----------- NOT LIKELY TO CHANGE BELOW THIS POINT ----------------- # 

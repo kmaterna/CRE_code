@@ -8,6 +8,7 @@ From list of repeating earthquake families, generate a few time-space diagrams.
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 
 
@@ -15,10 +16,10 @@ import util_general_functions
 def main_program(time_window,family_summaries, mapping_data):
 
 	dont_plot_family = 1.0;  # number of years between the beginning and end of the sequence, in case we dont want short-lived sequences
-	colorlist='brgcmky'
+	colorlist = 'brgcmky'
 
-	lon_bounds=[-124.63,-124.28];
-	lat_bounds=[40.25, 40.36];  # latitude and longitude range for most plots. 
+	lon_bounds = [-124.63, -124.28];
+	lat_bounds = [40.25, 40.36];  # latitude and longitude range for most plots. 
 	color_change_time = 2015.07; # the timing of the M5.7 event. 
 
 	# Zoomed in, simpler: 
@@ -36,23 +37,19 @@ def main_program(time_window,family_summaries, mapping_data):
 
 def plot_recent_M5_eqs(ax, mapping_data): # plot stars for major earthquakes in the time range. 
 	# record of major >M5 earthquakes in: "latitude longitude depth time magnitude"
-	input_file=open(mapping_data+"/M5up.eq",'r');	
+	input_file = open(mapping_data+"/M5up.eq", 'r');	
 	for line in input_file:
-		temp=line.split();
-		comment_flag=temp[0]
-		if comment_flag=='#':   # this allows us to add comments to the M5 earthquake file. 
+		temp = line.split();
+		comment_flag = temp[0]
+		if comment_flag == '#':   # this allows us to add comments to the M5 earthquake file. 
 			continue;
-		time=float(temp[1])
-		lat=float(temp[2])
-		lon=float(temp[3])
-		dep=float(temp[4])
-		mag=float(temp[5])
-		if lat>40.20 and lat<40.50:
-			ax.plot(lon,time,'D',markersize=mag*2,c='red')
+		[time, lat, lon, dep, mag] = [float(temp[1]), float(temp[2]), float(temp[3]), float(temp[4]), float(temp[5])];
+		if lat > 40.20 and lat < 40.50:
+			ax.plot(lon, time, 'D', markersize=mag*2, c='red')
 	return ax;
 
 def plot_M6p8_eq(ax): # M6.8 Earthquake on 2014-069
-	ax.plot([-127,-121],[2014.0+69/365.24, 2014.0+69/365.24],'--k'); 
+	ax.plot([-127, -121], [2014.0+69/365.24, 2014.0+69/365.24], '--k'); 
 	return ax;
 
 def plot_M5p7_eq(ax): # M5.7 rupture patch
@@ -77,10 +74,7 @@ def plot_eq_cloud(ax,dep_min,dep_max,lat_min,lat_max, mapping_data):
 
 	for line in input_file:
 		temp=line.split();
-		time=float(temp[0]);
-		lon=float(temp[1]);
-		lat=float(temp[2]);
-		dep=float(temp[3]);
+		[time, lon, lat, dep] = [float(temp[0]), float(temp[1]), float(temp[2]), float(temp[3])];
 		if (dep>dep_min) and (dep<dep_max):
 			if (lat>lat_min) and (lat<lat_max):
 				ax.plot(lon, time, '.', color='gray');
@@ -90,10 +84,7 @@ def plot_eq_cloud_afterM5p7(ax,dep_min,dep_max,lat_min,lat_max, time_start, dot_
 	input_file=open(mapping_data+"/hypodd.txyzm",'r');
 	for line in input_file:
 		temp=line.split();
-		time=float(temp[0]);
-		lon=float(temp[1]);
-		lat=float(temp[2]);
-		dep=float(temp[3]);
+		[time, lon, lat, dep] = [float(temp[0]), float(temp[1]), float(temp[2]), float(temp[3])];
 		if (dep>dep_min) and (dep<dep_max):
 			if (lat>lat_min) and (lat<lat_max):
 				if time >= time_start:
@@ -127,10 +118,7 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
 	ax=plt.gca();
 	cm = plt.cm.Spectral;
 
-	lon_mapping=[]
-	time_mapping=[]
-	mag_mapping=[]
-	depth_mapping=[]
+	lon_mapping, time_mapping, mag_mapping, depth_mapping = [], [], [], []
 
 	for line1 in input_file1:   # for each family
 		[lon, lat, time, mag, depth, loctype, mean_lon, mean_lat, mean_depth, slip_rate]=util_general_functions.read_family_line(line1)
@@ -181,10 +169,8 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
 	fig=plt.figure(figsize=(8,4));
 	ax=plt.gca();
 
-	first_segment_times=[];
-	second_segment_times=[];
-	first_segment_lons=[];
-	second_segment_lons=[];
+	first_segment_times, second_segment_times = [], [];
+	first_segment_lons, second_segment_lons = [], [];
 
 	for line1 in input_file1:   # for each family
 
@@ -224,8 +210,4 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
 
 	input_file1.close()
 	return;
-
-
-
-
 

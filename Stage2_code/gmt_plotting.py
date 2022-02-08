@@ -10,6 +10,7 @@ Makes about 10 GMT plots.
 
 from subprocess import call
 import glob
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 
 
@@ -47,15 +48,13 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 	xyzm_ncss=open(xyzm_file_ncss,'w+');
 	
 	# size of event dots on GMT:
-	size1=0.20
-	size2=0.10
+	size1 = 0.20
+	size2 = 0.10
 
 	[stations,station_paths]=util_general_functions.get_dirs_for_station(station_location_file);
 
 	# Read in lists for event1 and event2
-	event1=[]
-	event2=[]
-	station=[]
+	event1, event2, station = [], [], []
 	my_file.readline();
 	for line in my_file:
 		temp=line.split()

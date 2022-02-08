@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 MAIN PYTHON SCRIPT 
 that compares CRE results under different cutoffs for coherence and cross-correlation. 
@@ -15,6 +17,8 @@ Preferred recipe for Mendocino:
 """
 
 import collections;
+import sys
+sys.path.append(".");   # add current directory to python path
 import def_rep_each_station
 
 # The main parameter object. 

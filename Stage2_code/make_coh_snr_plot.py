@@ -147,7 +147,6 @@ def make_coh_snr_plot(output_dir,event1,event2,waveform_file_name,coh_file_name,
 	return;
 
 
-
 def get_mag_dist_from_sac(sacfile):
 	st1 = read(sacfile)
 	tr1 = st1[0]

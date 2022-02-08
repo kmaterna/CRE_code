@@ -9,7 +9,6 @@ from obspy import read
 import numpy as np 
 
 
-
 def get_dirs_for_station(station_location_file):
 	# Read the station location file, generate the directories where the sac files live.
 	stations=[]; station_paths=[];
@@ -23,7 +22,6 @@ def get_dirs_for_station(station_location_file):
 		station_paths.append(temp[3]);
 	ifile.close();
 	return [stations, station_paths];
-
 
 
 def get_info_from_sac(filename):
@@ -44,7 +42,6 @@ def get_float_time_from_name(name):
 	# Converts something like "2012.121.034422.71773265.sac" into a floating point decimal year (2010.26928) . 
 	decyear=float(name[0:4])+float(name[5:8])/365.24+float(name[9:11])/(24*365.24)+float(name[11:13])/(24*60*365.24)+float(name[13:15])/(24*60*60*365.24);
 	return decyear;
-
 
 
 def read_family_line(line):
@@ -100,9 +97,7 @@ def get_average_location(line):
 		loc_type.append(temp[5+5*number_of_events+1+i].lower())
 
 	# Taking the mean of all hypodd quantities (for plotting)
-	lats_to_mean=[]
-	lons_to_mean=[]
-	depths_to_mean=[]
+	lats_to_mean, lons_to_mean, depths_to_mean = [], [], []
 	for k in range(number_of_events):
 		if loc_type[k]=="hypodd":
 			lats_to_mean.append(latitude[k])
@@ -119,14 +114,10 @@ def get_average_location(line):
 	return [mean_lon, mean_lat, mean_depth]
 
 
-
-
-
 # ------- CHRONOLOGICAL SORTING FUNCTION ------- #
 def reorder_chronologically(event_names):
 	""" Arrange the events in a family in chronological order """
-	event_time=[];
-	new_event_name=[]
+	event_time, new_event_name = [], [];
 	new_event_names=[]
 	if len(event_names)==2:
 		if event_names[0]==event_names[1]:
@@ -148,6 +139,4 @@ def event_slip(Magnitude):
 	Mo=np.power(10,16.1+1.5*Magnitude);  # Hanks and Kanamori, 1979
 	d=np.power(10,-2.36+0.17*np.log10(Mo));   # Nadeau and Johnson, 1998
 	return d;
-
-
 

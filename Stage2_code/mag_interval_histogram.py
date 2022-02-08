@@ -7,6 +7,7 @@ From a list of repeating earthquakes, generate histograms of magnitudes and inte
 """
 
 import matplotlib.pyplot as plt
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 
 

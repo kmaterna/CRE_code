@@ -8,6 +8,7 @@ This script takes a series of repeating earthquake families and makes a composit
 
 import numpy as np 
 import matplotlib.pyplot as plt
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 
 
@@ -330,11 +331,3 @@ def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep
 	ax1.set_xlim([xmin, xmax])
 	plt.savefig("Map_View_"+plot_name+".png");
 	plt.close();
-
-
-
-
-
-
-
-

@@ -39,8 +39,7 @@ def configure(Network_repeaters_list,stage2_results):
 	return [filelist, outfile];
 
 def inputs(filelist):
-	station_names=[];
-	station_data=[];
+	station_names, station_data = [], [];
 	for i in filelist:
 		datalist=[];
 		infile=open(i,'r')
@@ -55,7 +54,7 @@ def inputs(filelist):
 	return Individual_station_repeaters;
 
 def compute(Individual_station_reps):
-	winners=[]; recorded_stations=[];  # has the intersections of repeaters found at two stations
+	winners, recorded_stations = [], [];  # intersections of repeaters found at two stations
 
 	# Find intersections. 
 	for i in range(len(Individual_station_reps.station_data)):

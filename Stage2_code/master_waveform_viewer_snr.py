@@ -11,6 +11,7 @@ June 9, 2016.
 """
 import subprocess
 import glob, os, sys
+sys.path.append(".");   # add current directory to python path
 import make_coh_snr_plot
 
 def master_waveform_viewer_snr(station_name, event1,event2,f1=1.0,f2=15.0,snr_cutoff=5.0,raw_sac_dir="",output_dir=""):

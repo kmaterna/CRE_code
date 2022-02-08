@@ -5,8 +5,8 @@ It's useful for plotting later.
 Sept 5, 2016
 """
 
-import glob
-import os
+import glob, os
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 
 def main_program(time_window,families_list,families_summaries,station_location_file):
@@ -152,5 +152,3 @@ def get_best_station_for_family(event_names,available_filelist):
 	# best_station=best_station.decode('utf-8-sig');
 	# best_station=best_station.encode('utf-8');
 	return best_station; 
-
-

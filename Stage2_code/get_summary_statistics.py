@@ -9,9 +9,10 @@ slip rate uncertainty in Nth box
 """
 
 import numpy as np 
+import collections
+sys.path.append(".");   # add current directory to python path
 import util_general_functions
 import util_functions_for_viewing_families
-import collections
 
 Family_sum_arrays=collections.namedtuple('Family_sum_arrays',[
 	'lon_array','lat_array',
@@ -31,11 +32,9 @@ def get_summary_statistics(families_summaries):
 
 
 def configure():  # You're going to want to change this for different locations (Mendocino, Anza, etc.)
-	output_filename="summary_statistics.txt";
-	min_lon=-124.75;
-	max_lon=-124.25;
-	min_lat=40.25;
-	max_lat=40.36; # this gets the main cluster in the MTJ
+	output_filename = "summary_statistics.txt";
+	min_lon, max_lon = -124.75, -124.25;
+	min_lat, max_lat = 40.25, 40.36; # this gets the main cluster in the MTJ
 	box_dims=[];  # define as many boxes as you want! 
 	box_dims.append([min_lon, max_lon, min_lat, max_lat, 18, 30]);   # the lower cluster
 	box_dims.append([min_lon, max_lon, min_lat, max_lat, 0, 18]);    # the upper cluster
@@ -47,15 +46,9 @@ def configure():  # You're going to want to change this for different locations 
 def inputs(families_summaries):
 
 	myfile=open(families_summaries,'r');
-	cov_array=[]
-	n_events_array = [];
-	event_times_array=[];
-	event_timespan_array = [];
-	lon_array=[];
-	lat_array=[];
-	mag_array=[];
-	dep_array=[];
-	id_array=[];
+	cov_array, n_events_array = [], []
+	event_times_array, event_timespan_array =[], [];
+	lon_array, lat_array, mag_array, dep_array, id_array = [], [], [], [], [];
 	for line in myfile:
 		[sing_lon_array, sing_lat_array, sing_time_array, sing_mag_array, sing_dep_array, type_of_loc, mean_lon, mean_lat, mean_depth, slip_rate] = util_general_functions.read_family_line(line);
 		event_times_array.append(sing_time_array);
@@ -93,7 +86,7 @@ def compute(box_dims, time_window, make_slip_rate_cutoff, MyFamilies):
 		else:
 			is_long_enough_array.append(1);
 
-	slip_rate_boxes=[]; unc_boxes=[];
+	slip_rate_boxes, unc_boxes = [], [];
 	for mybox in box_dims:
 		[slip_rate1, unc_1] = get_slip_rate_stats(mybox, make_slip_rate_cutoff, time_window, MyFamilies, is_long_enough_array);  # for box 1: the lower region
 		slip_rate_boxes.append(slip_rate1);
@@ -115,17 +108,12 @@ def get_slip_rate_stats(box, make_slip_rate_cutoff, time_window, MyFamilies, is_
 	mag_array=MyFamilies.mag_array;
 	id_array=MyFamilies.family_id;
 
-	min_lon=box[0];
-	max_lon=box[1];
-	min_lat=box[2];
-	max_lat=box[3];
-	min_dep=box[4];
-	max_dep=box[5];
+	min_lon, max_lon = box[0], box[1];
+	min_lat, max_lat = box[2], box[3];
+	min_dep, max_dep = box[4], box[5];
 
 	# Get events that are within the box and time range of interest. 
-	event_timing=[];
-	event_magnitude=[];
-	family_code_number=[];
+	event_timing, event_magnitude, family_code_number = [], [], [];
 
 	for i in range(len(lat_array)):
 		for j in range(len(lat_array[i])):
@@ -165,8 +153,7 @@ def get_uncertainty(MyFamilies, time_window, family_code_number):
 
 	for k in range(len(MyFamilies.lon_array)):
 	
-		test_event_timing = [];
-		test_event_magnitude = [];
+		test_event_timing, test_event_magnitude = [], [];
 		if k in family_code_number:
 			for j in range(len(MyFamilies.event_times_array[k])):
 				test_event_timing.append(MyFamilies.event_times_array[k][j]);
@@ -195,6 +182,4 @@ def write_outputs(filename, avg_cov, n_families, avg_n, max_n, mean_timespan, n_
 		myfile.write("Box [%.2f,%.2f,%.2f,%.2f,%.2f,%.2f] slip_rate_unc = %f cm/year \n" % (box[0], box[1], box[2], box[3], box[4], box[5], unc_boxes[i]));
 	myfile.close();
 	return;
-
-
 
