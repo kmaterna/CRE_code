@@ -3,15 +3,14 @@
 Steps to using this repo:
 1. Clone the github repo. 
 2. Put the Stage1_code and Stage2_code onto your shell path
-3. Put Stage2_code into your pythonpath
 
-4. Set up a new experiment directory (My_Expt):
+3. Set up a new experiment directory (My_Expt):
 
     Make directories for B045, all stations, etc., each with an added/ subdirectory that contains sac files. 
 
     Make station_locations.txt (text file with name, lon, lat, name/exist/ for each station). Put in your experiment directory.
 
-5. Run Stage1: 
+4. Run Stage1: 
     Call shell script c_coh_main_script.sh (stage1) from each of the B045-type directories. 
     
     The code assumes that you have added/ directories full of sac files created by Taka, with T5 header variable as the picked p-wave arrival time. 
@@ -21,7 +20,7 @@ Stage1 will generate a list of candidate CRE pairs that pass xcorr>threshold.
 See parameters in the tops of generate_nearby_add_ons_list.c and call_xcorr_and_coherence_cfilter.c for details. 
 
 
-6. Run Stage2: 
+5. Run Stage2: 
     Run python Stage2_code/drive_comparison.py from your experiment directory that contains the data directories. Stage2 will create a new folder called Stage2_results or similar. Inside, CREs_by_station will be created and rewritten. 
 A new directory for each criterion is made. 
 
