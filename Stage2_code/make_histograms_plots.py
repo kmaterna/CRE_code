@@ -48,7 +48,7 @@ def make_inter_event_time_histogram(station_name, filename, output_dir):
 
 
 # Shows us the dist/mag distributions of the repeaters we are finding. 
-def make_mag_dist_histograms(repeaters_file, directory):
+def make_mag_dist_histograms(station_name, repeaters_file, directory):
     [mag1, dist1, mag2, dist2] = np.loadtxt(repeaters_file, usecols=(6, 7, 8, 9), unpack=True, skiprows=1)
     dist, Mean_M, Diff_M = [], [], [];
 
@@ -69,7 +69,7 @@ def make_mag_dist_histograms(repeaters_file, directory):
     plt.hist(dist, color='b');
     plt.xlabel('Mean Distance From Station (km)');
     plt.ylabel('Number of Event Pairs');
-    plt.title("Distance of Repeating Event Pairs")
+    plt.title("Distance of Repeating Event Pairs at %s " % station_name)
     plt.savefig(directory + "_distances_histogram.png")
     plt.close();
 

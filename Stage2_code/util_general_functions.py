@@ -47,6 +47,18 @@ def get_float_time_from_name(name):
     return decyear;
 
 
+def get_time(evname):
+    # event name is formatted like: B046.PB.EHZ..D.2016.238.040926.72684751.sac
+    # we want its decimal year.
+    year = float(evname[-28:-24])
+    day = float(evname[-23:-20])
+    hour = float(evname[-19:-17])
+    minute = float(evname[-17:-15])
+    second = float(evname[-15:-13])
+    decimal_time = year + (day / 365.24) + ((60 * 60 * hour + 60 * minute + second) / (60 * 60 * 24 * 365.24));
+    return decimal_time;
+
+
 def read_family_line(line):
     """
     Parses a line from family summary file
@@ -122,12 +134,12 @@ def get_average_location(line):
 # ------- CHRONOLOGICAL SORTING FUNCTION ------- #
 def reorder_chronologically(event_names):
     """ Arrange the events in a family in chronological order """
-    event_time, new_event_name = [], [];
-    new_event_names = []
+    event_time, new_event_name, new_event_names = [], [], [];
     if len(event_names) == 2:
         if event_names[0] == event_names[1]:
             return event_names;
-        # This is a fix for those weird families where the same event was detected under two different event ID's.  There are only a few of them.
+        # This is a fix for those weird families where the same event was detected under two different event ID's.
+        # There are only a few of them.
     for i in range(len(event_names)):
         name = event_names[i]
         event_time.append(

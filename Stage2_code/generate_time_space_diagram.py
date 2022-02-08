@@ -1,13 +1,10 @@
 """ 
 MENDOCINO REPEATERS PROJECT
 8/23/16
-
-From list of repeating earthquake families, generate a few time-space diagrams. 
-
+From list of repeating earthquake families, generate a few time-space diagrams.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 import sys
 
 sys.path.append(".");  # add current directory to python path
@@ -122,9 +119,8 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
     """
     input_file1 = open(family_summaries, 'r');
 
-    fig = plt.figure();
+    _fig = plt.figure();
     ax = plt.gca();
-    cm = plt.cm.Spectral;
 
     lon_mapping, time_mapping, mag_mapping, depth_mapping = [], [], [], []
 
@@ -134,7 +130,7 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
         # Please plot something for each family
         if time[-1] - time[0] > dont_plot_family:
             # DON'T PLOT THE EVENTS WITH SHORT SEQUENCE (not likely repeaters anyway)
-            if lat_bounds < mean_lat < lat_bounds[1]:
+            if lat_bounds[0] < mean_lat < lat_bounds[1]:
                 for i in range(len(depth)):
                     lon_mapping.append(mean_lon);
                     time_mapping.append(time[i]);
@@ -176,7 +172,7 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
     """
     input_file1 = open(family_summaries, 'r');
 
-    fig = plt.figure(figsize=(8, 4));
+    _fig = plt.figure(figsize=(8, 4));
     ax = plt.gca();
 
     first_segment_times, second_segment_times = [], [];

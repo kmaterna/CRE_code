@@ -37,15 +37,15 @@ SNR_cutoff = 5.0;
 Minimum_freq_width = 5.0;
 
 # Parameters that aren't likely to change between experiments
-time_window = [2008.7, 2020.24];  # start time and end time for repeater search, etc. You may want to change this.
+time_window = [2008.7, 2022.10];  # start time and end time for repeater search, etc. You may want to change this.
 families_list = "families_list.txt";
 families_summaries = "Families_Summaries.txt";
 stage2_results = "Stage2_Results";
-station_locations_file = "station_locations.txt";
+station_locations_file = "station_locations.txt";   # relative path to reference file
 Network_repeaters_list = 'Network_CRE_pairs_list.txt';
-mapping_code = '/Users/kmaterna/Documents/B_Research/MTJ_CREs/CRE_detection/Mapping_files/Mendocino_mapping_code';  # you will want to change this if you're interested in a different place, like Mendocino, etc.
-mapping_data_general = '/Users/kmaterna/Documents/B_Research/MTJ_CREs/CRE_detection/Mapping_files/General_mapping_files';
-mapping_data_specific = '/Users/kmaterna/Documents/B_Research/MTJ_CREs/CRE_detection/Mapping_files/Mendocino_mapping_data';
+mapping_code = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/Mendocino_mapping_code';  # change this
+mapping_data_general = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/General_mapping_files';
+mapping_data_specific = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/Mendocino_mapping_data';
 MyParams = TotalParams(Network_repeaters_list=Network_repeaters_list, families_list=families_list,
                        families_summaries=families_summaries,
                        station_locations=station_locations_file, time_window=time_window, stage2_results=stage2_results,

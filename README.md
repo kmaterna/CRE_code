@@ -21,8 +21,10 @@ See parameters in the tops of generate_nearby_add_ons_list.c and call_xcorr_and_
 
 
 5. Run Stage2: 
-    Run python Stage2_code/drive_comparison.py from your experiment directory that contains the data directories. Stage2 will create a new folder called Stage2_results or similar. Inside, CREs_by_station will be created and rewritten. 
+Run python Stage2_code/drive_comparison.py **from your experiment directory** that contains the data directories. Stage2 will create a new folder called Stage2_results or similar. Inside, CREs_by_station will be created and rewritten. 
 A new directory for each criterion is made. 
+
+6. Update your background catalog for detailed plots.  For Mendocino, see "hypodd_raw_2_txyzm.py" in mapping data folder 
 
 
 WHAT WILL BE CREATED: 

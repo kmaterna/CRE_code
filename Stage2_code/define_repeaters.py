@@ -53,7 +53,7 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
                      max_frequency=25.0, snr_cutoff=5.0, Minimum_frequency_width=5.0, plot_all=0):
     MyParams = configure(station_name, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic,
                          freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
-    [Candidates_coh, Candidates_snr] = inputs(MyParams);
+    [Candidates_coh, Candidates_snr] = inputs(MyParams.data_input_file, MyParams.snr_input_file);
     [Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
     outputs(MyParams, Total_results, CRE_results, inParams.mapping_data_general, inParams.mapping_data_specific,
             inParams.mapping_code);
@@ -67,8 +67,8 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
     # Decisions that you rarely change:
     magnitude_difference_tolerance = 3.0;  # We ignore event pairs that have very disparate magnitudes.
 
-    # Frequencies we have in the data file, based on sampling frequency (this is used to interpret the coherence in data_input_file,
-    # which does not come with a frequency label)
+    # Frequencies we have in the data file, based on sampling frequency
+    # (this is used to interpret the coherence in data_input_file, which does not come with a frequency label)
     min_freq_inst = 0.0;
     max_freq_inst = 50.0;
     lowest_chosen_frequency = 1;  # This is a CHOICE.  Set to 0-50 if you want every frequency.
@@ -128,7 +128,7 @@ def print_out_statements(MyParams):
         print("Available frequencies = %f to %f Hz." % (
         MyParams.lowest_chosen_frequency, MyParams.highest_chosen_frequency));
         print(
-            "Repeaters must have magnitudes less than %f magnitude units apart." % MyParams.magnitude_difference_tolerance);
+            "Repeaters have magnitudes less than %f magnitude units apart." % MyParams.magnitude_difference_tolerance);
         if MyParams.plot_arg == 1:
             print("You have chosen to view plots of all of your repeaters.  ");
         print("-------------------------------------\n");
@@ -150,11 +150,9 @@ def print_out_statements(MyParams):
 
 # ------------------ INPUTS ------------------- #
 
-def inputs(MyParams):
-    Candidates_coh = read_data_input_file(MyParams.data_input_file);
-    Candidates_snr = read_snr_input_file(MyParams.snr_input_file);
-    print(MyParams.data_input_file);
-    print(MyParams.snr_input_file);
+def inputs(data_input_file, snr_input_file):
+    Candidates_coh = read_data_input_file(data_input_file);
+    Candidates_snr = read_snr_input_file(snr_input_file);
     return [Candidates_coh, Candidates_snr];
 
 
@@ -305,8 +303,8 @@ def compute(MyParams, Candidates_coh, Candidates_snr):
         if coh_statistic == np.nan:
             print("NAN!!!");
 
-        if (
-                max_freq - min_freq) <= MyParams.Minimum_frequency_width:  # these are events where there's very little usable signal anyway
+        if (max_freq - min_freq) <= MyParams.Minimum_frequency_width:
+            # if events have very little usable signal anyway
             low_signal_counter += 1;
             continue;
         else:
@@ -424,9 +422,9 @@ def outputs(MyParams, Total_results, CRE_results, mapping_data_general, mapping_
 
             # Make summary histograms of the repeaters we've found.
             make_histograms_plots.make_inter_event_time_histogram(MyParams.station_name, MyParams.CRE_out_filename,
-                                                                  MyParams.output_dir);  # making inter-event time histogram.
-            make_histograms_plots.make_mag_dist_histograms(MyParams.CRE_out_filename,
-                                                           MyParams.output_dir);  # making magnitudes histogram.
+                                                                  MyParams.output_dir);  # inter-event-time histogram.
+            make_histograms_plots.make_mag_dist_histograms(MyParams.station_name, MyParams.CRE_out_filename,
+                                                           MyParams.output_dir);  # magnitudes histogram.
 
         elif len(CRE_results.name1) == 0:
             print("No Repeaters Found: Cannot Make Plots!")
@@ -442,8 +440,8 @@ def write_outfiles(MyParams, Total_results, CRE_results):
     ofile.write(Header_string);
     for i in range(len(Total_results.name1)):
         # write to "total_list" file no matter what.
-        time_ev1 = get_time(Total_results.name1[i]);
-        time_ev2 = get_time(Total_results.name2[i]);
+        time_ev1 = util_general_functions.get_time(Total_results.name1[i]);
+        time_ev2 = util_general_functions.get_time(Total_results.name2[i]);
         if time_ev2 >= time_ev1:  # the case where event2 is later in time.
             ofile.write("%s %s %f %f %f %f %f %f %f %f \n" % (
             Total_results.name1[i], Total_results.name2[i], Total_results.xcorr_value[i], Total_results.coh_value[i],
@@ -461,8 +459,8 @@ def write_outfiles(MyParams, Total_results, CRE_results):
     ofile.write(Header_string);
     for i in range(len(CRE_results.name1)):
         # write to "total_list" file no matter what.
-        time_ev1 = get_time(CRE_results.name1[i]);
-        time_ev2 = get_time(CRE_results.name2[i]);
+        time_ev1 = util_general_functions.get_time(CRE_results.name1[i]);
+        time_ev2 = util_general_functions.get_time(CRE_results.name2[i]);
         if time_ev2 >= time_ev1:  # the case where event2 is later in time.
             ofile.write("%s %s %f %f %f %f %f %f %f %f \n" % (
             CRE_results.name1[i], CRE_results.name2[i], CRE_results.xcorr_value[i], CRE_results.coh_value[i],
@@ -475,16 +473,3 @@ def write_outfiles(MyParams, Total_results, CRE_results):
             CRE_results.mag1[i], CRE_results.dist1[i]));
     ofile.close();
     return;
-
-
-# ------------ UTILITY FUNCTIONS ---------- #
-def get_time(evname):
-    # event name is formatted like: B046.PB.EHZ..D.2016.238.040926.72684751.sac
-    # we want its decimal year.
-    year = float(evname[-28:-24])
-    day = float(evname[-23:-20])
-    hour = float(evname[-19:-17])
-    minute = float(evname[-17:-15])
-    second = float(evname[-15:-13])
-    decimal_time = year + (day / 365.24) + ((60 * 60 * hour + 60 * minute + second) / (60 * 60 * 24 * 365.24));
-    return decimal_time;
