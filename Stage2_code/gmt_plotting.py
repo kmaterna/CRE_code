@@ -14,21 +14,21 @@ import util_general_functions
 
 
 
-def mendocino_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
-	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data);
-	mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
+def mendocino_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data_general, mapping_data_specific):
+	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data_general, mapping_data_specific);
+	mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data_general, mapping_data_specific);  
 	cleaning_up();
 	return;
 
-def anza_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data):
-	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data);
-	anza_familywise_gmt(families_summaries, mapping_code, mapping_data);  # right now this isn't working, since I haven't fixed all the GMT scripts to use relative paths yet. 
+def anza_main_program(Network_repeaters_list, families_summaries, station_locations, mapping_code, mapping_data_general, mapping_data_specific):
+	pairwise_gmt(Network_repeaters_list, station_locations, mapping_code, mapping_data_general, mapping_data_specific);
+	anza_familywise_gmt(families_summaries, mapping_code, mapping_data_general, mapping_data_specific); 
 	cleaning_up();
 	return;
 
 
 
-def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_data):
+def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_data_general, mapping_data_specific):
 	hypodd_file1="event_locations_first_hypodd.txt"
 	hypodd_file2="event_locations_second_hypodd.txt"
 	ncss_file1="event_locations_first_ncss.txt"
@@ -105,8 +105,8 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 	xyzm_hypodd.close();
 	xyzm_ncss.close();
 
-	call(mapping_code+'/map_view_repeaters.gmt 0 0 0 '+mapping_data,shell=True)  # this is to allow the script to handle both single-station and multi-station files. 
-	call(mapping_code+'/xyzm_repeaters.gmt '+mapping_data,shell=True)
+	call(mapping_code+'/map_view_repeaters.gmt 0 0 0 '+mapping_data_general+' '+mapping_data_specific,shell=True)  # this is to allow the script to handle both single-station and multi-station files. 
+	call(mapping_code+'/xyzm_repeaters.gmt '+mapping_data_general,shell=True)
 
 	print("Maps of repeating earthquakes generated!");
 	return;
@@ -114,7 +114,8 @@ def pairwise_gmt(repeaters_file,station_location_file, mapping_code, mapping_dat
 
 
 
-def mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data):
+def mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data_general, mapping_data_specific):
+	print("Plotting cross sections and zoomed-in plots");
 	input_file=open(families_summaries,'r');
 	outputfile1=open("Families_xy_hypodd.txt",'w');
 	outputfile2=open("Families_xy_ncss.txt",'w');
@@ -149,18 +150,18 @@ def mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data):
 	output_nums.close();
 	input_file.close();
 
-	call([mapping_code+'/microseismicity_map.gmt',mapping_data],shell=False)   # makes the depth profile of red dots for repeaters. 
-	call([mapping_code+'/zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
-	call([mapping_code+'/zoomed_in_num_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
-	call([mapping_code+'/very_zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate. 
-	call([mapping_code+'/cross_section_plus_historical.gmt',mapping_data],shell=False)  # makes the depth profile and adds recent M5 events. 
-	call([mapping_code+'/very_zoomed_in_plus_historical.gmt',mapping_data],shell=False)  # makes the zoomed in graph with M5s. 
-	call([mapping_code+'/slip_rates.gmt',mapping_data],shell=False)
-	call([mapping_code+'/zoomed_in_slip_rates.gmt',mapping_data],shell=False)
+	call([mapping_code+'/microseismicity_map.gmt',mapping_data_general, mapping_data_specific],shell=False)   # makes the depth profile of red dots for repeaters. 
+	call([mapping_code+'/zoomed_in_slip_depth.gmt',mapping_data_general, mapping_data_specific],shell=False)  # makes the depth profile with colored dots for slip rate
+	call([mapping_code+'/zoomed_in_num_depth.gmt',mapping_data_general, mapping_data_specific],shell=False)  # makes the depth profile with colored dots for slip rate
+	call([mapping_code+'/very_zoomed_in_slip_depth.gmt',mapping_data_general, mapping_data_specific],shell=False)  # makes the depth profile with colored dots for slip rate. 
+	call([mapping_code+'/cross_section_plus_historical.gmt',mapping_data_general, mapping_data_specific],shell=False)  # makes the depth profile and adds recent M5 events. 
+	call([mapping_code+'/very_zoomed_in_plus_historical.gmt',mapping_data_general, mapping_data_specific],shell=False)  # makes the zoomed in graph with M5s. 
+	call([mapping_code+'/slip_rates.gmt',mapping_data_general, mapping_data_specific],shell=False)
+	call([mapping_code+'/zoomed_in_slip_rates.gmt',mapping_data_general, mapping_data_specific],shell=False)
 
 	return;
 
-def anza_familywise_gmt(families_summaries, mapping_code, mapping_data):
+def anza_familywise_gmt(families_summaries, mapping_code, mapping_data_general, mapping_data_specific):
 	input_file=open(families_summaries,'r');
 	outputfile1=open("Families_xyz_hypodd.txt",'w');
 	outputfile2=open("Families_xyz_ncss.txt",'w');
@@ -188,13 +189,7 @@ def anza_familywise_gmt(families_summaries, mapping_code, mapping_data):
 	allfile2.close();
 	input_file.close();
 
-	call([mapping_code+'/repeaters_profile.gmt',mapping_data],shell=False)   # makes the depth profile of repeaters. 
-	#call([mapping_code+'/zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
-	#call([mapping_code+'/zoomed_in_num_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate
-	#call([mapping_code+'/very_zoomed_in_slip_depth.gmt',mapping_data],shell=False)  # makes the depth profile with colored dots for slip rate. 
-	#call([mapping_code+'/cross_section_plus_historical.gmt',mapping_data],shell=False)  # makes the depth profile and adds recent M5 events. 
-	#call([mapping_code+'/slip_rates.gmt',mapping_data],shell=False)
-
+	call([mapping_code+'/repeaters_profile.gmt',mapping_data_general],shell=False)   # makes the depth profile of repeaters. 
 	return;
 
 

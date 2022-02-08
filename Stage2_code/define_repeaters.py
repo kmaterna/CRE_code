@@ -50,7 +50,7 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 	MyParams=configure(station_name, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
 	[Candidates_coh, Candidates_snr] = inputs(MyParams);
 	[Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
-	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data, inParams.mapping_code);
+	outputs(MyParams, Total_results, CRE_results, inParams.mapping_data_general, inParams.mapping_data_specific, inParams.mapping_code);
 	return;
 
 
@@ -67,8 +67,6 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
 	max_freq_inst=50.0;
 	lowest_chosen_frequency=1;    # This is a CHOICE.  Set to 0-50 if you want every frequency. 
 
-        station_name=station_name.decode('utf-8-sig');
-        station_name=station_name.encode('utf-8');
 	four_char=station_name;
 	if len(station_name)==3:
 		four_char=station_name+"_"
@@ -154,10 +152,11 @@ def inputs(MyParams):
 
 def read_data_input_file(filename):
 	# The coherence and xcorr information.
-        print("Reading file %s" % filename);
-        s=filename.decode('utf-8-sig');
-        u=s.encode('utf-8');  # the UTF-8 BOM issue
-	ifile=open(u,'r');
+	print("Reading file %s" % filename);
+	# s=filename.decode('utf-8-sig');
+	# u=s.encode('utf-8');  # the UTF-8 BOM issue
+	# ifile=open(u,'r');
+	ifile=open(filename,'r');
 	event1name=[]; event2name=[]; ev1mag=[]; ev2mag=[]; ev1dist=[]; ev2dist=[]; xcorr=[]; coh_collection=[];
 	for line in ifile:
 		coh=[];
@@ -179,10 +178,11 @@ def read_data_input_file(filename):
 
 def read_snr_input_file(filename):
 	# Read in the SNR information. 	
-        print("Reading file %s" % filename);
-        s=filename.decode('utf-8-sig');
-        u=s.encode('utf-8');  # the UTF-8 BOM issue
-	ifile=open(u,'r');
+	print("Reading file %s" % filename);
+	# s=filename.decode('utf-8-sig');
+	# u=s.encode('utf-8');  # the UTF-8 BOM issue
+	# ifile=open(u,'r');
+	ifile=open(filename,'r');
 
 	f_axis1=[]; snr1=[]; 
 	f_axis2=[]; snr2=[];
@@ -382,14 +382,14 @@ def determine_freqs_by_SNR(freq1, snr1, freq2, snr2, cutoff, max_frequency, lowe
 
 # ------------------ OUTPUTS ------------------- # 
 
-def outputs(MyParams, Total_results, CRE_results, mapping_data, mapping_code):
+def outputs(MyParams, Total_results, CRE_results, mapping_data_general, mapping_data_specific, mapping_code):
 
 	write_outfiles(MyParams, Total_results, CRE_results);
 	
 	# # ------------- PLOTTING ------------ #
 	if len(CRE_results.name1)>=0: # should be len(CRE_results.name1) (during non-debug operation)
 
-		make_histograms_plots.make_repeaters_map(MyParams, mapping_data, mapping_code);   # making a gmt plot of repeating event locations. 
+		make_histograms_plots.make_repeaters_map(MyParams, mapping_data_general, mapping_data_specific, mapping_code);   # making a gmt plot of repeating event locations. 
 
 		if MyParams.plot_arg == 1:
 			make_histograms_plots.make_repeater_seismograms(MyParams);

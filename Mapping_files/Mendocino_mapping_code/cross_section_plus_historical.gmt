@@ -6,17 +6,18 @@
 # AND PLOT THE SLIP RATES. 
 # 9/08/2016
 
-mapping_data=$1
+mapping_data_general=$1
+mapping_data_specific=$2
 
 lonW=-125.52
 lonE=-124
 latS=40.06
 latN=40.9
 range="$lonW/$lonE/$latS/$latN"
-projection="m3.7i"
+projection="M5.7i"
 resampling="0.004"  # smaller means more fine sampling (bigger file)
 bigrange="-128/-114.0/35/44.0"
-bigprojection="m0.08i"
+bigprojection="M1.0i"
 
 Cx=-124.7
 Cx_start=-125.50
@@ -33,7 +34,7 @@ output="Depth_Profile_plus_historical.ps"
 maxdepth=-50
 twice_length=$(echo $lmax - $lmin | bc)  # for the full profile
 brange="$Cx_start/$Cx_end/$maxdepth/0" # The edges of the eventual cross-section (in km)
-bprojection="x9.5/0.12"
+bprojection="X6.5/3.12"
 
 
 # Make a color scale from 0 to 8 cm / year. This is for plotting slip rates. 
@@ -43,7 +44,7 @@ gmt makecpt -T-9400/3400/100 -Cgray -Z > myrainbow.cpt
 # nice example: -Cdem2
 
 # Make a projection of seismicity with depth. 
-awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
+awk '{print $2, $3, $4, $5}' $mapping_data_specific/hypodd.txyzm | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tprofile.tmp
 gmt project Families_xyz_hypodd.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis1.tmp
 gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!tseis2.tmp
 # F: format x,y,z,parallel-distance-from-center,perp-distance-from-center,long-projected-into-XS,lat-projected-intoXS
@@ -52,28 +53,28 @@ gmt project Families_xyz_ncss.txt -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -
 # Q: put km units
 
 # Establish the cross-section in a new box
-gmt psxy $mapping_data/box_dim -R${brange} -J${bprojection} -Bf0.25a0.5:"":/f10a10:"Depth (km)":WesN -P -K -X3 -Y2 -V >$output
+gmt psxy $mapping_data_specific/box_dim -R${brange} -J${bprojection} -Bf0.25a0.5:"":/f10a10:"Depth (km)":WesN -P -K -V >$output
 # B2: annotate the axes every 2 km
 # X and Y: move this axis relative to map
 
 
 # Project the cascadia subduction zone model from Slab1p0 into the depth profile. 
 # Choosing values to give a nice slab. 
-gmt project $mapping_data/cascadia_s1p0.xyz -C-124.7/40.34 -A$azimuth -Fxyzpqrs -L-85/55 -W-1/1 -Q -V >!tslab.tmp
+gmt project $mapping_data_specific/cascadia_s1p0.xyz -C-124.7/40.34 -A$azimuth -Fxyzpqrs -L-85/55 -W-1/1 -Q -V >!tslab.tmp
 
 
 # Plot the HypoDD hypocenters and slab on the cross section profile 
-awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.06 -Ggray -V >> $output
+awk '{print $1, $3*(-1.0)}' !tprofile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.04 -Ggray -V >> $output
 awk '{print $1, $3*(1.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthickest,magenta -V >> $output
 awk '{print $1, $3-(7.0)}' !tslab.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Wthin,black,- -V >> $output
 # Add the historical large seismicity in the box. 
 # Make a projection of the large seismicity in the box. 
-awk '{print $4, $3, $5, $6}' $mapping_data/M5p5up.eq | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!large_profile.tmp
+awk '{print $4, $3, $5, $6}' $mapping_data_specific/M5p5up.eq | gmt project -C$Cx/$Cy -A$azimuth -Fxyzpqrs -L$lmin/$lmax -W$width_min/$width_max -Q -V >!large_profile.tmp
 awk '{print $1, $3*(-1.0), $4*(2.0)}' !large_profile.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sap -Gyellow -Wthinner,black >> $output
 
 # Including the repeaters! WITH SLIP RATES. 
-awk '{print $1, $3*(1.0), $4}' !tseis1.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Cmycpt -Wthinnest,black >> $output
-awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Cmycpt -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis1.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Sc0.1i -Cmycpt -Wthinnest,black >> $output
+awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brange} -P -O -K -Ss0.1i -Cmycpt -Wthinnest,black >> $output
 #gmt psxy Families_xz_hypodd.txt -J${bprojection} -R${brange} -P -O -K -Sc0.2 -Cmycpt -Wthinnest,black >> $output  # if you want colors for slip rates. 
 #gmt psxy Families_xz_ncss.txt -J${bprojection} -R${brange} -P -O -K -Ss0.2 -Cmycpt -Wthinnest,black >> $output  # if you want colors for slip rates. 
 
@@ -81,7 +82,7 @@ awk '{print $1, $3*(1.0), $4}' !tseis2.tmp | gmt psxy -J${bprojection} -R${brang
 # ---------------------------------------- #
 # Plot the coast of California and the DD catalog above. 
 
-gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -B0.5:."":WeSN -P -K -O -X0 -Y9 --FORMAT_GEO_MAP="ddd.xx" >> $output
+gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -B0.5:."":WeSN -P -K -O -X0 -Y4.5 --FORMAT_GEO_MAP="ddd.xx" >> $output
 # Df = full resolution coastline; 
 # N1=country boundaries; N2=state boundaries. 
 # -S means water color
@@ -92,7 +93,7 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -Glightgray -
 
 # Resample to make the topography a bit more clear. 
 # Use grdsample to make a fine mesh out of a course one, or the other way around. 
-gmt grdsample $mapping_data/srtm1205.grd -GTopogrid.grd -I$resampling
+gmt grdsample $mapping_data_specific/srtm1205.grd -GTopogrid.grd -I$resampling
 
 # Make some illumination data # # Plot the topography data
 gmt grdgradient Topogrid.grd -A350 -GTopogrid.grad -Nt
@@ -102,7 +103,7 @@ gmt grdmath Topogrid.hist 6 DIV = Topogrid.norm
 gmt grdimage Topogrid.grd -ITopogrid.norm -R$range -J$projection -K -V -O -Cmyrainbow.cpt >> $output
 
 # Do the same thing for the second tile (haven't gotten them to combine with grdpaste yet)
-gmt grdsample $mapping_data/srtm1204.grd -GTopogrid.grd -I$resampling
+gmt grdsample $mapping_data_specific/srtm1204.grd -GTopogrid.grd -I$resampling
 gmt grdgradient Topogrid.grd -A350 -GTopogrid.grad -Nt
 gmt grdhisteq Topogrid.grad -GTopogrid.hist -N
 gmt grdinfo Topogrid.hist
@@ -111,12 +112,12 @@ gmt grdimage Topogrid.grd -ITopogrid.norm -R$range -J$projection -K -V -O -Cmyra
 
 
 # Add the fault map
-gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,gray26 -P -K -O >> $output
+gmt psxy $mapping_data_general/Quaternary.txt -R$range -J$projection -Wthin,gray26 -P -K -O >> $output
 gmt pscoast -R$range -J$projection -Df -N1 -N2 -Wblack -Slightblue -L-125.3/40.12/40.12/30+jt+u -P -K -O >> $output
 
 
 # Add double differenced background seismicity
-awk '{print $2, $3, $4, $5}' $mapping_data/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.03 -Ggray36 -P -K -O >> $output
+awk '{print $2, $3, $4, $5}' $mapping_data_specific/hypodd.txyzm | gmt psxy -R$range -J$projection -Sc0.015i -Ggray36 -P -K -O >> $output
 # COMMENT: 2 = lon, 3 = lat
 
 # Make small cross-section annotations (SJ means rotated rectangle)
@@ -134,10 +135,10 @@ EOF
 # The pipe bc is for adding floating point numbers
 
 # Plot the historical large seismicity in stars
-awk '{print $3, $4, $6*(2.0)}' $mapping_data/M5p5up.eq | gmt psxy -J$projection -R$range -Sap -Gyellow -Wthinner,black -P -K -O >> $output
+awk '{print $3, $4, $6*(2.0)}' $mapping_data_specific/M5p5up.eq | gmt psxy -J$projection -R$range -Sap -Gyellow -Wthinner,black -P -K -O >> $output
 
 # Plot focal mechanisms for big events. 
-gmt psmeca -R$range -J$projection -K -O -C -Sd0.5u <<EOF >> $output
+gmt psmeca -R$range -J$projection -K -O -C -Sd0.2u <<EOF >> $output
 -125.20537 40.52977 6.390 -0.87 0.25 0.61 -1.07 4.14 -9.11 25 0 0 1984M6.6
 -124.68927 40.65021 20.943 -0.03 -0.69 0.73 0.04 -0.06 0.21 26 0 0 2010M6.5
 -125.13383 40.82867 15 -0.06 -2.84 2.90 0.21 -0.08 0.48 26 -125.12383 40.82867 2014M6.8
@@ -154,9 +155,9 @@ EOF
 #rm focal_mechanism_list[1-2].txt
 
 # Add the plate boundaries and labels
-gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -Sf5/1+r+s+o3.25 -K -O >> $output
-gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O -Sf5/1+r+s+o1.3 >> $output
-gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -Sf1.5/0.6+r+t+o1.8 -K -O >> $output
+gmt psxy $mapping_data_general/transform.gmt -R$range -J$projection -Wthin,red -Sf5/1+r+s+o3.25 -K -O >> $output
+gmt psxy $mapping_data_general/ridge.gmt -R$range -J$projection -Wthin,red -K -O -Sf5/1+r+s+o1.3 >> $output
+gmt psxy $mapping_data_general/trench.gmt -R$range -J$projection -Wthin,red -Sf1.2/0.3+r+t+o1.0 -K -O >> $output
 
 # Label important features
 gmt pstext -R$range -J$projection -F+a+f14p,Times-BoldItalic,red -K -O <<EOF >> $output
@@ -169,23 +170,24 @@ EOF
 
 
 # plot plate motion vectors
-gmt psvelo $mapping_data/Plate_arrows.txt -R$range -J$projection -A20p+e+gblack+p2.7p -Se0.04/0.95/13 -Wblack -K -O >> $output
+vscale=0.015
+gmt psvelo $mapping_data_specific/Plate_arrows.txt -R$range -J$projection -A20p+e+gblack+p2.7p -Se$vscale/0.95/13 -Wblack -K -O >> $output
 gmt pstext -R$range -J$projection -F+f18 -K -O <<EOF >> $output
 -123.1 40.75 North
 -123.1 40.68 American
 -123.1 40.60 Plate
 EOF
-gmt psvelo -R$range -J$projection -A20p+e+gblack+p2.7p -Se0.04/0.95/13 -Wblack -K -O <<EOF >> $output
+gmt psvelo -R$range -J$projection -A20p+e+gblack+p2.7p -Se$vscale/0.95/13 -Wblack -K -O <<EOF >> $output
 -125.24 40.16 20 0 0.0 0.0 0.0 20mm/yr
 EOF
 
 
 # # Plot the repeating earthquake families WITH SLIP RATES. 
-gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
-gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.2 -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_hypodd.txt -R$range -J$projection -Sc0.1i -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
+gmt psxy Families_xy_ncss.txt -R$range -J$projection -Ss0.1i -Wthinnest,black -Cmycpt -P -K -O >> $output   # if you want colors for slip rates. 
 
 #  Put a tiny map in the corner to orient you
-gmt pscoast -R$bigrange -J$bigprojection -Ggray -SWhite -Di -N2 -K -O -X0 -Y8.0 >> $output
+gmt pscoast -R$bigrange -J$bigprojection -Ggray -SWhite -Di -N2 -K -O -X0 -Y3.3 >> $output
 gmt psxy -R$bigrange -J$bigprojection -Wthick,black -K -O <<EOF >> $output
 $lonW $latS
 $lonE $latS
@@ -194,9 +196,9 @@ $lonW $latN
 $lonW $latS
 EOF
 # Add the plate boundaries
-gmt psxy $mapping_data/transform.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
-gmt psxy $mapping_data/ridge.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
-gmt psxy $mapping_data/trench.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
+gmt psxy $mapping_data_general/transform.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
+gmt psxy $mapping_data_general/ridge.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
+gmt psxy $mapping_data_general/trench.gmt -R$bigrange -J$bigprojection -Wthinnest,red -K -O >> $output
 
 
 # Plot the scale for the slip rate colors

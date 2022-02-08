@@ -34,7 +34,7 @@ def make_inter_event_time_histogram(station_name,filename,output_dir):
 	print("Making inter event time histogram...\n");
 
 	plt.figure()
-	plt.hist(intervals,30)
+	plt.hist(intervals,30,color='b')
 	plt.ylabel('Number of Event Pairs');
 	plt.xlabel('Time (years)');
 	plt.title('Intervals between Repeating Event Pairs at ' + station_name + "; N_total = "+str(len(intervals)));
@@ -64,7 +64,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 
 	print("Making Distances histogram...\n");
 	plt.figure();
-	plt.hist(dist);
+	plt.hist(dist,color='b');
 	plt.xlabel('Mean Distance From Station (km)');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Distance of Repeating Event Pairs")
@@ -73,7 +73,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 	
 	print("Making Magnitudes histogram...\n");
 	plt.figure();
-	plt.hist(Mean_M);
+	plt.hist(Mean_M,color='b');
 	plt.xlabel('Mean Magnitude');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Magnitudes of Repeating Event Pairs")
@@ -82,7 +82,7 @@ def make_mag_dist_histograms(station_name,repeaters_file,directory):
 
 	print("Making Magnitude Differences histogram...\n");
 	plt.figure();
-	plt.hist(Diff_M);
+	plt.hist(Diff_M,color='b');
 	plt.xlabel('Magnitude Difference');
 	plt.ylabel('Number of Event Pairs');
 	plt.title("Magnitude Differences of Repeating Event Pairs");
@@ -160,7 +160,7 @@ def get_event_location(sacfile):
 
 
 # Make a gmt map of the repeaters distribution
-def make_repeaters_map(MyParams, mapping_data, mapping_code):
+def make_repeaters_map(MyParams, mapping_data_general, mapping_data_specific, mapping_code):
 
 	ifile=open(MyParams.CRE_out_filename,'r')
 	evfile1=open('event_locations_first_hypodd.txt','w')
@@ -185,7 +185,8 @@ def make_repeaters_map(MyParams, mapping_data, mapping_code):
 	
 	ifile.close(); evfile1.close(); evfile2.close(); connectors.close();
 
-	call([mapping_code+'/map_view_repeaters.gmt',str(MyParams.station_coords[0]),str(MyParams.station_coords[1]),MyParams.station_name, mapping_data]);
+	call([mapping_code+'/map_view_repeaters.gmt',str(MyParams.station_coords[0]),str(MyParams.station_coords[1]), 
+		MyParams.station_name, mapping_data_general, mapping_data_specific]);
 	call(['mv','Repeater_Locations.ps',MyParams.output_dir+'Repeater_Locations.ps'],shell=False);	
 	call(['rm','event_connectors.txt','event_locations_first_hypodd.txt','event_locations_second_hypodd.txt','gmt.history']);
 	return;

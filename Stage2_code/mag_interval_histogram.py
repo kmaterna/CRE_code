@@ -46,38 +46,36 @@ def generate_histograms(repeaters_file,station_location_file):
 	my_file.close();
 
 	plt.figure()
-	plt.hist(intervals,30)
+	plt.hist(intervals,30,color='b');
 	plt.ylabel('Number of Event Pairs',fontsize=18);
 	plt.xlabel('Time (years)',fontsize=18);
 	plt.xticks(fontsize=18)
 	plt.yticks(fontsize=18)
-	plt.title('Intervals between Repeating Event Pairs',fontsize=20);
+	plt.title('Intervals between Repeating Event Pairs',fontsize=18);
 	plt.savefig('interval_histogram.eps');
 	plt.close();
-
 	print("Histogram of Inter-Event Times Plotted!");
 
 
 	plt.figure()
-	plt.hist(mean_mag,15)
+	plt.hist(mean_mag,15,color='b');
 	plt.ylabel('Number of Event Pairs',fontsize=18);
 	plt.xlabel('Mean Event Magnitudes',fontsize=18);
 	plt.xticks(fontsize=18);
 	plt.yticks(fontsize=18);
-	plt.title('Mean Magnitues of Repeating Event Pairs',fontsize=20);
+	plt.title('Mean Magnitues of Repeating Event Pairs',fontsize=18);
 	plt.savefig('magnitude_histogram.eps');
 	plt.close();
+	print("Histogram of Magnitudes Plotted!");
 
 
 	plt.figure();
-	plt.hist(M,15);
+	plt.hist(M,15,color='b');
 	plt.xlabel('Magnitude Difference',fontsize=18);
 	plt.ylabel('Number of Event Pairs',fontsize=18);
 	plt.xticks(fontsize=18);
 	plt.yticks(fontsize=18);
-	plt.title("Magnitude Differences of Repeating Event Pairs",fontsize=20);
+	plt.title("Magnitude Differences of Repeating Event Pairs",fontsize=18);
 	plt.savefig("magnitude_differences_histogram.eps");
 	plt.close()
-
-	print("Histogram of Magnitudes Plotted!");
 	print("Histogram of Magnitude Differences Plotted!");

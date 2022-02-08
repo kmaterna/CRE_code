@@ -77,6 +77,7 @@ int main(int argc, char *argv[]){
 	// Please open the output file
 	FILE * outptr;  // the output file pointer
 	outptr = fopen(output_name,"w");                       // detailed output file
+	printf("\nStarting the generate_nearby_add_ons calculation.\n");
 	printf("Station name is: %s\n",station_name);
 	printf("Output_filename is: %s\n",output_name);
 

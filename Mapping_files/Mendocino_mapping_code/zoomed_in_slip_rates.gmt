@@ -2,7 +2,8 @@
 # Plot the slip rates for repeaters at the Mendocino Triple Junction
 # 1/2/2016 Kathryn Materna
 
-mapping_data=$1
+mapping_data_general=$1
+mapping_data_specific=$2
 
 lonW=-124.65
 lonE=-124.32
@@ -18,10 +19,10 @@ gmt pscoast -R$range -J$projection -Df -N1 -N2 -Lf-124.53/40.24/40.24/10+jt+u -W
 # Df = full resolution coastline
 
 # Add all the faults
-gmt psxy $mapping_data/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy $mapping_data/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy $mapping_data/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
-gmt psxy $mapping_data/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data_general/transform.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data_general/ridge.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data_general/trench.gmt -R$range -J$projection -Wthin,red -K -O >> $output
+gmt psxy $mapping_data_general/Quaternary.txt -R$range -J$projection -Wthin,red -K -O >> $output
 
 
 # Make a colormap using JET colorscale (for slip rates). 
