@@ -13,15 +13,15 @@ import util_functions_for_viewing_families
 import util_general_functions
 
 
-def view_families(time_window, families_summaries, station_locations, mapping_data, output_dir, families=(-1)):
+def view_families(time_window, families_summaries, station_locations, mapping_data, output_dir, families=(-1,)):
     """
-    Note: families=-1 is the default state, and means do all families.
-    Alternately: families = [0, 1, 2, 3] means only do a few stations
+    Note: families='-1' is the default state, and means do all families.
+    Alternately: families = [0, 1, 2, 3] means only do a few families
     """
     [summary_array, stations, station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,
                                                                                        station_locations, mapping_data);
-    if families == (-1):
-        families = np.range(0, len(summary_array));  # do all families
+    if families[0] == -1:
+        families = np.arange(0, len(summary_array));  # do all families
     cwd = os.getcwd();
     output_dir = cwd + "/" + output_dir + "Image_Families/";
     for i, myline in enumerate(summary_array):
@@ -43,10 +43,10 @@ def overall_inputs(families_summaries, station_locations_file, mapping_data):
     for line in input_plates:
         temp = line.split()
         if len(temp) > 0:
-            if temp[0] is '>':
+            if temp[0] == '>':
                 plate_lat.append(np.nan)
                 plate_lon.append(np.nan)
-            if temp[0] is not '>':
+            else:
                 plate_lat.append(float(temp[0]))
                 plate_lon.append(float(temp[1]) - 360.0)
     input_plates.close();
@@ -109,7 +109,7 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     a1.set_xlim([-127, -122])
     # a1.set_ylim([31, 35.5])  # ANZA
     # a1.set_xlim([-119, -114.9])
-    a1.set(adjustable='box-forced', aspect='equal')
+    a1.set(adjustable='box', aspect='equal')
     a1.set_xlabel("Longitude")
     a1.set_ylabel("Latitude")
     if len(event_names) > 2:
@@ -166,7 +166,7 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     a1.get_yaxis().get_major_formatter().set_useOffset(False)
     a1.set_xlabel("Longitude")
     a1.set_ylabel("Latitude")
-    a1.set(adjustable='box-forced', aspect='equal')
+    a1.set(adjustable='box', aspect='equal')
     a1.text(0.6, 0.15, "n_events=" + str(number_of_events) + "; n_pairs=" + str(pairs_counter),
             horizontalalignment='center',
             verticalalignment='center',
@@ -199,14 +199,14 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     a1.set_ylim([-0.50, number_of_events - 0.5])
     a1.set_yticks(y)
     a1.set_xticks(x)
-    a1.set(adjustable='box-forced', aspect='equal')
+    a1.set(adjustable='box', aspect='equal')
     a1.set_title(best_station + ' Correlations')
 
     # Coloring the boxes and circles
     cbar_ax = g.add_axes([0.90, 0.12, 0.02, 0.20])
     sm = plt.cm.ScalarMappable(norm=plt.Normalize(0.5, 1), cmap='jet')
-    sm.set_array([0, 1, 2, 3, 4])
-    cbar = plt.colorbar(sm, cbar_ax)
+    sm.set_array(np.array([0, 1, 2, 3, 4]))
+    _cbar = plt.colorbar(sm, cbar_ax)
 
     plt.savefig(output_dir + "Family_" + str(family_number) + "_Metadata.png")
     plt.close()

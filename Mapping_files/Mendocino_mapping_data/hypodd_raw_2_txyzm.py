@@ -35,8 +35,10 @@ def get_time(year_string, time_string):
 
 
 if __name__=="__main__":
-	input_file="hypodd_raw_search.eq"
-	output_file="hypodd.txyzm"
+	# input_file="hypodd_raw_search.eq"
+	# output_file="hypodd.txyzm"
+	input_file="ncsn_raw_search.eq"
+	output_file="ncsn.txyzm"	
 	ifile=open(input_file,'r');
 	ofile=open(output_file,'w');
 
@@ -48,10 +50,8 @@ if __name__=="__main__":
 		if test_item.isdigit():  # are we looking at an actual data row?  not a header?  
 			year_str=temp[0]
 			time_str=temp[1]
-			lat=temp[2]
-			lon=temp[3]
-			dep=temp[4]
-			mag=temp[5]
+			lat, lon = temp[2], temp[3]
+			dep, mag = temp[4], temp[5]
 			dec_time=get_time(year_str,time_str);
 			ofile.write(str(dec_time)+" "+lon+" "+lat+" "+dep+" "+mag+"\n");
 	ofile.close();

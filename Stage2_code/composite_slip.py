@@ -13,24 +13,23 @@ import util_general_functions
 
 
 def main_program(time_window, Family_Summaries, mapping_data):
-    min_lon = -124.75;
-    max_lon = -124.25;
-    min_lat = 40.25;
-    max_lat = 40.36;  # this gets the main cluster in the MTJ
+    min_lon, max_lon = -124.75, -124.25;
+    min_lat, max_lat = 40.25, 40.36;  # this gets the main cluster in the MTJ
     no_slip_rates_cutoff = 1.0;  # If the family spans less than this # of years, we don't consider it for slip rates.
+    bg_catalog_file = mapping_data + '/ncsn.txyzm'
 
     start_time, end_time = time_window[0], time_window[1]
 
     [lat, lon, dep, timing, mag, n_seq] = read_file(Family_Summaries, no_slip_rates_cutoff);  # read family locations
-    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 18, 30, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, "Integrated Repeater Slip History Below 18 km", 1);
+    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 18, 27, lat, lon, dep, timing, mag, n_seq, start_time,
+                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History Below 18 km", 1);
     # make_map(min_lon, max_lon, min_lat, max_lat, 18, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History Below 18 km");
     make_composite_plot(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, "Integrated Repeater Slip History Above 18 km", 0);
+                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History Above 18 km", 0);
     # make_map(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History Above 18 km");
 
-    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, "Integrated Repeater Slip History All Depths", 0);
+    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 0, 27, lat, lon, dep, timing, mag, n_seq, start_time,
+                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History All Depths", 0);
     # make_map(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History All Depths");
 
     print("Composite Slip Diagrams created!");
@@ -117,18 +116,16 @@ def add_large_events(axarr, max_slip, start_time, end_time, mapping_data, min_ma
     return axarr;
 
 
-def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, start_time, end_time, mapping_data,
+def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, start_time, end_time, eq_file,
                               axarr):
     # Get seismicity from the rest of the newtork in this box.
     network_time = []  # the time series of when events happen in the box.
     MINIMUM_MAG = 0.5;
-    input_file = open(mapping_data + "/hypodd.txyzm", 'r');
+    input_file = open(eq_file, 'r');
     for line in input_file:
         temp = line.split();
-        test_lon = float(temp[1]);
-        test_lat = float(temp[2]);
-        test_dep = float(temp[3]);
-        test_mag = float(temp[4]);
+        test_lon, test_lat = float(temp[1]), float(temp[2]);
+        test_dep, test_mag = float(temp[3]), float(temp[4]);
         test_timing = float(temp[0]);
         if min_lat < test_lat < max_lat:
             if min_lon < test_lon < max_lon:
@@ -171,7 +168,7 @@ def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_d
 
 
 def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep, timing, mag, n_seq,
-                        start_time, end_time, mapping_data, plot_name, fancy_labels):
+                        start_time, end_time, mapping_data, bg_eq_file, plot_name, fancy_labels):
     plt.figure();
     g, axarr = plt.subplots(2, sharex=True, figsize=(10, 7), dpi=300)
 
@@ -242,7 +239,7 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
     a1.set_ylim([-2.2, max(slip) + 0.2]);
 
     axarr = add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, start_time, end_time,
-                                      mapping_data, axarr);
+                                      bg_eq_file, axarr);
     axarr = add_large_events(axarr, max_slip, start_time, end_time, mapping_data, min_mag=5.5);  # min_mag for events
 
     if fancy_labels == 1:

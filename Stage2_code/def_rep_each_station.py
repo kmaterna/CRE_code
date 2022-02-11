@@ -32,24 +32,21 @@ def CRE_post_analysis(MyParams, output_dir):
 
     # # OPTIONAL IN ANY SEQUENCE:
     # HISTOGRAMS
-    mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list, MyParams.station_locations);
+    # mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list, MyParams.station_locations);
 
     # These two are right now very specific to Mendocino.
     generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries,
                                              MyParams.mapping_data_specific);
     composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data_specific);
 
-    view_families.view_families(MyParams.time_window, MyParams.families_summaries,
-                                MyParams.station_locations, MyParams.mapping_data_general, output_dir,
-                                families=(0));  # 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
-    # Broken box formatting in view_families
-
-    # GMT CROSS-SECTIONS, SLIP HISTORIES, SPACE-TIME DIAGRAMS, METADATA PLOTS
-    # These are moderately specific to Mendocino; changes necessary for other areas.
-    gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries,
-                                        MyParams.station_locations, MyParams.mapping_code,
-                                        MyParams.mapping_data_general, MyParams.mapping_data_specific);
-
+    # view_families.view_families(MyParams.time_window, MyParams.families_summaries,
+    #                             MyParams.station_locations, MyParams.mapping_data_general, output_dir,
+    #                             families=(-1,));  # 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+    #
+    # # GMT CROSS-SECTIONS: specific to Mendocino; changes necessary for other areas.
+    # gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries,
+    #                                     MyParams.station_locations, MyParams.mapping_code,
+    #                                     MyParams.mapping_data_general, MyParams.mapping_data_specific);
     return;
 
 
