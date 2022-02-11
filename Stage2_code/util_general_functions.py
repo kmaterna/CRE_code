@@ -5,6 +5,8 @@ That are common to most scripts to analyze CRE familes.
 
 from obspy import read
 import numpy as np
+import datetime as dt
+import collections
 
 
 def get_dirs_for_station(station_location_file):
@@ -158,3 +160,63 @@ def event_slip(Magnitude):
     Mo = np.power(10, 16.1 + 1.5 * Magnitude);  # Hanks and Kanamori, 1979
     d = np.power(10, -2.36 + 0.17 * np.log10(Mo));  # Nadeau and Johnson, 1998
     return d;
+
+
+
+# ---------- EARTHQUAKE CATALOG FOR BACKGROUND SEISMICITY ------- #
+Catalog_EQ = collections.namedtuple("Catalog_EQ", ["dt", "decdate", "lon", "lat", "depth", "mag"]);
+
+def read_txyzm(infile):
+    input_file = open(infile, 'r');
+    MyCat = [];
+    for line in input_file:
+        temp = line.split();
+        [time, lon, lat, dep, mag] = [float(temp[0]), float(temp[1]), float(temp[2]), float(temp[3]), float(temp[4])];
+        oneEQ = Catalog_EQ(dt=None, decdate=time, lon=lon, lat=lat, depth=dep, mag=mag);
+        MyCat.append(oneEQ);
+    input_file.close();
+    return MyCat;
+
+
+def read_humanreadable(infile):
+    # Format: 1984/02/28 1984.16164384 40.42982 -125.13354 4.765 5.20 NAME
+    input_file = open(infile, 'r');
+    MyCat = [];
+    for line in input_file:
+        if line.split()[0] == '#':
+            continue;
+        temp = line.split();
+        time, lon, lat, dep, mag = float(temp[1]), float(temp[3]), float(temp[2]), float(temp[4]), float(temp[5]);
+        datestr = temp[0];
+        oneEQ = Catalog_EQ(dt=dt.datetime.strptime(datestr, "%Y/%m/%d"), decdate=time, lon=lon, lat=lat,
+                           depth=dep, mag=mag);
+        MyCat.append(oneEQ);
+    return MyCat;
+
+
+def filter_to_bounding_box(MyCat, bbox):
+    # bbox is [E, W, S, N, top, bottom]
+    newcat = [];
+    for item in MyCat:
+        if bbox[0] < item.lon < bbox[1]:
+            if bbox[2] < item.lat < bbox[3]:
+                if bbox[4] < item.depth < bbox[5]:
+                    newcat.append(item);
+    return newcat;
+
+
+def filter_to_starttime_endtime(MyCat, starttime, endtime):
+    # everything in decdates right now.
+    newcat = [];
+    for item in MyCat:
+        if starttime < item.decdate < endtime:
+            newcat.append(item);
+    return newcat;
+
+
+def filter_to_mag_range(MyCat, minmag, maxmag):
+    newcat = [];
+    for item in MyCat:
+        if minmag < item.mag < maxmag:
+            newcat.append(item);
+    return newcat;

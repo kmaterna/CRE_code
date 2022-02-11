@@ -4,7 +4,6 @@ September 29, 2016
 This script takes a series of repeating earthquake families and makes a composite time-series of slip.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
@@ -17,20 +16,23 @@ def main_program(time_window, Family_Summaries, mapping_data):
     min_lat, max_lat = 40.25, 40.36;  # this gets the main cluster in the MTJ
     no_slip_rates_cutoff = 1.0;  # If the family spans less than this # of years, we don't consider it for slip rates.
     bg_catalog_file = mapping_data + '/ncsn.txyzm'
-
-    start_time, end_time = time_window[0], time_window[1]
+    big_events_file = mapping_data + '/M5up.eq'
 
     [lat, lon, dep, timing, mag, n_seq] = read_file(Family_Summaries, no_slip_rates_cutoff);  # read family locations
-    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 18, 27, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History Below 18 km", 1);
-    # make_map(min_lon, max_lon, min_lat, max_lat, 18, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History Below 18 km");
-    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History Above 18 km", 0);
-    # make_map(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History Above 18 km");
 
-    make_composite_plot(min_lon, max_lon, min_lat, max_lat, 0, 27, lat, lon, dep, timing, mag, n_seq, start_time,
-                        end_time, mapping_data, bg_catalog_file, "Integrated Repeater Slip History All Depths", 0);
-    # make_map(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, mag, n_seq, start_time, end_time, mapping_data, "Integrated Repeater Slip History All Depths");
+    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 18, 27], lat, lon, dep, timing, mag, n_seq, time_window,
+                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History Below 18 km", 1);
+    make_map(min_lon, max_lon, min_lat, max_lat, 18, 27, lat, lon, dep, timing, n_seq, time_window,
+             big_events_file, "Integrated Repeater Slip History Below 18 km");
+    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 0, 18], lat, lon, dep, timing, mag, n_seq, time_window,
+                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History Above 18 km", 0);
+    make_map(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, n_seq, time_window,
+             big_events_file, "Integrated Repeater Slip History Above 18 km");
+
+    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 0, 27], lat, lon, dep, timing, mag, n_seq, time_window,
+                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History All Depths", 0);
+    make_map(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, n_seq, time_window,
+             big_events_file, "Integrated Repeater Slip History All Depths");
 
     print("Composite Slip Diagrams created!");
     return;
@@ -40,22 +42,20 @@ def read_file(families_summary, no_slip_rates_cutoff):
     # Starts with "Family_Summaries.txt"
     # Makes a list of latitude, longitude, depth, timing, magnitude, and family_number for each event in family file.
     input_file1 = open(families_summary, 'r')
-    total_lat, total_lon, total_dep, total_timing, total_mag = [], [], [], [], [];
-    n_seq = []  # initialize arrays to zero.
+    total_lat, total_lon, total_dep, total_timing, total_mag, n_seq = [], [], [], [], [], [];
 
     for line in input_file1:
         # get timing and metadata for each family.
         number_of_sequence = int(line.split()[1]);
-        [_, _, fam_time, fam_mag, _, _, mean_lon, mean_lat, mean_depth,
-         _] = util_general_functions.read_family_line(line);
+        [_, _, fam_time, fam_mag, _, _, avg_lon, avg_lat, avg_dep, _] = util_general_functions.read_family_line(line);
 
         if (fam_time[-1] - fam_time[0]) > no_slip_rates_cutoff:  # if the family from start-to-finish
             # spans more than some number of years, then we count it.
 
             for i in range(len(fam_time)):
-                total_lat.append(mean_lat)
-                total_lon.append(mean_lon)
-                total_dep.append(mean_depth)
+                total_lat.append(avg_lat)
+                total_lon.append(avg_lon)
+                total_dep.append(avg_dep)
                 total_timing.append(fam_time[i])
                 total_mag.append(fam_mag[i]);
                 n_seq.append(number_of_sequence);
@@ -66,8 +66,7 @@ def read_file(families_summary, no_slip_rates_cutoff):
 
 def add_fancy_labels(axarr):
     # For the faster-slip period of time:
-    starttime = 2014.5;
-    endtime = 2015.03;
+    starttime, endtime = 2014.5, 2015.03;
     level = 100;
     axarr[1].plot([starttime, endtime], [level, level], color='black');
     axarr[1].plot([starttime, starttime], [level - 10, level + 10], color='black')
@@ -75,66 +74,43 @@ def add_fancy_labels(axarr):
     axarr[1].text(2014.35, level - 50, " More\nActive")
 
     # For the slower-slip period of time:
-    starttime = 2015.25;
-    endtime = 2016.89;
+    starttime, endtime = 2015.25, 2016.89;
     level = 100;
     axarr[1].plot([starttime, endtime], [level, level], color='black');
     axarr[1].plot([starttime, starttime], [level - 10, level + 10], color='black')
     axarr[1].plot([endtime, endtime], [level - 10, level + 10], color='black')
     axarr[1].text(starttime + 0.2, level - 20, "Less Active")
-
     return axarr;
 
 
-def add_large_events(axarr, max_slip, start_time, end_time, mapping_data, min_mag):
+def add_large_events(axarr, max_slip, start_time, end_time, mapping_file, min_mag):
     ax1 = axarr[1];
-    source_file = open(mapping_data + "/M5up.eq", 'r')
-    for line in source_file:
-        temp = line.split()
-        if temp[0] == '#':
-            continue;
-        time = float(temp[1]);
-        mag = float(temp[-2])
-        if (time > start_time) and (time < end_time):
-            if mag >= min_mag:
-
-                if temp[1] == "2010.09589041":
-                    plotting_epsilon = 0.58;  # we need to offset the label because of two closely spaced events.
-                    plotting_end = "";
-                elif temp[1] == "2010.02739726":
-                    plotting_epsilon = 0.06;
-                    plotting_end = ",";
-                else:
-                    plotting_epsilon = 0.04;  # the label-plotting offset from the black line.
-                    plotting_end = "";
-
-                ax1.plot([time, time], [0, max_slip], '--k')
-                mag_str = str(temp[5])
-                ax1.text(time + plotting_epsilon, 0.3, "M" + mag_str[0:3] + plotting_end)
-    source_file.close();
-
+    MyCat = util_general_functions.read_humanreadable(mapping_file);
+    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = util_general_functions.filter_to_mag_range(MyCat, min_mag, 10);
+    for item in MyCat:
+        if item.decdate == 2010.09589041:
+            plotting_epsilon = 0.58;  # we need to offset the label because of two closely spaced events.
+            plotting_end = "";
+        elif item.decdate == 2010.02739726:
+            plotting_epsilon = 0.06;
+            plotting_end = ",";
+        else:
+            plotting_epsilon = 0.04;  # the label-plotting offset from the black line.
+            plotting_end = "";
+        ax1.plot([item.decdate, item.decdate], [0, max_slip], '--k')
+        ax1.text(item.decdate + plotting_epsilon, 0.3, "M" + str(item.mag) + plotting_end)
     return axarr;
 
 
-def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, start_time, end_time, eq_file,
-                              axarr):
+def add_cumulative_seismicity(bbox, start_time, end_time, eq_file, axarr):
     # Get seismicity from the rest of the newtork in this box.
-    network_time = []  # the time series of when events happen in the box.
     MINIMUM_MAG = 0.5;
-    input_file = open(eq_file, 'r');
-    for line in input_file:
-        temp = line.split();
-        test_lon, test_lat = float(temp[1]), float(temp[2]);
-        test_dep, test_mag = float(temp[3]), float(temp[4]);
-        test_timing = float(temp[0]);
-        if min_lat < test_lat < max_lat:
-            if min_lon < test_lon < max_lon:
-                if min_dep < test_dep < max_dep:
-                    if test_mag >= MINIMUM_MAG:
-                        if start_time < test_timing < end_time:
-                            # Now we have an event in our region of interest; let's add it to the plot.
-                            network_time.append(test_timing)
-                        # print test_timing;
+    MyCat = util_general_functions.read_txyzm(eq_file);
+    MyCat = util_general_functions.filter_to_bounding_box(MyCat, bbox);
+    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = util_general_functions.filter_to_mag_range(MyCat, MINIMUM_MAG, 10);
+    network_time = [x.decdate for x in MyCat];  # the time series of when events happen in the box.
 
     # Making the seismicity time series; this is the staircase time series
     n_total_eq, total_eq_ts = [], []
@@ -167,8 +143,9 @@ def add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_d
     return axarr;
 
 
-def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep, timing, mag, n_seq,
-                        start_time, end_time, mapping_data, bg_eq_file, plot_name, fancy_labels):
+def make_composite_plot(bbox, lat, lon, dep, timing, mag, n_seq, time_window, bg_eq_file, big_events_file,
+                        plot_name, fancy_labels):
+    start_time, end_time = time_window[0], time_window[1]
     plt.figure();
     g, axarr = plt.subplots(2, sharex=True, figsize=(10, 7), dpi=300)
 
@@ -180,10 +157,10 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
 
     # Get events that are within the box and time range of interest.
     for i in range(len(lat)):
-        if min_lat < lat[i] < max_lat:
-            if min_lon < lon[i] < max_lon:
-                if min_dep < dep[i] < max_dep:
-                    if start_time < timing[i] < end_time:
+        if bbox[2] < lat[i] < bbox[3]:
+            if bbox[0] < lon[i] < bbox[1]:
+                if bbox[4] < dep[i] < bbox[5]:
+                    if time_window[0] < timing[i] < time_window[1]:
                         # Now we have an event in our region and time of interest; let's add its slip to the plot.
                         plot_timing.append(timing[i])
                         plot_mag.append(mag[i])
@@ -208,7 +185,7 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
 
     # Writing output so that we can make an estimate of slip rate slope and uncertainty.
     # going to use scipy curve fitting.
-    outfile = open("slip_curve_" + str(min_dep) + "_" + str(max_dep) + "_km_depth.txt", 'w');
+    outfile = open("slip_curve_" + str(bbox[4]) + "_" + str(bbox[5]) + "_km_depth.txt", 'w');
     cumulative_slip = 0;
     for i in range(len(plot_timing)):
         cumulative_slip += util_general_functions.event_slip(
@@ -217,7 +194,6 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
     outfile.close();
 
     # # GET THE SLIP RATE
-
     # Plot the lollipop diagram
     a1 = axarr[0];
     for i in range(len(plot_timing)):
@@ -238,9 +214,8 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
         number_of_families) + " sequences]");
     a1.set_ylim([-2.2, max(slip) + 0.2]);
 
-    axarr = add_cumulative_seismicity(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, start_time, end_time,
-                                      bg_eq_file, axarr);
-    axarr = add_large_events(axarr, max_slip, start_time, end_time, mapping_data, min_mag=5.5);  # min_mag for events
+    axarr = add_cumulative_seismicity(bbox, start_time, end_time, bg_eq_file, axarr);
+    axarr = add_large_events(axarr, max_slip, start_time, end_time, big_events_file, min_mag=5.5);  # min_mag for events
 
     if fancy_labels == 1:
         _axarr = add_fancy_labels(axarr);
@@ -250,70 +225,42 @@ def make_composite_plot(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, la
     return;
 
 
-def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep, timing, mag, n_seq, start_time,
-             end_time, mapping_data, plot_name):
+def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep, timing, n_seq, time_window,
+             big_eq_file, plot_name):
     # Getting the large events.
-    source_file = open(mapping_data + "/M5up.eq", 'r')
-    xmin, xmax = -125.6, -123.4
-    ymin, ymax = 39.4, 41.4
-    big_time, big_mag, big_lon, big_lat, big_dep = [], [], [], [], []
-    for line in source_file:
-        temp = line.split()
-        if temp[0] == '#':
-            break;
-        test_time = float(temp[1]);
-        test_mag = float(temp[-2]);
-        if (test_time > start_time) and (test_time < end_time):
-            # if (test_time>1984.0) and (test_time<end_time):
-            if test_mag > 5.5:
-                big_time.append(float(temp[1]));
-                big_mag.append(float(temp[-2]));
-                big_lon.append(float(temp[3]));
-                big_lat.append(float(temp[2]));
-                big_dep.append(float(temp[4]));
-    source_file.close();
+    start_time, end_time = time_window[0], time_window[1]
+    MyCat = util_general_functions.read_humanreadable(big_eq_file);
+    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = util_general_functions.filter_to_mag_range(MyCat, 5.5, 10);
+    MyCat = util_general_functions.filter_to_bounding_box(MyCat, [-125.6, -123.4, 39.4, 41.4, 0, 40]);
 
     _fig = plt.figure();
     ax0 = plt.subplot2grid((4, 1), (0, 0), rowspan=3)
-    ax1 = plt.subplot2grid((4, 1), (3, 0),
-                           rowspan=1)  # 3 rows, 1 column. Second coordinates are top left corner position.
+    ax1 = plt.subplot2grid((4, 1), (3, 0), rowspan=1)  # 3 rows, 1 column. Second coordinates are top left corner.
 
     # Making map view.
     ax0.plot(lon, lat, '.')
     for x in range(len(lon)):
         ax0.text(lon[x], lat[x], str(n_seq[x]), fontsize=8);
-    ax0.plot([min_lon, max_lon, max_lon, min_lon, min_lon], [min_lat, min_lat, max_lat, max_lat, min_lat],
-             'r');  # draw a rectangle
-    for i in range(len(big_lon)):
-        if (big_lon[i] > xmin) and (big_lon[i] < xmax):
-            ax0.text(big_lon[i], big_lat[i], str(big_time[i])[0:4] + 'M' + str(big_mag[i]));
-            if (big_lon[i] > min_lon) and (big_lon[i] < max_lon) and (big_lat[i] > min_lat) and (
-                    big_lat[i] < max_lat) and (big_dep[i] > min_dep) and (big_dep[i] < max_dep):
-                ax0.scatter(big_lon[i], big_lat[i], c='b');
-            else:
-                ax0.scatter(big_lon[i], big_lat[i], c='c');
-    [ca_lon, ca_lat] = np.loadtxt(mapping_data + "/CA_bdr", unpack=True);
-    ax0.plot(ca_lon, ca_lat, 'k');
+    # draw rectangle
+    ax0.plot([min_lon, max_lon, max_lon, min_lon, min_lon], [min_lat, min_lat, max_lat, max_lat, min_lat], 'r');
+    for item in MyCat:
+        ax0.text(item.lon, item.lat, str(item.decdate)[0:4] + 'M' + str(item.mag));
+        ax0.scatter(item.lon, item.lat, c='b');
     ax0.set_title("Map of Repeaters and Background Events");
-    ax0.set_xlim([xmin, xmax])
-    ax0.set_ylim([ymin, ymax])
+    ax0.set_xlim([min_lon, max_lon])
+    ax0.set_ylim([min_lat, max_lat])
     ax0.set_ylabel("Latitude")
 
     # Making depth view.
     ax1.plot(lon, dep, '.')
     ax1.plot([min_lon, min_lon, max_lon, max_lon, min_lon], [min_dep, max_dep, max_dep, min_dep, min_dep], 'r')
-    plt.scatter(big_lon, big_dep, c='m');
-    for i in range(len(big_lon)):
-        if (big_lon[i] > xmin) and (big_lon[i] < xmax):
-            ax1.text(big_lon[i], big_dep[i], str(big_time[i])[0:6] + 'M' + str(big_mag[i]));
-            if (big_lon[i] > min_lon) and (big_lon[i] < max_lon) and (big_dep[i] > min_dep) and (
-                    big_dep[i] < max_dep) and (big_lat[i] > min_lat) and (big_lat[i] < max_lat):
-                ax1.scatter(big_lon[i], big_dep[i], c='b');
-            else:
-                ax1.scatter(big_lon[i], big_dep[i], c='c');
+    for item in MyCat:
+        ax0.text(item.lon, item.depth, str(item.decdate)[0:4] + 'M' + str(item.mag));
+        ax0.scatter(item.lon, item.depth, c='b');
     plt.gca().invert_yaxis();
     ax1.set_xlabel("Longitude")
     ax1.set_ylabel("Depth (km)")
-    ax1.set_xlim([xmin, xmax])
+    ax1.set_xlim([min_lon, max_lon])
     plt.savefig("Map_View_" + plot_name + ".png");
     plt.close();

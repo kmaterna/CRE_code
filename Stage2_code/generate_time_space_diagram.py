@@ -30,8 +30,8 @@ def main_program(time_window, family_summaries, mapping_data):
                        time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time);  # deepest
 
     # More complicated, colored by depth, zoomed in and zoomed out:
-    time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 27], dont_plot_family, time_window[0],
-                                time_window[1], bg_catalog_file, large_event_catalog_file, colorlist);
+    # time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 27], dont_plot_family, time_window[0],
+    #                             time_window[1], bg_catalog_file, large_event_catalog_file, colorlist);
 
     print("Space-Time Diagrams Created!");
     return;
@@ -39,15 +39,10 @@ def main_program(time_window, family_summaries, mapping_data):
 
 def plot_recent_M5_eqs(ax, mapping_file):  # plot stars for major earthquakes in the time range.
     # record of major >M5 earthquakes in: "latitude longitude depth time magnitude"
-    input_file = open(mapping_file, 'r');  # large event file
-    for line in input_file:
-        temp = line.split();
-        comment_flag = temp[0]
-        if comment_flag == '#':  # this allows us to add comments to the M5 earthquake file.
-            continue;
-        [time, lat, lon, _, mag] = [float(temp[1]), float(temp[2]), float(temp[3]), float(temp[4]), float(temp[5])];
-        if 40.20 < lat < 40.50:
-            ax.plot(lon, time, 'D', markersize=mag * 2, c='red')
+    MyCat = util_general_functions.read_humanreadable(mapping_file);
+    MyCat = util_general_functions.filter_to_bounding_box(MyCat, [-360, 360, 40.20, 40.50, 0, 50]);
+    for item in MyCat:
+        ax.plot(item.lon, item.decdate, 'D', markersize=item.mag * 2, c='red');
     return ax;
 
 
@@ -76,32 +71,22 @@ def plot_M6p5_eq(ax):  # M6.5 Earthquake in 2010
 
 
 def plot_eq_cloud(ax, dep_min, dep_max, lat_min, lat_max, eq_file):
-    input_file = open(eq_file, 'r');
-    for line in input_file:
-        temp = line.split();
-        [time, lon, lat, dep] = [float(temp[0]), float(temp[1]), float(temp[2]), float(temp[3])];
-        if (dep > dep_min) and (dep < dep_max):
-            if (lat > lat_min) and (lat < lat_max):
-                ax.plot(lon, time, '.', color='gray');
+    bg_cat = util_general_functions.read_txyzm(eq_file);
+    filt_cat = util_general_functions.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
+    ax.plot([x.lon for x in filt_cat], [x.decdate for x in filt_cat], '.', color='gray');
     return ax;
 
 
 def plot_eq_cloud_afterM5p7(ax, dep_min, dep_max, lat_min, lat_max, time_start, dot_color, eq_file):
-    input_file = open(eq_file, 'r');
-    for line in input_file:
-        temp = line.split();
-        [time, lon, lat, dep] = [float(temp[0]), float(temp[1]), float(temp[2]), float(temp[3])];
-        if (dep > dep_min) and (dep < dep_max):
-            if (lat > lat_min) and (lat < lat_max):
-                if time >= time_start:
-                    ax.plot(lon, time, '.', color=dot_color);
+    bg_cat = util_general_functions.read_txyzm(eq_file);
+    filt_cat = util_general_functions.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
+    filt_cat = util_general_functions.filter_to_starttime_endtime(filt_cat, time_start, 2030.0);
+    ax.plot([x.lon for x in filt_cat], [x.decdate for x in filt_cat], '.', color=dot_color);
     return ax;
 
 
 def axis_format(ax, start_time, end_time):  # useful formatting for the axis of the plot.
     ax.grid();
-    # ax.plot([-124.36,-124.36],[start_time-0.2, end_time+0.2],'-.k');  # the longitude of the Mendocino Coastline
-    # ax.text(-124.36,start_time+7.2,'Mendocino Coastline',rotation='vertical',fontsize=10);  # label
     ax.set_ylim([start_time - 0.2, end_time + 0.2])
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
     ax.get_xaxis().get_major_formatter().set_useOffset(False)  # keeps the labels in regular (not engineering) notation
@@ -139,8 +124,7 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
                     time_mapping.append(time[i]);
                     mag_mapping.append(magsq[i]);
                     depth_mapping.append(depth[i]);
-                ax.plot([mean_lon, mean_lon], [time[0], time[-1]],
-                        color=colorlist[(i % 7)]);  # looks like it's gonna be a blue line with dots
+                ax.plot([mean_lon, mean_lon], [time[0], time[-1]], color=colorlist[(i % 7)]);  # blue line with dots
 
     ax1 = ax.scatter(lon_mapping, time_mapping, s=mag_mapping, c=depth_mapping);  # one dot for each event
 
@@ -183,7 +167,7 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
 
     for line1 in input_file1:  # for each family
 
-        [_, _, time, mag, depth, _, mean_lon, mean_lat, mean_depth, _] = util_general_functions.read_family_line(line1)
+        [_, _, time, _mag, depth, _, mean_lon, mean_lat, mean_depth, _] = util_general_functions.read_family_line(line1)
 
         # Please plot something for each family
         if time[-1] - time[0] > dont_plot_family:
