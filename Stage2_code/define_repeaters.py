@@ -9,13 +9,11 @@ your physical parameters.  Then run it!
 """
 
 import numpy as np
-import collections
+import collections, sys
 from subprocess import call
-import sys
 
 sys.path.append(".");  # add current directory to python path
-import make_histograms_plots
-import util_general_functions
+import make_histograms_plots, util_general_functions
 
 Params = collections.namedtuple('Params', [
     'station_name',
@@ -125,10 +123,9 @@ def print_out_statements(MyParams):
         print("\nYou have chosen to define repeaters as: ");
         print("The %s of all coherence values where SNR > %f ." % (MyParams.statistic.upper(), MyParams.snr_cutoff));
         print("Coherence cutoff = %f." % MyParams.cutoff);
-        print("Available frequencies = %f to %f Hz." % (
-        MyParams.lowest_chosen_frequency, MyParams.highest_chosen_frequency));
-        print(
-            "Repeaters have magnitudes less than %f magnitude units apart." % MyParams.magnitude_difference_tolerance);
+        print("Available frequencies = %f to %f Hz." % (MyParams.lowest_chosen_frequency,
+                                                        MyParams.highest_chosen_frequency));
+        print("Repeaters are less than %f magnitude units apart." % MyParams.magnitude_difference_tolerance);
         if MyParams.plot_arg == 1:
             print("You have chosen to view plots of all of your repeaters.  ");
         print("-------------------------------------\n");
@@ -283,7 +280,8 @@ def compute(MyParams, Candidates_coh, Candidates_snr):
         # print "Minimum and maximum frequencies = %f Hz, %f Hz" %(min_freq, max_freq)
         elif MyParams.freq_method == "magnitude_based":
             min_freq = 1;
-            max_freq = determine_freqs_by_magnitude(M, MyParams.highest_chosen_frequency);
+            max_freq = determine_freqs_by_magnitude(Candidates_coh.ev1mag[i], Candidates_coh.ev2mag[i],
+                                                    MyParams.highest_chosen_frequency);
 
         # Cut to the range of useful frequencies.
         coh = Candidates_coh.coh_array[i];
@@ -298,8 +296,10 @@ def compute(MyParams, Candidates_coh, Candidates_snr):
         # !!!!!! Define the measure of coherence (usually mean or median)
         if MyParams.statistic == 'mean':
             coh_statistic = np.mean(coh[index_1:index_top])
-        if MyParams.statistic == 'median':
+        elif MyParams.statistic == 'median':
             coh_statistic = np.median(coh[index_1:index_top])
+        else:
+            coh_statistic = np.nan;
         if coh_statistic == np.nan:
             print("NAN!!!");
 
@@ -358,9 +358,12 @@ def compute(MyParams, Candidates_coh, Candidates_snr):
     return [Total_results, CRE_results];
 
 
-def determine_freqs_by_magnitude(mag, highest_chosen_frequency):
-    """ This determines the maximum frequency we would ever look at, based on the mean magnitude of the events.
-    Returns frequency in Hz. """
+def determine_freqs_by_magnitude(mag1, mag2, highest_chosen_frequency):
+    """
+    Determines the maximum frequency we would ever look at, as a function of the mean magnitude of two events.
+    Returns frequency in Hz.
+    """
+    mag = np.nanmean([mag1, mag2]);
     highest_frequency = highest_chosen_frequency;
     if mag > 2:
         highest_frequency = 16;  # Hz

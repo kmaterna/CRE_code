@@ -72,6 +72,7 @@ def read_family_line(line):
     # Go read in the timing and location information for each family from the files
     temp1 = line.split();
     num_events = int(temp1[3]);
+    family_id = line.split()[1]  # ID number of the family
 
     for i in range(0, num_events):
         thisname = temp1[5 + i]
@@ -99,7 +100,7 @@ def read_family_line(line):
     # Taking mean of only hypoDD locations
     [mean_lon, mean_lat, mean_depth] = get_average_location(line);
 
-    return [lon, lat, time, mag, depth, type_of_loc, mean_lon, mean_lat, mean_depth, slip_rate];
+    return [lon, lat, time, mag, depth, type_of_loc, mean_lon, mean_lat, mean_depth, slip_rate, family_id];
 
 
 def get_average_location(line):
@@ -165,7 +166,7 @@ def event_slip(Magnitude):
 # ---------- EARTHQUAKE CATALOG FOR BACKGROUND SEISMICITY ------- #
 Catalog_EQ = collections.namedtuple("Catalog_EQ", ["dt", "decdate", "lon", "lat", "depth", "mag"]);
 CRE_Family = collections.namedtuple("CRE_Family", ["ev_lon", "ev_lat", "ev_time", "ev_mag", "ev_depth", "ev_name",
-                                                   "type_of_loc", "lon", "lat", "depth", "slip_rate"]);
+                                                   "type_of_loc", "lon", "lat", "depth", "slip_rate", "family_id"]);
 # lon, lat, depth are AVERAGE for the entire family.   ev_lon etc. are lists for each event in the family.
 
 def read_txyzm(infile):
@@ -228,10 +229,10 @@ def read_families_into_structure(family_summary_file):
     family_list = [];
     input_file1 = open(family_summary_file, 'r');
     for line1 in input_file1:  # for each family
-        ev_lon, ev_lat, ev_time, ev_mag, ev_depth, type_of_loc, lon, lat, depth, slip_rate = read_family_line(line1)
+        ev_lon, ev_lat, ev_time, ev_mag, ev_depth, type_of_loc, lon, lat, depth, slip_rate, id = read_family_line(line1)
         myfamily = CRE_Family(ev_lon=ev_lon, ev_lat=ev_lat, ev_time=ev_time, ev_mag=ev_mag, ev_depth=ev_depth,
                               type_of_loc=type_of_loc, lon=lon, lat=lat, depth=depth, slip_rate=slip_rate,
-                              ev_name=None);
+                              ev_name=None, family_id=id);
         family_list.append(myfamily)
     input_file1.close();
     return family_list;

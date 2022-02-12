@@ -57,7 +57,7 @@ def make_waveform_plot(family_of_interest, event_names, magnitude, station, sac_
     x = np.arange(0, 20.48, 0.01)
     number_of_events = len(event_names);
     plt.figure()
-    g, axarr = plt.subplots(number_of_events, sharex=True)
+    g, axarr = plt.subplots(number_of_events, sharex='all')
     for i in range(number_of_events):
         name = event_names[i]
 

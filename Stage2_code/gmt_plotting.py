@@ -127,7 +127,7 @@ def mendocino_familywise_gmt(families_summaries, mapping_code, mapping_data_gene
     for line in input_file:
 
         [fam_lon, _, _, _, _, fam_loctype, mean_lon, mean_lat, mean_depth,
-         slip_rate] = util_general_functions.read_family_line(line);
+         slip_rate, _] = util_general_functions.read_family_line(line);
 
         if slip_rate > -1.0:
             if "hypodd" in fam_loctype:
@@ -181,7 +181,7 @@ def anza_familywise_gmt(families_summaries, mapping_code, mapping_data_general, 
     for line in input_file:
 
         [_, _, _, _, _, fam_loctype, mean_lon, mean_lat, mean_depth,
-         slip_rate] = util_general_functions.read_family_line(line);
+         slip_rate, _] = util_general_functions.read_family_line(line);
 
         # output_nums.write(str(mean_lon)+" "+str(mean_lat)+" "+str(mean_depth)+" "+str(len(fam_lon))+" \n");
         if "hypodd" in fam_loctype:

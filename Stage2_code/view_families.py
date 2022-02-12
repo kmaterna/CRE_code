@@ -77,7 +77,7 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     family_number = int(temp[1]);
     number_of_events = int(temp[3])
     [longitude, latitude, event_time, magnitude, depth, _type_of_loc, mean_lon, mean_lat, _mean_depth,
-     slip_rate] = util_general_functions.read_family_line(myline);
+     slip_rate, _] = util_general_functions.read_family_line(myline);
 
     # Get the names and metadata of the files in the family.
     event_names = []

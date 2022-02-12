@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import sys
 
 sys.path.append(".");  # add current directory to python path
-import util_general_functions
+import util_general_functions as utils
 
 
 def main_program(time_window, Family_Summaries, mapping_data):
@@ -18,50 +18,21 @@ def main_program(time_window, Family_Summaries, mapping_data):
     bg_catalog_file = mapping_data + '/ncsn.txyzm'
     big_events_file = mapping_data + '/M5up.eq'
 
-    [lat, lon, dep, timing, mag, n_seq] = read_file(Family_Summaries, no_slip_rates_cutoff);  # read family locations
-
-    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 18, 27], lat, lon, dep, timing, mag, n_seq, time_window,
-                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History Below 18 km", 1);
-    make_map(min_lon, max_lon, min_lat, max_lat, 18, 27, lat, lon, dep, timing, n_seq, time_window,
-             big_events_file, "Integrated Repeater Slip History Below 18 km");
-    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 0, 18], lat, lon, dep, timing, mag, n_seq, time_window,
-                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History Above 18 km", 0);
-    make_map(min_lon, max_lon, min_lat, max_lat, 00, 18, lat, lon, dep, timing, n_seq, time_window,
-             big_events_file, "Integrated Repeater Slip History Above 18 km");
-
-    make_composite_plot([min_lon, max_lon, min_lat, max_lat, 0, 27], lat, lon, dep, timing, mag, n_seq, time_window,
-                        bg_catalog_file, big_events_file, "Integrated Repeater Slip History All Depths", 0);
-    make_map(min_lon, max_lon, min_lat, max_lat, 0, 30, lat, lon, dep, timing, n_seq, time_window,
-             big_events_file, "Integrated Repeater Slip History All Depths");
+    make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 18, 27], time_window, bg_catalog_file,
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Below 18 km", 1);
+    make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 18, 27, time_window, big_events_file,
+             "Integrated Repeater Slip History Below 18 km");
+    make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 0, 18], time_window, bg_catalog_file,
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Above 18 km", 0);
+    make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 0, 18, time_window, big_events_file,
+             "Integrated Repeater Slip History Above 18 km");
+    make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 0, 27], time_window, bg_catalog_file,
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History All Depths", 0);
+    make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 0, 30, time_window, big_events_file,
+             "Integrated Repeater Slip History All Depths");
 
     print("Composite Slip Diagrams created!");
     return;
-
-
-def read_file(families_summary, no_slip_rates_cutoff):
-    # Starts with "Family_Summaries.txt"
-    # Makes a list of latitude, longitude, depth, timing, magnitude, and family_number for each event in family file.
-    input_file1 = open(families_summary, 'r')
-    total_lat, total_lon, total_dep, total_timing, total_mag, n_seq = [], [], [], [], [], [];
-
-    for line in input_file1:
-        # get timing and metadata for each family.
-        number_of_sequence = int(line.split()[1]);
-        [_, _, fam_time, fam_mag, _, _, avg_lon, avg_lat, avg_dep, _] = util_general_functions.read_family_line(line);
-
-        if (fam_time[-1] - fam_time[0]) > no_slip_rates_cutoff:  # if the family from start-to-finish
-            # spans more than some number of years, then we count it.
-
-            for i in range(len(fam_time)):
-                total_lat.append(avg_lat)
-                total_lon.append(avg_lon)
-                total_dep.append(avg_dep)
-                total_timing.append(fam_time[i])
-                total_mag.append(fam_mag[i]);
-                n_seq.append(number_of_sequence);
-
-    input_file1.close();
-    return [total_lat, total_lon, total_dep, total_timing, total_mag, n_seq]
 
 
 def add_fancy_labels(axarr):
@@ -85,9 +56,9 @@ def add_fancy_labels(axarr):
 
 def add_large_events(axarr, max_slip, start_time, end_time, mapping_file, min_mag):
     ax1 = axarr[1];
-    MyCat = util_general_functions.read_humanreadable(mapping_file);
-    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
-    MyCat = util_general_functions.filter_to_mag_range(MyCat, min_mag, 10);
+    MyCat = utils.read_humanreadable(mapping_file);
+    MyCat = utils.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = utils.filter_to_mag_range(MyCat, min_mag, 10);
     for item in MyCat:
         if item.decdate == 2010.09589041:
             plotting_epsilon = 0.58;  # we need to offset the label because of two closely spaced events.
@@ -106,10 +77,10 @@ def add_large_events(axarr, max_slip, start_time, end_time, mapping_file, min_ma
 def add_cumulative_seismicity(bbox, start_time, end_time, eq_file, axarr):
     # Get seismicity from the rest of the newtork in this box.
     MINIMUM_MAG = 0.5;
-    MyCat = util_general_functions.read_txyzm(eq_file);
-    MyCat = util_general_functions.filter_to_bounding_box(MyCat, bbox);
-    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
-    MyCat = util_general_functions.filter_to_mag_range(MyCat, MINIMUM_MAG, 10);
+    MyCat = utils.read_txyzm(eq_file);
+    MyCat = utils.filter_to_bounding_box(MyCat, bbox);
+    MyCat = utils.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = utils.filter_to_mag_range(MyCat, MINIMUM_MAG, 10);
     network_time = [x.decdate for x in MyCat];  # the time series of when events happen in the box.
 
     # Making the seismicity time series; this is the staircase time series
@@ -143,36 +114,43 @@ def add_cumulative_seismicity(bbox, start_time, end_time, eq_file, axarr):
     return axarr;
 
 
-def make_composite_plot(bbox, lat, lon, dep, timing, mag, n_seq, time_window, bg_eq_file, big_events_file,
+def make_composite_plot(families_summary, bbox, time_window, bg_eq_file, big_events_file, no_slip_rates_cutoff,
                         plot_name, fancy_labels):
     start_time, end_time = time_window[0], time_window[1]
     plt.figure();
-    g, axarr = plt.subplots(2, sharex=True, figsize=(10, 7), dpi=300)
+    g, axarr = plt.subplots(2, sharex='all', figsize=(10, 7), dpi=300)
 
+    myfamilies = utils.read_families_into_structure(families_summary);
+    myfamilies = utils.filter_to_bounding_box(myfamilies, bbox);
+
+    # Filter for long-lived families
+    longfamilies = [];
+    for family in myfamilies:
+        if (family.ev_time[-1] - family.ev_time[0]) > no_slip_rates_cutoff:  # if the family from start-to-finish
+            longfamilies.append(family);
+
+    # Start building the staircase plot
     plot_timing, plot_mag, ts, slip, n_families = [], [], [], [], []
     ts.append(start_time)
     slip_keep_level = 0
     slip.append(0)
     slip.append(0)  # initializing things for the slip history.
 
-    # Get events that are within the box and time range of interest.
-    for i in range(len(lat)):
-        if bbox[2] < lat[i] < bbox[3]:
-            if bbox[0] < lon[i] < bbox[1]:
-                if bbox[4] < dep[i] < bbox[5]:
-                    if time_window[0] < timing[i] < time_window[1]:
-                        # Now we have an event in our region and time of interest; let's add its slip to the plot.
-                        plot_timing.append(timing[i])
-                        plot_mag.append(mag[i])
-                        n_families.append(n_seq[i])
+    # Get individual events that are within the box and time range of interest.
+    for family in longfamilies:
+        for i in range(len(family.ev_depth)):
+            if time_window[0] < family.ev_time[i] < time_window[1]:
+                # Now we have an event in our region and time of interest; let's add its slip to the plot.
+                plot_timing.append(family.ev_time[i])
+                plot_mag.append(family.ev_mag[i])
 
-    number_of_families = len(set(n_families));  # the unique number of families that we observed in the blob.
+    number_of_families = len(longfamilies);  # the unique number of families that we observed in the blob.
     ordered_mag = [x for (y, x) in sorted(zip(plot_timing, plot_mag))]  # magnitude in an ordered list.
     plot_timing.sort();
 
     # plot the slip associated with each event (Nadeau and Johnson, 1998); this is the crazy staircase
     for i in range(len(plot_timing)):
-        d = util_general_functions.event_slip(ordered_mag[i]);
+        d = utils.event_slip(ordered_mag[i]);
         slip_keep_level += (d * 10.0) / number_of_families;  # *10 means millimeters
         ts.append(plot_timing[i])
         ts.append(plot_timing[i])
@@ -188,8 +166,7 @@ def make_composite_plot(bbox, lat, lon, dep, timing, mag, n_seq, time_window, bg
     outfile = open("slip_curve_" + str(bbox[4]) + "_" + str(bbox[5]) + "_km_depth.txt", 'w');
     cumulative_slip = 0;
     for i in range(len(plot_timing)):
-        cumulative_slip += util_general_functions.event_slip(
-            ordered_mag[i]) * 10.0 / number_of_families;  # *10 means millimeters
+        cumulative_slip += utils.event_slip(ordered_mag[i]) * 10.0 / number_of_families;  # *10 for millimeters
         outfile.write("%f %f \n" % (plot_timing[i], cumulative_slip));
     outfile.close();
 
@@ -225,26 +202,29 @@ def make_composite_plot(bbox, lat, lon, dep, timing, mag, n_seq, time_window, bg
     return;
 
 
-def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep, timing, n_seq, time_window,
+def make_map(families_summary, min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, time_window,
              big_eq_file, plot_name):
-    # Getting the large events.
+    # Getting large events.
     start_time, end_time = time_window[0], time_window[1]
-    MyCat = util_general_functions.read_humanreadable(big_eq_file);
-    MyCat = util_general_functions.filter_to_starttime_endtime(MyCat, start_time, end_time);
-    MyCat = util_general_functions.filter_to_mag_range(MyCat, 5.5, 10);
-    MyCat = util_general_functions.filter_to_bounding_box(MyCat, [-125.6, -123.4, 39.4, 41.4, 0, 40]);
+    bbox = [min_lon, max_lon, min_lat, max_lat, min_dep, max_dep]
+    MyCat = utils.read_humanreadable(big_eq_file);
+    MyCat = utils.filter_to_starttime_endtime(MyCat, start_time, end_time);
+    MyCat = utils.filter_to_mag_range(MyCat, 5.5, 10);
+    MyCat = utils.filter_to_bounding_box(MyCat, [-125.6, -123.4, 39.4, 41.4, 0, 40]);
 
     _fig = plt.figure();
     ax0 = plt.subplot2grid((4, 1), (0, 0), rowspan=3)
     ax1 = plt.subplot2grid((4, 1), (3, 0), rowspan=1)  # 3 rows, 1 column. Second coordinates are top left corner.
 
+    myfamilies = utils.read_families_into_structure(families_summary);
+    depth_slice_families = utils.filter_to_bounding_box(myfamilies, bbox);
+
     # Making map view.
-    ax0.plot(lon, lat, '.')
-    for x in range(len(lon)):
-        ax0.text(lon[x], lat[x], str(n_seq[x]), fontsize=8);
+    for family in depth_slice_families:
+        ax0.plot(family.lon, family.lat, '.');
     # draw rectangle
     ax0.plot([min_lon, max_lon, max_lon, min_lon, min_lon], [min_lat, min_lat, max_lat, max_lat, min_lat], 'r');
-    for item in MyCat:
+    for item in MyCat:   # big events
         ax0.text(item.lon, item.lat, str(item.decdate)[0:4] + 'M' + str(item.mag));
         ax0.scatter(item.lon, item.lat, c='b');
     ax0.set_title("Map of Repeaters and Background Events");
@@ -253,7 +233,8 @@ def make_map(min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, lat, lon, dep
     ax0.set_ylabel("Latitude")
 
     # Making depth view.
-    ax1.plot(lon, dep, '.')
+    for family in myfamilies:
+        ax1.plot(family.lon, family.depth, '.');
     ax1.plot([min_lon, min_lon, max_lon, max_lon, min_lon], [min_dep, max_dep, max_dep, min_dep, min_dep], 'r')
     for item in MyCat:
         ax0.text(item.lon, item.depth, str(item.decdate)[0:4] + 'M' + str(item.mag));
