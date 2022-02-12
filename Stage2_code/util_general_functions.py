@@ -162,9 +162,11 @@ def event_slip(Magnitude):
     return d;
 
 
-
 # ---------- EARTHQUAKE CATALOG FOR BACKGROUND SEISMICITY ------- #
 Catalog_EQ = collections.namedtuple("Catalog_EQ", ["dt", "decdate", "lon", "lat", "depth", "mag"]);
+CRE_Family = collections.namedtuple("CRE_Family", ["ev_lon", "ev_lat", "ev_time", "ev_mag", "ev_depth", "ev_name",
+                                                   "type_of_loc", "lon", "lat", "depth", "slip_rate"]);
+# lon, lat, depth are AVERAGE for the entire family.   ev_lon etc. are lists for each event in the family.
 
 def read_txyzm(infile):
     input_file = open(infile, 'r');
@@ -220,3 +222,16 @@ def filter_to_mag_range(MyCat, minmag, maxmag):
         if minmag < item.mag < maxmag:
             newcat.append(item);
     return newcat;
+
+
+def read_families_into_structure(family_summary_file):
+    family_list = [];
+    input_file1 = open(family_summary_file, 'r');
+    for line1 in input_file1:  # for each family
+        ev_lon, ev_lat, ev_time, ev_mag, ev_depth, type_of_loc, lon, lat, depth, slip_rate = read_family_line(line1)
+        myfamily = CRE_Family(ev_lon=ev_lon, ev_lat=ev_lat, ev_time=ev_time, ev_mag=ev_mag, ev_depth=ev_depth,
+                              type_of_loc=type_of_loc, lon=lon, lat=lat, depth=depth, slip_rate=slip_rate,
+                              ev_name=None);
+        family_list.append(myfamily)
+    input_file1.close();
+    return family_list;

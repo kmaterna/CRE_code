@@ -6,9 +6,10 @@ From list of repeating earthquake families, generate a few time-space diagrams.
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import pygmt
 
 sys.path.append(".");  # add current directory to python path
-import util_general_functions
+import util_general_functions as utils
 
 
 def main_program(time_window, family_summaries, mapping_data):
@@ -30,8 +31,11 @@ def main_program(time_window, family_summaries, mapping_data):
                        time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time);  # deepest
 
     # More complicated, colored by depth, zoomed in and zoomed out:
-    # time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 27], dont_plot_family, time_window[0],
-    #                             time_window[1], bg_catalog_file, large_event_catalog_file, colorlist);
+    time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 27], dont_plot_family, time_window[0],
+                                time_window[1], bg_catalog_file, large_event_catalog_file, colorlist);
+
+    map_bbox = [-124.8, -124.20, 40.15, 40.46];
+    map_by_timing_of_last_event(family_summaries, map_bbox, large_event_catalog_file);
 
     print("Space-Time Diagrams Created!");
     return;
@@ -39,8 +43,8 @@ def main_program(time_window, family_summaries, mapping_data):
 
 def plot_recent_M5_eqs(ax, mapping_file):  # plot stars for major earthquakes in the time range.
     # record of major >M5 earthquakes in: "latitude longitude depth time magnitude"
-    MyCat = util_general_functions.read_humanreadable(mapping_file);
-    MyCat = util_general_functions.filter_to_bounding_box(MyCat, [-360, 360, 40.20, 40.50, 0, 50]);
+    MyCat = utils.read_humanreadable(mapping_file);
+    MyCat = utils.filter_to_bounding_box(MyCat, [-360, 360, 40.20, 40.50, 0, 50]);
     for item in MyCat:
         ax.plot(item.lon, item.decdate, 'D', markersize=item.mag * 2, c='red');
     return ax;
@@ -71,16 +75,16 @@ def plot_M6p5_eq(ax):  # M6.5 Earthquake in 2010
 
 
 def plot_eq_cloud(ax, dep_min, dep_max, lat_min, lat_max, eq_file):
-    bg_cat = util_general_functions.read_txyzm(eq_file);
-    filt_cat = util_general_functions.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
+    bg_cat = utils.read_txyzm(eq_file);
+    filt_cat = utils.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
     ax.plot([x.lon for x in filt_cat], [x.decdate for x in filt_cat], '.', color='gray');
     return ax;
 
 
 def plot_eq_cloud_afterM5p7(ax, dep_min, dep_max, lat_min, lat_max, time_start, dot_color, eq_file):
-    bg_cat = util_general_functions.read_txyzm(eq_file);
-    filt_cat = util_general_functions.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
-    filt_cat = util_general_functions.filter_to_starttime_endtime(filt_cat, time_start, 2030.0);
+    bg_cat = utils.read_txyzm(eq_file);
+    filt_cat = utils.filter_to_bounding_box(bg_cat, [-360, 360, lat_min, lat_max, dep_min, dep_max]);
+    filt_cat = utils.filter_to_starttime_endtime(filt_cat, time_start, 2030.0);
     ax.plot([x.lon for x in filt_cat], [x.decdate for x in filt_cat], '.', color=dot_color);
     return ax;
 
@@ -105,26 +109,25 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
     """
     Zoomed out and Zoomed in color-coded by depth.
     """
-    input_file1 = open(family_summaries, 'r');
-
     _fig = plt.figure();
     ax = plt.gca();
 
-    lon_mapping, time_mapping, mag_mapping, depth_mapping = [], [], [], []
+    myfamilies = utils.read_families_into_structure(family_summaries);
+    myfamilies = utils.filter_to_bounding_box(myfamilies, [-360, 360, lat_bounds[0], lat_bounds[1], 0, 50])
 
-    for line1 in input_file1:  # for each family
-        [_, _, time, mag, depth, _, mean_lon, mean_lat, _, _] = util_general_functions.read_family_line(line1)
-        magsq = [x * x * 10 for x in mag];
+    lon_mapping, time_mapping, mag_mapping, depth_mapping = [], [], [], []
+    for j, family in enumerate(myfamilies):  # for each family
         # Please plot something for each family
-        if time[-1] - time[0] > dont_plot_family:
-            # DON'T PLOT THE EVENTS WITH SHORT SEQUENCE (not likely repeaters anyway)
-            if lat_bounds[0] < mean_lat < lat_bounds[1]:
-                for i in range(len(depth)):
-                    lon_mapping.append(mean_lon);
-                    time_mapping.append(time[i]);
-                    mag_mapping.append(magsq[i]);
-                    depth_mapping.append(depth[i]);
-                ax.plot([mean_lon, mean_lon], [time[0], time[-1]], color=colorlist[(i % 7)]);  # blue line with dots
+        if family.ev_time[-1] - family.ev_time[0] > dont_plot_family:
+            # DON'T PLOT THE EVENTS WITH SHORT SEQUENCE (likely not repeaters anyway)
+            magsq = [x * x * 10 for x in family.ev_mag];
+            for i in range(len(family.ev_depth)):
+                lon_mapping.append(family.lon);
+                time_mapping.append(family.ev_time[i]);
+                mag_mapping.append(magsq[i]);
+                depth_mapping.append(family.ev_depth[i]);
+            ax.plot([family.lon, family.lon], [family.ev_time[0], family.ev_time[-1]],
+                    color=colorlist[(j % 7)]);  # blue line with dots
 
     ax1 = ax.scatter(lon_mapping, time_mapping, s=mag_mapping, c=depth_mapping);  # one dot for each event
 
@@ -147,7 +150,6 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
     ax.set_xlim([-125.5, -123.8])
     plt.savefig("Time_Space_Diagram.eps")
     plt.close();
-    input_file1.close()
     return;
 
 
@@ -157,35 +159,28 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
     Simplified Zoomed in on the active region.
     Adding the stars for M5 earthquakes.
     """
-    input_file1 = open(family_summaries, 'r');
 
     _fig = plt.figure(figsize=(8, 4), dpi=300);
     ax = plt.gca();
+    times0, times1, lons0, lons1 = [], [], [], [];
 
-    first_segment_times, second_segment_times = [], [];
-    first_segment_lons, second_segment_lons = [], [];
-
-    for line1 in input_file1:  # for each family
-
-        [_, _, time, _mag, depth, _, mean_lon, mean_lat, mean_depth, _] = util_general_functions.read_family_line(line1)
-
-        # Please plot something for each family
-        if time[-1] - time[0] > dont_plot_family:
+    myfamilies = utils.read_families_into_structure(family_summaries);
+    myfamilies = utils.filter_to_bounding_box(myfamilies, [-360, 360, lat_bounds[0], lat_bounds[1], dep_bounds[0],
+                                                           dep_bounds[1]])
+    for family in myfamilies:  # for each family
+        if family.ev_time[-1] - family.ev_time[0] > dont_plot_family:
             # DON'T PLOT THE EVENTS WITH SHORT SEQUENCE (not likely repeaters anyway)
-            if dep_bounds[0] < mean_depth < dep_bounds[1]:
-                if lat_bounds[0] < mean_lat < lat_bounds[1]:
-                    ax.plot([mean_lon, mean_lon], [time[0], time[-1]],
-                            color='b');  # looks like it's gonna be a blue line with dots
-                    for i in range(len(depth)):
-                        first_segment_times.append(time[i]);
-                        first_segment_lons.append(mean_lon);
-                        if time[i] > color_change_time:
-                            second_segment_times.append(time[i]);
-                            second_segment_lons.append(mean_lon);
+            ax.plot([family.lon, family.lon], [family.ev_time[0], family.ev_time[-1]], color='b');  # line
+            for i in range(len(family.ev_depth)):
+                times0.append(family.ev_time[i]);
+                lons0.append(family.lon);
+                if family.ev_time[i] > color_change_time:
+                    times1.append(family.ev_time[i]);
+                    lons1.append(family.lon);
 
     # the dots for each CRE event.
-    ax.plot(first_segment_lons, first_segment_times, marker='.', markersize=10.0, color='b', linestyle='None')
-    ax.plot(second_segment_lons, second_segment_times, marker='.', markersize=10.0, color='r', linestyle='None')
+    ax.plot(lons0, times0, marker='.', markersize=10.0, color='b', linestyle='None')
+    ax.plot(lons1, times1, marker='.', markersize=10.0, color='r', linestyle='None')
 
     # For the cloud of microseismicity and other annotations:
     ax = axis_format(ax, start_time, end_time);
@@ -201,6 +196,30 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
     # ax.set_title("Repeating Earthquake Families "+str(dep_bounds[0])+" to " +str(dep_bounds[1])+" km Depth")
     plt.tight_layout()
     plt.savefig("Time_Space_Diagram_zoomed_in_" + str(dep_bounds[0]) + "_" + str(dep_bounds[1]) + "_depth.eps", dpi=500)
+    return;
 
-    input_file1.close()
+
+def map_by_timing_of_last_event(family_summaries, region, large_event_cat_file):
+    myfamilies = utils.read_families_into_structure(family_summaries);
+    myfamilies = utils.filter_to_bounding_box(myfamilies, [-360, 360, region[2], region[3], 0, 50])
+
+    big_events = utils.read_humanreadable(large_event_cat_file);
+    big_events = utils.filter_to_bounding_box(big_events, [-360, 360, 40.20, 40.50, 0, 50]);
+    big_events = utils.filter_to_starttime_endtime(big_events, 2010.0, 2023.0);
+
+    proj = 'M4i'
+    pygmt.makecpt(cmap="roma", series="2015/2022/0.1", background="o", output="mycpt.cpt", reverse=True);
+
+    fig = pygmt.Figure();
+    fig.basemap(region=region, projection=proj, frame="+t\"CRE families by most recent event\"");
+    fig.coast(region=region, projection=proj, borders='1', shorelines='1.0p,black', water='lightblue',
+              map_scale="n0.4/0.06+c" + str(region[2]) + "+w20", frame="0.1");
+    for event in big_events:
+        fig.plot([event.lon], [event.lat], style='a0.4c', color=[event.decdate], cmap='mycpt.cpt', pen="thin,black");
+
+    for family in myfamilies:
+        fig.plot([family.lon], [family.lat], style='c0.2c', color=[family.ev_time[-1]], cmap='mycpt.cpt',
+                 pen="thin,black");
+    fig.colorbar(position="JCR+w4.0i+v+o0.7i/0i", cmap="mycpt.cpt", frame=["x1.0", "y+L\"Year\""]);
+    fig.savefig("Recent_CREs.png");
     return;

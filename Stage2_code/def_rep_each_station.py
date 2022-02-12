@@ -13,8 +13,8 @@ def full_CRE_analysis(MyParams, metric, cutoff, statistic='median', freq_method=
                       SNR_cutoff=5.0, Minimum_frequency_width=5.0):
     output_dir = setup_output_dir(MyParams, metric, cutoff, freq_method, max_frequency, statistic);  # config step
     station_tuple_list = util_general_functions.get_dirs_for_station(MyParams.station_locations);  # read step
-    define_repeaters_each_station(MyParams, station_tuple_list, metric, cutoff, statistic, freq_method, max_frequency,
-                                  SNR_cutoff, Minimum_frequency_width);  # define repeaters
+    # define_repeaters_each_station(MyParams, station_tuple_list, metric, cutoff, statistic, freq_method, max_frequency,
+    #                               SNR_cutoff, Minimum_frequency_width);  # define repeaters
     CRE_post_analysis(MyParams, output_dir);  # do CRE family analysis
     cleaning_up(output_dir);  # Move everything to output directory
     return;
@@ -32,21 +32,21 @@ def CRE_post_analysis(MyParams, output_dir):
 
     # # OPTIONAL IN ANY SEQUENCE:
     # HISTOGRAMS
-    mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list, MyParams.station_locations);
+    # mag_interval_histogram.generate_histograms(MyParams.Network_repeaters_list, MyParams.station_locations);
+    #
+    # view_families.view_families(MyParams.time_window, MyParams.families_summaries,
+    #                             MyParams.station_locations, MyParams.mapping_data_general, output_dir,
+    #                             families=(-1,));  # 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
 
     # These two are right now very specific to Mendocino.
     generate_time_space_diagram.main_program(MyParams.time_window, MyParams.families_summaries,
                                              MyParams.mapping_data_specific);
-    composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data_specific);
-
-    view_families.view_families(MyParams.time_window, MyParams.families_summaries,
-                                MyParams.station_locations, MyParams.mapping_data_general, output_dir,
-                                families=(-1,));  # 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
-
-    # GMT CROSS-SECTIONS: specific to Mendocino; changes necessary for other areas.
-    gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries,
-                                        MyParams.station_locations, MyParams.mapping_code,
-                                        MyParams.mapping_data_general, MyParams.mapping_data_specific);
+    # composite_slip.main_program(MyParams.time_window, MyParams.families_summaries, MyParams.mapping_data_specific);
+    #
+    # # GMT CROSS-SECTIONS: specific to Mendocino; changes necessary for other areas.
+    # gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries,
+    #                                     MyParams.station_locations, MyParams.mapping_code,
+    #                                     MyParams.mapping_data_general, MyParams.mapping_data_specific);
     return;
 
 
