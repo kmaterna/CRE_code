@@ -19,11 +19,12 @@ fi
 station_name=$1
 compare_list_file=$station_name"_nearby_list.txt"  # something like "B045_nearby_list.txt"
 where_is_code="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"  # where does the c code live on this machine? 
-amilinux=`uname -a | grep 'Linux' || True`  # the True is necessary for grep under set -e
+am_i_linux=`uname -a | grep 'Linux' || True`  # the True is necessary for grep under set -e
 if [ ! -z "$am_i_linux" ]; then # WE ARE ON A LINUX MACHINE 
 	# compiler_list=" -L/share/apps/sac/lib -lsacio -lsac -lm" # FOR BSL LINUX
 	compiler_list=" -L/usr/local/sac/lib -lsacio -lsac -lm -no-pie -I/usr/local/sac/include"  # FOR NEWER LINUX
 	sed_args=("-i" "s/added/exist/g" "$compare_list_file")  # FOR LINUX
+	echo $compiler_list
 else
 	compiler_list=" -L/$HOME/sac/lib -lsacio -lsac" # FOR MAC
 	sed_args=("-i" "''" "s/added/exist/g" "$compare_list_file")  # FOR MAC
