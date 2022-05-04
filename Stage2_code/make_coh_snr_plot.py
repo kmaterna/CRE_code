@@ -12,7 +12,7 @@ This code makes an important plot:
 
 """
 from obspy import read
-from obspy.signal.cross_correlation import xcorr
+from obspy.signal.cross_correlation import correlate
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -39,7 +39,7 @@ def make_coh_snr_plot(output_dir, event1, event2, waveform_file_name, coh_file_n
     # DOING XCORR JUST FOR KICKS
     if len(waveform1) < 256 / 4 or len(waveform2) < 256 / 4:
         N_xcorr = 256 / 4;  # smaller window for smaller signals
-    [index, cc_max, fnct] = xcorr(waveform1, waveform2, shift_len=N_xcorr, full_xcorr=True)
+    [index, cc_max, fnct] = correlate(waveform1, waveform2, shift=N_xcorr);  # possible issue with new obspy xcorr API
 
     # GRABBING EVENT MAGNITUDES, ALSO FOR KICKS
     # Assuming that sacfiles are already copied into working dir

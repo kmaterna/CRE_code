@@ -14,10 +14,10 @@ SNR_cutoff = [5.0];
 Minimum_freq_width = [5.0];
 Preferred recipe for Mendocino:
 'coh', 0.97, 'mean', 'snr_based', 15, SNR_cutoff=5.0, Minimum_freq_width=5.0.
+Run from a Pygmt conda environment.
 """
 
-import collections;
-import sys
+import collections, sys, os, configparser, ast
 
 sys.path.append(".");  # add current directory to python path
 import def_rep_each_station
@@ -25,34 +25,38 @@ import def_rep_each_station
 # The main parameter object. 
 TotalParams = collections.namedtuple('TotalParams', ['Network_repeaters_list', 'families_list', 'families_summaries',
                                                      'station_locations', 'time_window', 'stage2_results',
-                                                     'mapping_code', 'mapping_data_general', 'mapping_data_specific']);
+                                                     'mapping_code', 'mapping_data_general', 'mapping_data_specific',
+                                                     'config_filename']);
 
-# Definition of types of parameters you want to play with. 
-Metric = 'corr';
-Cutoff = 0.87;
-Statistic = 'mean';
-max_freq_options = 20;
-Define_freq = 'snr-based';
-SNR_cutoff = 5.0;
-Minimum_freq_width = 5.0;
+def parse_config(configfile):
+    assert(os.path.isfile(configfile)), FileNotFoundError("config file "+configfile+" not found.");
+    configobj = configparser.ConfigParser();
+    configobj.read(configfile);
+    fileconfig = configobj["filepaths_config"];
+    techconfig = configobj["cre_config"]
+    MyParams = TotalParams(Network_repeaters_list=fileconfig["Network_repeaters_list"],
+                           families_list=fileconfig["families_list"],
+                           families_summaries=fileconfig["families_summaries"],
+                           station_locations=fileconfig["station_locations_file"],
+                           time_window=ast.literal_eval(techconfig["time_window"]),
+                           stage2_results=fileconfig["stage2_results"],
+                           mapping_code=fileconfig["mapping_code"],
+                           mapping_data_general=fileconfig["mapping_data_general"],
+                           mapping_data_specific=fileconfig["mapping_data_specific"],
+                           config_filename=configfile);
+    metric = techconfig["metric"];
+    cutoff = float(techconfig["cutoff"]);
+    statistic = techconfig["Statistic"];
+    max_freq_options = float(techconfig["max_freq_options"]);
+    Define_freq = techconfig["Define_freq"];
+    SNR_cutoff = float(techconfig["SNR_cutoff"]);
+    Minimum_freq_width = float(techconfig["Minimum_freq_width"])
+    return MyParams, metric, cutoff, statistic, max_freq_options, Define_freq, Minimum_freq_width, SNR_cutoff;
 
-# Parameters that aren't likely to change between experiments
-time_window = [2008.7, 2022.10];  # start time and end time for repeater search, etc. You may want to change this.
-families_list = "families_list.txt";
-families_summaries = "Families_Summaries.txt";
-stage2_results = "Stage2_Results";
-station_locations_file = "station_locations.txt";   # relative path to reference file
-Network_repeaters_list = 'Network_CRE_pairs_list.txt';
-mapping_code = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/Mendocino_mapping_code';  # change this
-mapping_data_general = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/General_mapping_files';
-mapping_data_specific = '/Volumes/SeagateKM/Seismo85/CRE_detection/Mapping_files/Mendocino_mapping_data';
-MyParams = TotalParams(Network_repeaters_list=Network_repeaters_list, families_list=families_list,
-                       families_summaries=families_summaries,
-                       station_locations=station_locations_file, time_window=time_window, stage2_results=stage2_results,
-                       mapping_code=mapping_code,
-                       mapping_data_general=mapping_data_general, mapping_data_specific=mapping_data_specific);
-
-# # Preferred
-def_rep_each_station.full_CRE_analysis(MyParams, 'coh', 0.97, 'mean', 'snr_based', 15, SNR_cutoff,
-                                       Minimum_freq_width);  # example with coherence
-# def_rep_each_station.full_CRE_analysis(MyParams, 'corr', 0.90);   # example with cross correlation
+if __name__ == "__main__":
+    configfile = sys.argv[1];
+    MyParams, metric, cutoff, statistic, max_freq, Define_freq, min_freq_width, SNR_cutoff = parse_config(configfile);
+    # # Preferred
+    def_rep_each_station.full_CRE_analysis(MyParams, metric, cutoff, statistic, Define_freq, max_freq, SNR_cutoff,
+                                           min_freq_width);  # example with coherence
+    # def_rep_each_station.full_CRE_analysis(MyParams, 'corr', 0.90);   # example with cross correlation

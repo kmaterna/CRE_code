@@ -65,6 +65,7 @@ def setup_output_dir(MyParams, metric, cutoff, freq_method, max_frequency, stati
     call(['mkdir', '-p', directory_name + "Image_Families/"], shell=False);  # For the image directory
     delete_files_matching(directory_name + "*");
     delete_files_matching(directory_name + "Image_Families/*");
+    call(['cp', MyParams.config_filename, directory_name + MyParams.config_filename], shell=False);
     return directory_name;
 
 
