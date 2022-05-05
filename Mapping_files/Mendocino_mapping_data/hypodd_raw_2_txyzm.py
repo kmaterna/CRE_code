@@ -35,10 +35,8 @@ def get_time(year_string, time_string):
 
 
 if __name__=="__main__":
-	# input_file="hypodd_raw_search.eq"
-	# output_file="hypodd.txyzm"
-	input_file="ncsn_raw_search.eq"
-	output_file="ncsn.txyzm"	
+	# input_file, output_file = "hypodd_raw_search.eq", "hypodd.txyzm"
+	input_file, output_file = "ncsn_raw_search.eq", "ncsn.txyzm"
 	ifile=open(input_file,'r');
 	ofile=open(output_file,'w');
 
