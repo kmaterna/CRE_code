@@ -59,4 +59,3 @@ if __name__ == "__main__":
     configfile = sys.argv[1];
     MyParams = parse_config(configfile);
     def_rep_each_station.full_CRE_analysis(MyParams);
-    # def_rep_each_station.full_CRE_analysis(MyParams, 'corr', 0.90);   # example with cross correlation

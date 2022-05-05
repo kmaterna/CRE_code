@@ -144,7 +144,7 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
     # Make the zoomed-in version
     ax.set_xlim([lon_bounds[0], lon_bounds[1]]);
     ax.set_title("Longitude of Repeating Earthquake Families")
-    plt.savefig("Time_Space_Diagram_zoomed_in.eps")
+    plt.savefig(outdir+"Time_Space_Diagram_zoomed_in.eps")
 
     # Make the zoomed-out version
     ax.set_xlim([-125.5, -123.8])
@@ -216,10 +216,10 @@ def map_by_timing_of_last_event(family_summaries, region, large_event_cat_file, 
     fig.coast(region=region, projection=proj, borders='1', shorelines='1.0p,black', water='lightblue',
               map_scale="n0.4/0.06+c" + str(region[2]) + "+w20", frame="0.1");
     for event in big_events:
-        fig.plot([event.lon], [event.lat], style='a0.4c', color=[event.decdate], cmap='mycpt.cpt', pen="thin,black");
+        fig.plot(x=[event.lon], y=[event.lat], style='a0.4c', color=[event.decdate], cmap='mycpt.cpt', pen="thin,black");
 
     for family in myfamilies:
-        fig.plot([family.lon], [family.lat], style='c0.2c', color=[family.ev_time[-1]], cmap='mycpt.cpt',
+        fig.plot(x=[family.lon], y=[family.lat], style='c0.2c', color=[family.ev_time[-1]], cmap='mycpt.cpt',
                  pen="thin,black");
     fig.colorbar(position="JCR+w4.0i+v+o0.7i/0i", cmap="mycpt.cpt", frame=["x1.0", "y+L\"Year\""]);
     fig.savefig(output_dir+"Recent_CREs.png");

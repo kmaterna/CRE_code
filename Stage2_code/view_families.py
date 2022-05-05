@@ -9,8 +9,7 @@ import matplotlib.pyplot as plt
 import os, sys
 
 sys.path.append(".");  # add current directory to python path
-import util_functions_for_viewing_families
-import util_general_functions
+import util_functions_for_viewing_families, util_general_functions
 
 
 def view_families(time_window, families_summaries, network_cres_file, station_location_file,

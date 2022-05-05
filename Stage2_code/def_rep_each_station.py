@@ -42,10 +42,11 @@ def CRE_post_analysis(MyParams, output_dir):
     composite_slip.main_program(MyParams.time_window, output_dir+MyParams.families_summaries,
                                 MyParams.mapping_data_specific, output_dir);
 
-    # # GMT CROSS-SECTIONS: specific to Mendocino; changes necessary for other areas.
-    gmt_plotting.mendocino_main_program(MyParams.Network_repeaters_list, MyParams.families_summaries,
-                                        MyParams.station_location_file, MyParams.mapping_code,
-                                        MyParams.mapping_data_general, MyParams.mapping_data_specific);
+    # # # # GMT CROSS-SECTIONS: specific to Mendocino; changes necessary for other areas.
+    # gmt_plotting.mendocino_main_program(output_dir+MyParams.Network_repeaters_list,
+    #                                     output_dir+MyParams.families_summaries,
+    #                                     MyParams.station_location_file, MyParams.mapping_code,
+    #                                     MyParams.mapping_data_general, MyParams.mapping_data_specific);
     return;
 
 
@@ -76,7 +77,7 @@ def define_repeaters_each_station(MyParams):
 
 
 def cleaning_up(output_dir):
-    delete_files_matching(["*_total_list.txt", "*_repeaters_list.txt", "filt*.sac"]);
+    delete_files_matching(["*_total_list.txt", "*_repeaters_list.txt", "filt*.sac", "slip_curve*.txt"]);
     move_files_matching(['*.ps'], output_dir);
     copy_files_matching('CREs_by_station/B046/*.eps', output_dir);
     copy_files_matching('CREs_by_station/B046/*.png', output_dir);
