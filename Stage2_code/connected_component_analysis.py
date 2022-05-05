@@ -23,16 +23,9 @@ def connected_components(time_window, Network_repeaters_list, families_list):
     return;
 
 
-# ----------- THE GUTS ---------- #
-
-def inputs(inputfile):
-    event1, event2 = [], [];
-    ifile = open(inputfile, 'r');
-    for line in ifile:
-        temp = line.split();
-        event1.append(temp[0])
-        event2.append(temp[1])
-    return [event1, event2];
+def inputs(infile):
+    [ev1, ev2] = np.loadtxt(infile, usecols=(0, 1), unpack=True, dtype={'names':('a', 'b'), 'formats':('U30', 'U30')});
+    return [ev1, ev2];
 
 
 def compute(time_window, event1, event2):
@@ -91,6 +84,7 @@ def connected_component_analysis(M):
 
 # ------------ OUTPUTS ------------ # 
 def outputs(unique_events, integer, labels, output_file):
+    print("writing output file %s " % output_file);
     outfile = open(output_file, "w");
     for i in range(integer):  # will be range(integer)
         unique_index = np.where(labels == i)  # this "index" will be an array of variable length

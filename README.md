@@ -12,15 +12,16 @@ My_Expt/
     │   ├── exist/    
     │   └── redos/    
     ├── more_stations..../    
-    ├── station_locations.txt  
-    ├── stage2_config.txt        
+    ├── Metadata/        
+    │   ├── station_locations.txt  
+    │   └── stage2_config.txt        
     └── Stage2_results/    
         ├── CREs_by_station
         └── sample_selection_criterion    
 ```
 
 * Make directories for B045, all stations, etc., each with an added/ subdirectory that contains sac files. 
-* Make station_locations.txt (text file with name, lon, lat, name/exist/ for each station). Put in your experiment directory.
+* Make station_locations.txt (text file with name, lon, lat, name/exist/ for each station). 
 
 4. Run Stage1: 
     Call shell script c_coh_main_script.sh (stage1) from each of the B045-type directories. 

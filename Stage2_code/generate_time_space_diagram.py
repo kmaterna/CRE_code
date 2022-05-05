@@ -12,7 +12,7 @@ sys.path.append(".");  # add current directory to python path
 import util_general_functions as utils
 
 
-def main_program(time_window, family_summaries, mapping_data):
+def main_program(time_window, family_summaries, mapping_data, output_dir):
     dont_plot_family = 1.0;  # years between beginning and end of sequence, in case we dont want short-lived sequences
     colorlist = 'brgcmky'
     bg_catalog_file = mapping_data + '/ncsn.txyzm'
@@ -22,20 +22,20 @@ def main_program(time_window, family_summaries, mapping_data):
     lat_bounds = [40.25, 40.36];  # latitude and longitude range for most plots.
     color_change_time = 2015.07;  # the timing of the M5.7 event.
 
-    # Zoomed in, simpler:
+    # Zoomed in, simpler:  shallow, deeper, and deepest
     time_space_simpler(family_summaries, lon_bounds, lat_bounds, [0, 18], dont_plot_family, time_window[0],
-                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time + 10);  # shallow
+                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time + 10, output_dir);
     time_space_simpler(family_summaries, lon_bounds, lat_bounds, [18, 27], dont_plot_family, time_window[0],
-                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time);  # deeper cluster
+                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time, output_dir);
     time_space_simpler(family_summaries, lon_bounds, lat_bounds, [27, 35], 0, time_window[0],
-                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time);  # deepest
+                       time_window[1], bg_catalog_file, large_event_catalog_file, color_change_time, output_dir);
 
     # More complicated, colored by depth, zoomed in and zoomed out:
     time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, [0, 27], dont_plot_family, time_window[0],
-                                time_window[1], bg_catalog_file, large_event_catalog_file, colorlist);
+                                time_window[1], bg_catalog_file, large_event_catalog_file, colorlist, output_dir);
 
     map_bbox = [-124.8, -124.20, 40.15, 40.46];
-    map_by_timing_of_last_event(family_summaries, map_bbox, large_event_catalog_file);
+    map_by_timing_of_last_event(family_summaries, map_bbox, large_event_catalog_file, output_dir);
 
     print("Space-Time Diagrams Created!");
     return;
@@ -105,7 +105,7 @@ def axis_format(ax, start_time, end_time):  # useful formatting for the axis of 
 
 
 def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family, start_time,
-                                end_time, bg_eq_file, large_event_file, colorlist):
+                                end_time, bg_eq_file, large_event_file, colorlist, outdir):
     """
     Zoomed out and Zoomed in color-coded by depth.
     """
@@ -148,13 +148,13 @@ def time_space_colored_by_depth(family_summaries, lon_bounds, lat_bounds, dep_bo
 
     # Make the zoomed-out version
     ax.set_xlim([-125.5, -123.8])
-    plt.savefig("Time_Space_Diagram.eps")
+    plt.savefig(outdir+"Time_Space_Diagram.eps")
     plt.close();
     return;
 
 
 def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, dont_plot_family, start_time, end_time,
-                       bg_eq_file, large_event_file, color_change_time):
+                       bg_eq_file, large_event_file, color_change_time, outdir):
     """
     Simplified Zoomed in on the active region.
     Adding the stars for M5 earthquakes.
@@ -195,11 +195,12 @@ def time_space_simpler(family_summaries, lon_bounds, lat_bounds, dep_bounds, don
     ax.set_xlim([lon_bounds[0], lon_bounds[1]]);
     # ax.set_title("Repeating Earthquake Families "+str(dep_bounds[0])+" to " +str(dep_bounds[1])+" km Depth")
     plt.tight_layout()
-    plt.savefig("Time_Space_Diagram_zoomed_in_" + str(dep_bounds[0]) + "_" + str(dep_bounds[1]) + "_depth.eps", dpi=500)
+    plt.savefig(outdir+"Time_Space_Diagram_zoomed_in_" + str(dep_bounds[0]) + "_" +
+                str(dep_bounds[1]) + "_depth.eps", dpi=500)
     return;
 
 
-def map_by_timing_of_last_event(family_summaries, region, large_event_cat_file):
+def map_by_timing_of_last_event(family_summaries, region, large_event_cat_file, output_dir):
     myfamilies = utils.read_families_into_structure(family_summaries);
     myfamilies = utils.filter_to_bounding_box(myfamilies, [-360, 360, region[2], region[3], 0, 50])
 
@@ -221,5 +222,5 @@ def map_by_timing_of_last_event(family_summaries, region, large_event_cat_file):
         fig.plot([family.lon], [family.lat], style='c0.2c', color=[family.ev_time[-1]], cmap='mycpt.cpt',
                  pen="thin,black");
     fig.colorbar(position="JCR+w4.0i+v+o0.7i/0i", cmap="mycpt.cpt", frame=["x1.0", "y+L\"Year\""]);
-    fig.savefig("Recent_CREs.png");
+    fig.savefig(output_dir+"Recent_CREs.png");
     return;

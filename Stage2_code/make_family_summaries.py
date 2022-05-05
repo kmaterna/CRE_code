@@ -1,7 +1,6 @@
 """
-This is code to take a list of families, and generate a related text file
-that shows the depth, location, etc. of each event in each family. 
-It's useful for plotting later. 
+Take a list of families, and generate a related text file of depth/location/etc. of each event in each family.
+Useful for plotting later.
 Sept 5, 2016
 """
 
@@ -11,8 +10,9 @@ sys.path.append(".");  # add current directory to python path
 import util_general_functions
 
 
-def main_program(time_window, families_list, families_summaries, station_location_file):
+def main_program(time_window, families_list, station_location_file, families_summaries):
     family_infile = open(families_list, 'r');
+    print("writing output file %s " % families_summaries);
     outfile = open(families_summaries, 'w');
     make_slip_rate_cutoff = 1.5;  # years
 

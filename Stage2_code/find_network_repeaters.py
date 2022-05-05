@@ -1,7 +1,6 @@
 """
-This file will take a series of individual-station repeater pair files and condense it into a list of 
-repeater pairs detected by 2 or more stations. 
-It writes an output file with elements like: 
+Take series of individual-station-repeater-pair files. Condense into repeater pairs detected by 2 or more stations.
+Write output file with elements like:
 2010.063.190428.71358400.sac 2017.114.161621.72793316.sac B045 B046 B047 (stations that were used to observe this pair)
 """
 
@@ -14,25 +13,22 @@ Indv_station_repeaters = collections.namedtuple('Indv_station_repeaters', ['stat
 # station_data field is full of arrays with elements like "2010.241.010956.71447890.sac 2017.175.203253.72820756.sac".
 
 
-def network_repeaters_two_more_stations(Network_repeaters_list, stage2_results):
-    [filelist, outfile] = configure(Network_repeaters_list, stage2_results);  # Get all individual-station CRE files.
+def network_repeaters_two_more_stations(stage2_results_dir, network_outfile):
+    [filelist] = configure(stage2_results_dir);  # Get all individual-station CRE files.
     Individual_station_repeaters = inputs(filelist);  # read them into an array
     [evpairs, stations] = compute(Individual_station_repeaters);  # compute unique repeaters and where observed
-    outputs(evpairs, stations, outfile);  # write a file.
+    outputs(evpairs, stations, network_outfile);  # write a file.
     return;
 
 
 # --------------------- GUTS -------------------- #
-def configure(Network_repeaters_list, stage2_results):
-    call(['rm', Network_repeaters_list], shell=False);
-    copy_list = glob.glob(stage2_results + '/CREs_by_station/*/*_*_list.txt');
-    # print(copy_list);
+def configure(stage2_results_dir):
+    copy_list = glob.glob(stage2_results_dir + '/CREs_by_station/*/*_*_list.txt');
     for item in copy_list:
         call(['cp', item, '.'], shell=False);
     filelist = glob.glob("*_repeaters_list.txt");
-    outfile = Network_repeaters_list;
     print("Available files are..." + str(filelist))
-    return [filelist, outfile];
+    return [filelist];
 
 
 def inputs(filelist):
@@ -86,6 +82,7 @@ def compute(Individual_station_reps):
 
 
 def outputs(unique_evpairs, unique_stations, outfile):
+    print("writing output file %s " % outfile);
     ofile = open(outfile, 'w');
     for i in range(len(unique_evpairs)):
         ofile.write(unique_evpairs[i])  # Write the unique event pairs

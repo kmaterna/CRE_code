@@ -11,7 +11,7 @@ sys.path.append(".");  # add current directory to python path
 import util_general_functions as utils
 
 
-def main_program(time_window, Family_Summaries, mapping_data):
+def main_program(time_window, Family_Summaries, mapping_data, output_dir):
     min_lon, max_lon = -124.75, -124.25;
     min_lat, max_lat = 40.25, 40.36;  # this gets the main cluster in the MTJ
     no_slip_rates_cutoff = 1.0;  # If the family spans less than this # of years, we don't consider it for slip rates.
@@ -19,17 +19,17 @@ def main_program(time_window, Family_Summaries, mapping_data):
     big_events_file = mapping_data + '/M5up.eq'
 
     make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 18, 27], time_window, bg_catalog_file,
-                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Below 18 km", 1);
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Below 18 km", 1, output_dir);
     make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 18, 27, time_window, big_events_file,
-             "Integrated Repeater Slip History Below 18 km");
+             "Integrated Repeater Slip History Below 18 km", output_dir);
     make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 0, 18], time_window, bg_catalog_file,
-                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Above 18 km", 0);
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History Above 18 km", 0, output_dir);
     make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 0, 18, time_window, big_events_file,
-             "Integrated Repeater Slip History Above 18 km");
+             "Integrated Repeater Slip History Above 18 km", output_dir);
     make_composite_plot(Family_Summaries, [min_lon, max_lon, min_lat, max_lat, 0, 27], time_window, bg_catalog_file,
-                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History All Depths", 0);
+                        big_events_file, no_slip_rates_cutoff, "Integrated Repeater Slip History All Depths", 0, output_dir);
     make_map(Family_Summaries, min_lon, max_lon, min_lat, max_lat, 0, 30, time_window, big_events_file,
-             "Integrated Repeater Slip History All Depths");
+             "Integrated Repeater Slip History All Depths", output_dir);
 
     print("Composite Slip Diagrams created!");
     return;
@@ -115,7 +115,7 @@ def add_cumulative_seismicity(bbox, start_time, end_time, eq_file, axarr):
 
 
 def make_composite_plot(families_summary, bbox, time_window, bg_eq_file, big_events_file, no_slip_rates_cutoff,
-                        plot_name, fancy_labels):
+                        plot_name, fancy_labels, output_dir):
     start_time, end_time = time_window[0], time_window[1]
     plt.figure();
     g, axarr = plt.subplots(2, sharex='all', figsize=(10, 7), dpi=300)
@@ -197,13 +197,13 @@ def make_composite_plot(families_summary, bbox, time_window, bg_eq_file, big_eve
     if fancy_labels == 1:
         _axarr = add_fancy_labels(axarr);
 
-    plt.savefig(plot_name + ".png")
+    plt.savefig(output_dir + plot_name + ".png")
     plt.close()
     return;
 
 
 def make_map(families_summary, min_lon, max_lon, min_lat, max_lat, min_dep, max_dep, time_window,
-             big_eq_file, plot_name):
+             big_eq_file, plot_name, output_dir):
     # Getting large events.
     start_time, end_time = time_window[0], time_window[1]
     bbox = [min_lon, max_lon, min_lat, max_lat, min_dep, max_dep]
@@ -243,5 +243,5 @@ def make_map(families_summary, min_lon, max_lon, min_lat, max_lat, min_dep, max_
     ax1.set_xlabel("Longitude")
     ax1.set_ylabel("Depth (km)")
     ax1.set_xlim([min_lon, max_lon])
-    plt.savefig("Map_View_" + plot_name + ".png");
+    plt.savefig(output_dir + "Map_View_" + plot_name + ".png");
     plt.close();

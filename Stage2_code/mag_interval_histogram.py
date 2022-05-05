@@ -2,8 +2,7 @@
 MENDOCINO REPEATERS PROJECT
 2/4/16
 
-From a list of repeating earthquakes, generate histograms of magnitudes and intervals between repeating events. 
-
+From a list of repeating earthquakes, generate histograms of magnitudes and intervals between repeating events.
 """
 
 import matplotlib.pyplot as plt
@@ -13,7 +12,7 @@ sys.path.append(".");  # add current directory to python path
 import util_general_functions
 
 
-def generate_histograms(repeaters_file, station_location_file):
+def plot_histograms(repeaters_file, station_location_file, output_dir):
     my_file = open(repeaters_file, 'r');
 
     # Read in lists for event1 and event2
@@ -53,7 +52,7 @@ def generate_histograms(repeaters_file, station_location_file):
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     plt.title('Intervals between Repeating Event Pairs', fontsize=18);
-    plt.savefig('interval_histogram.eps');
+    plt.savefig(output_dir+'interval_histogram.eps');
     plt.close();
     print("Histogram of Inter-Event Times Plotted!");
 
@@ -64,7 +63,7 @@ def generate_histograms(repeaters_file, station_location_file):
     plt.xticks(fontsize=18);
     plt.yticks(fontsize=18);
     plt.title('Mean Magnitues of Repeating Event Pairs', fontsize=18);
-    plt.savefig('magnitude_histogram.eps');
+    plt.savefig(output_dir+'magnitude_histogram.eps');
     plt.close();
     print("Histogram of Magnitudes Plotted!");
 
@@ -75,7 +74,7 @@ def generate_histograms(repeaters_file, station_location_file):
     plt.xticks(fontsize=18);
     plt.yticks(fontsize=18);
     plt.title("Magnitude Differences of Repeating Event Pairs", fontsize=18);
-    plt.savefig("magnitude_differences_histogram.eps");
+    plt.savefig(output_dir+"magnitude_differences_histogram.eps");
     plt.close()
     print("Histogram of Magnitude Differences Plotted!");
 

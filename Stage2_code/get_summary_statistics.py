@@ -15,8 +15,8 @@ sys.path.append(".");  # add current directory to python path
 import util_general_functions, util_functions_for_viewing_families
 
 
-def get_summary_statistics(families_summaries):
-    [output_filename, bboxes, time_window, make_slip_rate_cutoff] = configure();
+def get_summary_statistics(families_summaries, output_dir):
+    [output_filename, bboxes, time_window, make_slip_rate_cutoff] = configure(output_dir);
     MyFamilies = util_general_functions.read_families_into_structure(families_summaries);
     [avg_cov, n_families, avg_n, max_n, avg_time, n_short_fams, slip_rates, uncs] = compute(bboxes, time_window,
                                                                                             make_slip_rate_cutoff,
@@ -25,14 +25,14 @@ def get_summary_statistics(families_summaries):
                   make_slip_rate_cutoff, bboxes, slip_rates, uncs);
 
 
-def configure():  # You're going to want to change this for different locations (Mendocino, Anza, etc.)
-    output_filename = "summary_statistics.txt";
+def configure(output_dir):  # You're going to want to change this for different locations (Mendocino, Anza, etc.)
+    output_filename = output_dir + "summary_statistics.txt";
     min_lon, max_lon = -124.75, -124.25;
     min_lat, max_lat = 40.25, 40.36;  # this gets the main cluster in the MTJ
     bboxes = [];  # define as many boxes as you want!
     bboxes.append([min_lon, max_lon, min_lat, max_lat, 18, 30]);  # the lower cluster
     bboxes.append([min_lon, max_lon, min_lat, max_lat, 0, 18]);  # the upper cluster
-    time_window = [2008.7, 2022.1];
+    time_window = [2008.7, 2022.5];
     make_slip_rate_cutoff = 1.0;  # Years
     return [output_filename, bboxes, time_window, make_slip_rate_cutoff];
 
@@ -117,6 +117,7 @@ def get_uncertainty(MyFamilies, time_window, make_slip_rate_cutoff):
 
 def write_outputs(filename, avg_cov, n_families, avg_n, max_n, mean_timespan, n_short_families, slip_rate_cutoff,
                   bboxes, slip_rate_boxes, unc_boxes):
+    print("writing output file %s " % filename);
     myfile = open(filename, 'w');
     myfile.write("Number of families shorter than %.3f years = %d\n\n" % (slip_rate_cutoff, n_short_families));
 

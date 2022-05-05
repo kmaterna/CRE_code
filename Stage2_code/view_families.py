@@ -13,20 +13,23 @@ import util_functions_for_viewing_families
 import util_general_functions
 
 
-def view_families(time_window, families_summaries, station_locations, mapping_data, output_dir, families=(-1,)):
+def view_families(time_window, families_summaries, network_cres_file, station_location_file,
+                  mapping_data, output_dir, families=(-1,)):
     """
     Note: families='-1' is the default state, and means do all families.
     Alternately: families = [0, 1, 2, 3] means only do a few families
     """
     [summary_array, stations, station_paths, ca_coords, plate_coords] = overall_inputs(families_summaries,
-                                                                                       station_locations, mapping_data);
+                                                                                       station_location_file,
+                                                                                       mapping_data);
     if families[0] == -1:
         families = np.arange(0, len(summary_array));  # do all families
     cwd = os.getcwd();
     output_dir = cwd + "/" + output_dir + "Image_Families/";
     for i, myline in enumerate(summary_array):
         if i in families:  # do select families
-            major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_coords, time_window);
+            major_plots(myline, stations, station_paths, network_cres_file, output_dir, ca_coords, plate_coords,
+                        time_window);
     return;
 
 
@@ -69,7 +72,7 @@ def overall_inputs(families_summaries, station_locations_file, mapping_data):
 # ------------- THE MAIN PROGRAM ----------- #
 # MAKE WAVEFORM PLOTS AND METADATA PLOTS FOR EACH FAMILY
 
-def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_coords, time_window):
+def major_plots(myline, stations, station_paths, network_cres_file, output_dir, ca_coords, plate_coords, time_window):
     # Major plots for just a single line.
     # Line Format: Family 1 with n events: (lon)*n (lat)*n (dep)*n (mag)*n best_station (loc_type)*n + slip_rate.
 
@@ -89,7 +92,7 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     # # READ IN NON-REPEATERS DATA AT THE BEST STATION
     [ev1_non_repeaters, ev2_non_repeaters, xcorr_non_repeaters, coherence_non_repeaters] = read_event_comparison(
         best_station + '_total_list.txt');
-    [network_repeaters] = read_network_repeaters('Network_CRE_pairs_list.txt');
+    [network_repeaters] = read_network_repeaters(network_cres_file);
 
     # -------- MAKING THE FIRST SAVED FIGURE (WAVEFORMS) ----- #
     sac_directory = station_paths[stations.index(best_station)];
@@ -153,7 +156,8 @@ def major_plots(myline, stations, station_paths, output_dir, ca_coords, plate_co
     pairs_counter = 0;
     for i in range(len(event_names)):
         for j in range(i, len(event_names)):
-            if event_names[i] + " " + event_names[j] in network_repeaters or event_names[j] + " " + event_names[i] in network_repeaters:
+            if event_names[i] + " " + event_names[j] in network_repeaters or \
+                    event_names[j] + " " + event_names[i] in network_repeaters:
                 pairs_counter += 1;
                 a1.plot([longitude[i], longitude[j]], [latitude[i], latitude[j]], 'k')
 

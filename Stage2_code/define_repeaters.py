@@ -5,7 +5,6 @@ Those criteria are defined in the beginning of this script.
 When we define the cutoff = 0.95, we get a few great examples of repeating earthquakes. 
 Place your coherence and snr files into a directory named after the station.  Set the station and choose 
 your physical parameters.  Then run it!
-
 """
 
 import numpy as np
@@ -47,10 +46,23 @@ Results_summary = collections.namedtuple('Results_summary', [
     'mag1', 'mag2'])
 
 
-def define_repeaters(station_name, inParams, metric, cutoff, statistic='median', freq_method='hard_coded',
+def define_repeaters(station_tuple, inParams, metric, cutoff, statistic='median', freq_method='hard_coded',
                      max_frequency=25.0, snr_cutoff=5.0, Minimum_frequency_width=5.0, plot_all=0):
-    MyParams = configure(station_name, inParams.stage2_results, inParams.station_locations, metric, cutoff, statistic,
-                         freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
+    """
+    :param station_tuple:  tuple of (name, lon, lat, exist_sac_directory)
+    :param inParams: TotalParams object
+    :param metric: string
+    :param cutoff: float
+    :param statistic: string
+    :param freq_method: string
+    :param max_frequency: float
+    :param snr_cutoff: float
+    :param Minimum_frequency_width: float
+    :param plot_all: bool
+    :return: None
+    """
+    MyParams = configure(station_tuple, inParams.stage2_results_dir, metric, cutoff,
+                         statistic, freq_method, max_frequency, snr_cutoff, Minimum_frequency_width, plot_all);
     [Candidates_coh, Candidates_snr] = inputs(MyParams.data_input_file, MyParams.snr_input_file);
     [Total_results, CRE_results] = compute(MyParams, Candidates_coh, Candidates_snr);
     outputs(MyParams, Total_results, CRE_results, inParams.mapping_data_general, inParams.mapping_data_specific,
@@ -60,8 +72,14 @@ def define_repeaters(station_name, inParams, metric, cutoff, statistic='median',
 
 # ------------------ CONFIGURE ------------------- # 
 
-def configure(station_name, stage2_dir, station_location_file, metric, cutoff, statistic, freq_method,
+def configure(station_tuple, stage2_dir, metric, cutoff, statistic, freq_method,
               highest_chosen_frequency, snr_cutoff, Minimum_frequency_width, plot_all):
+    # Get the station directory and location info.
+    station_name = station_tuple[0];
+    station_coords = [station_tuple[1], station_tuple[2]];
+    raw_sac_dir = station_tuple[3];
+    print("Station %s with SAC files located in %s" % (station_name, raw_sac_dir));
+
     # Decisions that you rarely change:
     magnitude_difference_tolerance = 3.0;  # We ignore event pairs that have very disparate magnitudes.
 
@@ -90,17 +108,6 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
     call(['mkdir', '-p', output_dir1], shell=False);
     call(['mkdir', '-p', output_dir_inner], shell=False);
 
-    # Get the station directory and location info.
-    station_tuple_list = util_general_functions.get_dirs_for_station(station_location_file);
-    station_lon = [x[1] for x in station_tuple_list if x[0] == station_name][0];
-    station_lat = [x[2] for x in station_tuple_list if x[0] == station_name][0];
-    raw_sac_dir = [x[3] for x in station_tuple_list if x[0] == station_name][0];
-    station_coords = [station_lon, station_lat]
-    print("Station %s with SAC files located in %s" % (station_name, raw_sac_dir));
-    if not raw_sac_dir:
-        print("ERROR! Unable to find %s in %s" % (station_name, station_location_file));
-        sys.exit(1);
-
     MyParams = Params(station_name=station_name, metric=metric, cutoff=cutoff, statistic=statistic,
                       freq_method=freq_method, snr_cutoff=snr_cutoff,
                       Minimum_frequency_width=Minimum_frequency_width,
@@ -111,7 +118,6 @@ def configure(station_name, stage2_dir, station_location_file, metric, cutoff, s
                       plot_arg=plot_all, data_input_file=data_input_file, snr_input_file=snr_input_file,
                       CRE_out_filename=CRE_out_filename, total_out_filename=total_out_filename,
                       output_dir=output_dir_inner, station_coords=station_coords, raw_sac_dir=raw_sac_dir);
-
     print_out_statements(MyParams);
     return MyParams;
 

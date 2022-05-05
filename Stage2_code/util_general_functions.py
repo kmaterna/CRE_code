@@ -12,9 +12,10 @@ import collections
 def get_dirs_for_station(station_location_file):
     """"
     Read the station location file, generate the tuples where the sac files live.
-    Tuples are (name, lon, lat, directory)
+    Tuples are (name, lon, lat, exist_sac_directory)
     """
     station_tuple_list = [];
+    print("reading %s " % station_location_file);
     ifile = open(station_location_file);
     for line in ifile:
         temp = line.split();
